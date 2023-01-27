@@ -13,6 +13,10 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Boolean existsByID(Long id);
     Optional<Client> findClientById (Long id);
 
+    Client registerClient (Client client);
 
+    Client updateExistentClient (Client client);
+
+    Long deleteClient ();
 
 }

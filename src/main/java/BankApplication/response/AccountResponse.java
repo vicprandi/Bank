@@ -9,14 +9,17 @@ public class AccountResponse {
     private Client client;
     private Long amount;
 
+    private Long balanceMoney;
+
     public AccountResponse(){
     }
 
-    public AccountResponse(Long id, Long accountNumber, Client client, Long amount) {
+    public AccountResponse(Long id, Long accountNumber, Client client, Long amount, Long balanceMoney) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.client = client;
         this.amount = amount;
+        this.balanceMoney = balanceMoney;
     }
 
     public Long getId() {
@@ -49,5 +52,13 @@ public class AccountResponse {
 
     public void setAmount(Long amount) {
         this.amount = amount;
+    }
+
+    public Long getBalanceMoney() {
+        return balanceMoney;
+    }
+
+    public void setBalanceMoney(Long balanceMoney) {
+        this.balanceMoney = balanceMoney;
     }
 }

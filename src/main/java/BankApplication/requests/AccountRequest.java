@@ -13,7 +13,19 @@ public class AccountRequest {
     @NotNull(message = "{validation.field_required}")
     private Long amount;
 
+    @NotNull(message = "{validation.field_required}")
+    private Long balanceMoney;
+
+
     public AccountRequest(){
+    }
+
+    public Long getBalanceMoney() {
+        return balanceMoney;
+    }
+
+    public void setBalanceMoney(Long balanceMoney) {
+        this.balanceMoney = balanceMoney;
     }
 
     public Long getAccountNumber() {
@@ -38,6 +50,7 @@ public class AccountRequest {
         account.setAmount(this.amount);
         account.setClient(this.requestAccount().getClient());
         account.setCreatedData(LocalDate.now());
+        account.setBalanceMoney(this.balanceMoney);
         return account;
     }
 

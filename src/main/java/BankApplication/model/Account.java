@@ -15,7 +15,11 @@ public class Account {
     private Long accountNumber;
 
     @JoinColumn(name = "cpf", foreignKey = @ForeignKey)
+    @OneToOne
     private Client client;
+
+    @Column(name = "balanceMoney", nullable = false)
+    private Long balanceMoney;
 
     @Column(name = "amount", nullable = false)
     private Long amount;
@@ -23,12 +27,13 @@ public class Account {
     @Column(name = "createdData")
     private LocalDate createdData;
 
-    public Account(Long id, Long accountNumber, Client client, Long amount, LocalDate createdData) {
+    public Account(Long id, Long accountNumber, Client client, Long balanceMoney, Long amount, LocalDate createdData) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.client = client;
         this.amount = amount;
         this.createdData = createdData;
+        this.balanceMoney = balanceMoney;
     }
 
     public Account() {
@@ -64,6 +69,14 @@ public class Account {
 
     public LocalDate getCreatedData() {
         return createdData;
+    }
+
+    public Long getBalanceMoney() {
+        return balanceMoney;
+    }
+
+    public void setBalanceMoney(Long balanceMoney) {
+        this.balanceMoney = balanceMoney;
     }
 
     public void setCreatedData(LocalDate createdData) {
