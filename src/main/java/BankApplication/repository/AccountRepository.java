@@ -1,10 +1,24 @@
 package BankApplication.repository;
 
 import BankApplication.model.Account;
+import BankApplication.model.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Boolean existsByAccount(Long accountNumber);
+
+    Account depositMoney(Account account);
+
+    Account withdrawMoney (Account account);
+
+    Account transferMoney (Account firstAccount, Account secondAccount);
+
+    Long showBalance (Account account);
+
+
+
 }
