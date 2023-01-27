@@ -65,42 +65,26 @@ public class AccountService {
     }
 
     /* Usando o cliente, preciso realizar transferência para outra conta. Na transferência, o saldo (amount) deve ser suficiente. Na transferência, as contas (accountNumber) devem ser válidas e diferentes. */
-    public String transferMoney(AccountRequest firstAccountRequest, AccountRequest secondAccountRequest, ClientRequest firstClientRequest, ClientRequest secondClientRequest, Long amount) {
-
-        Account firstAccount = accountRepository.getReferenceById(firstAccountRequest.getBalanceMoney());
-        Account firstAccountNumber = accountRepository.getReferenceById(firstAccountRequest.getAccountNumber());
-        Long firstAccountBalance = firstAccount.getBalanceMoney();
-        Optional<Client> firstAccountCPF = clientRepository.findByCPF(firstClientRequest.getCPF());
-
-        Account secondAccount = accountRepository.getReferenceById(secondAccountRequest.getBalanceMoney());
-        Account secondAccountNumber = accountRepository.getReferenceById(secondAccountRequest.getAccountNumber());
-        Long secondAccountBalance = secondAccount.getBalanceMoney();
-        Optional<Client> secondAccountCPF = clientRepository.findByCPF(secondClientRequest.getCPF());
+    public String transferMoney(Account originAccount, Account destinationAccount, Long amount) {
 
         /* Primeira regra: Precisa existir o account number */
-        if (firstAccountNumber.getAccountNumber() < 0 || secondAccountNumber.getAccountNumber() < 0) throw new RuntimeException("Conta inexistente");
+        if (originAccount.getAccountNumber() < 0 || destinationAccount.getAccountNumber() < 0) throw new RuntimeException("Conta inexistente");
 
         /* Segunda regra: Ter saldo na conta que vai sair o dinheiro*/
-        if (firstAccount.getBalanceMoney() < 0) throw new RuntimeException("Saldo insuficiente");
+        if (originAccount.getBalanceMoney() < amount) throw new RuntimeException("Saldo insuficiente");
 
-        /*Terceira regra: Constas não podem ser iguais*/
-        if (Objects.equals(firstAccountCPF, secondAccountCPF)) throw new RuntimeException("CPFs idênticos");
+        /*Terceira regra: Contas não podem ser iguais*/
+        if (Objects.equals(originAccount.getClient().getCPF(), destinationAccount.getClient().getCPF())) throw new RuntimeException("Contas iguais!");
 
         /* Agora sim, a transferência entre contas. */
-        long diminuirSaldo = firstAccountBalance - amount;
-        secondAccountBalance += amount;
-        this.accountRepository.save(firstAccount);
-        this.accountRepository.save(secondAccount);
+        originAccount.setBalanceMoney(originAccount.getBalanceMoney() - amount) ;
+        destinationAccount.setBalanceMoney(destinationAccount.getBalanceMoney() + amount);
 
-
-        long somarSaldo = firstAccountBalance + amount;
-        secondAccountBalance -= amount;
-        this.accountRepository.save(firstAccount);
-        this.accountRepository.save(secondAccount);
+        accountRepository.save(originAccount);
+        accountRepository.save(destinationAccount);
 
         return "Transferência realizada com sucesso";
     }
-
 
     /* Usando o cliente, preciso observar o extrato. No extrato, deve mostrar as trasnferências, depósitos e saques. */
 }
