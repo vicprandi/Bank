@@ -16,7 +16,7 @@ public class Client {
     private String name;
 
     @Column(name = "cpf", length = 11, nullable = false)
-    private String cpf;
+    private String CPF;
 
     @Column(name = "postalCode", length = 50, nullable = false)
     private String postalCode;
@@ -36,10 +36,10 @@ public class Client {
     public Client() {
     }
 
-    public Client(Long id, String name, String cpf, String postalCode, String street, String state, String city, LocalDate createdData) {
+    public Client(Long id, String name, String CPF, String postalCode, String street, String state, String city, LocalDate createdData) {
         this.id = id;
         this.name = name;
-        this.cpf = cpf;
+        this.CPF = CPF;
         this.postalCode = postalCode;
         this.street = street;
         this.state = state;
@@ -64,12 +64,12 @@ public class Client {
         this.name = name;
     }
 
-    public String getCpf() {
-        return cpf;
+    public String getCPF() {
+        return CPF;
     }
 
     public void setCpf(String cpf) {
-        this.cpf = cpf;
+        this.CPF = cpf;
     }
 
     public String getPostalCode() {

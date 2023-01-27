@@ -1,6 +1,6 @@
 package BankApplication.service;
 
-import BankApplication.repository.repository.AccountRepository;
+import BankApplication.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
