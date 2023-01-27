@@ -9,7 +9,7 @@ public class ClientRequest {
     @NotNull(message = "{validation.field_required")
     private String name;
     @NotNull(message = "{validation.field_required")
-    private String cpf;
+    private String CPF;
 
     @NotNull(message = "{validation.field_required")
     private String postalCode;
@@ -29,9 +29,9 @@ public class ClientRequest {
     public ClientRequest(){
     }
 
-    public ClientRequest(String name, String cpf, String postalCode, String street, String state, String city) {
+    public ClientRequest(String name, String CPF, String postalCode, String street, String state, String city) {
         this.name = name;
-        this.cpf = cpf;
+        this.CPF = CPF;
         this.postalCode = postalCode;
         this.street = street;
         this.state = state;
@@ -46,12 +46,12 @@ public class ClientRequest {
         this.name = name;
     }
 
-    public String getCpf() {
-        return cpf;
+    public String getCPF() {
+        return CPF;
     }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
+    public void setCpf(String CPF) {
+        this.CPF = CPF;
     }
 
     public String getPostalCode() {
@@ -94,10 +94,10 @@ public class ClientRequest {
         this.createdData = createdData;
     }
 
-    public Client clientRequest() {
+    public Client clientObjectRequest() {
         Client client = new Client();
         client.setName(this.name);
-        client.setCpf(this.cpf);
+        client.setCpf(this.CPF);
         client.setPostalCode(this.postalCode);
         client.setStreet(this.street);
         client.setCity(this.city);
