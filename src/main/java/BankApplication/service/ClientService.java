@@ -1,7 +1,7 @@
 package BankApplication.service;
 
 import BankApplication.model.Client;
-import BankApplication.model.repository.ClientRepository;
+import BankApplication.repository.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
