@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres
+    #    volumes:
+    #      - \src\main\resources\migrations\db\V1__create_account_table.sql
+    #      - ./02-basegeografica.sql:/docker-entrypoint-initdb.d/02-basegeografica.sql
+    container_name: dbBank
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
