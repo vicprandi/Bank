@@ -2,21 +2,15 @@ package BankApplication.repository;
 
 import BankApplication.model.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    Boolean existsByCPF(String CPF);
-    Optional<Client> findByCPF(String CPF);
+    Boolean existsByCpf(String cpf);
 
-    Boolean existsByID(Long id);
-    Optional<Client> findClientById (Long id);
-
-    Client registerClient (Client client);
-
-    Client updateExistentClient (Client client);
-
-    Long deleteClient ();
+    Optional<Client> findByCpf(String cpf);
 
 }

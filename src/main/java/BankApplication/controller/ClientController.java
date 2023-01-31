@@ -7,7 +7,8 @@ import BankApplication.service.ClientService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
-import org.slf4j.LoggerFactory;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,7 @@ public class ClientController {
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
     }
-
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(ClientController.class);
+    private static final Logger logger = Logger.getLogger(Client.class.getName());
 
     /* Registro do Cliente */
     @ApiOperation(value = "Client Register")

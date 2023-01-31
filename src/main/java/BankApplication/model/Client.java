@@ -9,16 +9,16 @@ import java.time.LocalDate;
 public class Client {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
     @Column(name = "cpf", length = 11, nullable = false)
-    private String CPF;
+    private String cpf;
 
-    @Column(name = "postalCode", length = 50, nullable = false)
+    @Column(name = "postal_code", length = 50, nullable = false)
     private String postalCode;
 
     @Column(name = "street", length = 100, nullable = false)
@@ -30,23 +30,34 @@ public class Client {
     @Column(name = "city", length = 50, nullable = false)
     private String city;
 
-    @Column(name = "createdData")
-    private LocalDate createdData;
+    @Column(name = "created_data")
+    private LocalDate createdData = LocalDate.now();
+
+    @OneToOne(mappedBy = "client")
+    private Account account;
 
     public Client() {
     }
 
-    public Client(Long id, String name, String CPF, String postalCode, String street, String state, String city, LocalDate createdData) {
+    public Client(Long id, String name, String cpf, String postalCode, String street, String state, String city, LocalDate createdData, Account account) {
         this.id = id;
         this.name = name;
-        this.CPF = CPF;
+        this.cpf = cpf;
         this.postalCode = postalCode;
         this.street = street;
         this.state = state;
         this.city = city;
         this.createdData = createdData;
+        this.account = account;
     }
 
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 
     public Long getId() {
         return id;
@@ -64,12 +75,12 @@ public class Client {
         this.name = name;
     }
 
-    public String getCPF() {
-        return CPF;
+    public String getCpf() {
+        return cpf;
     }
 
     public void setCpf(String cpf) {
-        this.CPF = cpf;
+        this.cpf = cpf;
     }
 
     public String getPostalCode() {

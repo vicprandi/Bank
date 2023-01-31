@@ -9,16 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    Boolean existsByAccount(Long accountNumber);
-
-    Account depositMoney(Account account);
-
-    Account withdrawMoney (Account account);
-
-    Account transferMoney (Account firstAccount, Account secondAccount);
-
-    Long showBalance (Account account);
-
-
+    Boolean existsByAccountNumber(Long accountNumber);
 
 }
