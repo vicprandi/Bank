@@ -8,23 +8,23 @@ import java.time.LocalDate;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy =  GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name ="accountNumber", length = 50, nullable = false)
+    @Column(name ="account_number", length = 50, nullable = false)
     private Long accountNumber;
 
     @JoinColumn(name = "cpf", foreignKey = @ForeignKey)
     @OneToOne
     private Client client;
 
-    @Column(name = "balanceMoney", nullable = false)
+    @Column(name = "balance_money", nullable = false)
     private Long balanceMoney;
 
     @Column(name = "amount", nullable = false)
     private Long amount;
 
-    @Column(name = "createdData")
+    @Column(name = "created_data")
     private LocalDate createdData;
 
     public Account(Long id, Long accountNumber, Client client, Long balanceMoney, Long amount, LocalDate createdData) {

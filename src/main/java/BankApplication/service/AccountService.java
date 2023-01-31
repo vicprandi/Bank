@@ -1,11 +1,9 @@
 package BankApplication.service;
 
 import BankApplication.model.Account;
-import BankApplication.model.Client;
 import BankApplication.repository.AccountRepository;
 import BankApplication.repository.ClientRepository;
 import BankApplication.requests.AccountRequest;
-import BankApplication.requests.ClientRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +72,7 @@ public class AccountService {
         if (originAccount.getBalanceMoney() < amount) throw new RuntimeException("Saldo insuficiente");
 
         /*Terceira regra: Contas não podem ser iguais*/
-        if (Objects.equals(originAccount.getClient().getCPF(), destinationAccount.getClient().getCPF())) throw new RuntimeException("Contas iguais!");
+        if (Objects.equals(originAccount.getClient().getCpf(), destinationAccount.getClient().getCpf())) throw new RuntimeException("Contas iguais!");
 
         /* Agora sim, a transferência entre contas. */
         originAccount.setBalanceMoney(originAccount.getBalanceMoney() - amount) ;

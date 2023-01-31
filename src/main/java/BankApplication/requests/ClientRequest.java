@@ -3,13 +3,11 @@ package BankApplication.requests;
 import BankApplication.model.Client;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
-
 public class ClientRequest {
     @NotNull(message = "{validation.field_required")
     private String name;
     @NotNull(message = "{validation.field_required")
-    private String CPF;
+    private String cpf;
 
     @NotNull(message = "{validation.field_required")
     private String postalCode;
@@ -23,19 +21,26 @@ public class ClientRequest {
     @NotNull(message = "{validation.field_required")
     private String city;
 
-    @NotNull(message = "{validation.field_required")
-    private LocalDate createdData;
-
     public ClientRequest(){
     }
 
-    public ClientRequest(String name, String CPF, String postalCode, String street, String state, String city) {
+    public ClientRequest(String name, String cpf, String postalCode, String street, String state, String city) {
         this.name = name;
-        this.CPF = CPF;
+        this.cpf = cpf;
         this.postalCode = postalCode;
         this.street = street;
         this.state = state;
         this.city = city;
+    }
+    public Client clientObjectRequest() {
+        Client client = new Client();
+        client.setName(this.name);
+        client.setCpf(this.cpf);
+        client.setPostalCode(this.postalCode);
+        client.setState(this.state);
+        client.setStreet(this.street);
+        client.setCity(this.city);
+        return client;
     }
 
     public String getName() {
@@ -46,12 +51,12 @@ public class ClientRequest {
         this.name = name;
     }
 
-    public String getCPF() {
-        return CPF;
+    public String getCpf() {
+        return cpf;
     }
 
-    public void setCpf(String CPF) {
-        this.CPF = CPF;
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
     }
 
     public String getPostalCode() {
@@ -85,26 +90,4 @@ public class ClientRequest {
     public void setCity(String city) {
         this.city = city;
     }
-
-    public LocalDate getCreatedData() {
-        return createdData;
-    }
-
-    public void setCreatedData(LocalDate createdData) {
-        this.createdData = createdData;
-    }
-
-    public Client clientObjectRequest() {
-        Client client = new Client();
-        client.setName(this.name);
-        client.setCpf(this.CPF);
-        client.setPostalCode(this.postalCode);
-        client.setStreet(this.street);
-        client.setCity(this.city);
-        client.setCreatedData(LocalDate.now());
-        return client;
-    }
-
-
-
 }

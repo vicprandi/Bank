@@ -27,7 +27,7 @@ public class ClientService {
 
         Client client = clientRequest.clientObjectRequest();
 
-        if (clientRepository.existsByCPF(clientRequest.getCPF())) {
+        if (clientRepository.existsByCpf(clientRequest.getCpf())) {
             throw new CpfAlreadyExistsException("Client already registred");
         }
 
@@ -37,14 +37,14 @@ public class ClientService {
     /* Serviço de atualizar os dados do cliente */
     public Client updateExistentClient(ClientRequest clientRequest) {
 
-        Optional<Client> clientObject = clientRepository.findByCPF(clientRequest.getCPF());
+        Optional<Client> clientObject = clientRepository.findByCpf(clientRequest.getCpf());
 
         if (clientObject.isEmpty()) throw new ClientDoesntExistException("Client does not exist");
 
         Client clientGet = clientObject.get();
 
         clientGet.setName(clientRequest.getName());
-        clientGet.setCpf(clientRequest.getCPF());
+        clientGet.setCpf(clientRequest.getCpf());
         clientGet.setCity(clientRequest.getCity());
         clientGet.setStreet(clientRequest.getStreet());
         clientGet.setState(clientRequest.getState());
@@ -55,7 +55,7 @@ public class ClientService {
 
     /* Serviço de deletar o cliente*/
     public void deleteClient (Long id) {
-        if (!clientRepository.existsByID(id)) throw new ClientDoesntExistException("Client does not exist");
+        if (!clientRepository.existsById(id)) throw new ClientDoesntExistException("Client does not exist");
 
         clientRepository.deleteById(id);
     }
