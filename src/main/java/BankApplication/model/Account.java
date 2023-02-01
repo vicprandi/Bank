@@ -14,7 +14,7 @@ public class Account {
     @Column(name ="account_number", length = 50, nullable = false)
     private Long accountNumber;
 
-    @JoinColumn(name = "cpf", foreignKey = @ForeignKey)
+    @JoinColumn(name = "client_id", foreignKey = @ForeignKey)
     @OneToOne
     private Client client;
 

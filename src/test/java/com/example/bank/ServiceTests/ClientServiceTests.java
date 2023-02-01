@@ -4,7 +4,7 @@ import BankApplication.exception.CpfAlreadyExistsException;
 import BankApplication.model.Client;
 import BankApplication.repository.ClientRepository;
 import BankApplication.requests.ClientRequest;
-import BankApplication.service.ClientService;
+import BankApplication.service.ClientServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ public class ClientServiceTests {
     /*Antes dos testes*/
     @Spy
     @InjectMocks
-    private ClientService clientService;
+    private ClientServiceImpl clientService;
 
     @Mock
     private ClientRepository clientRepository;

@@ -8,5 +8,3 @@ state varchar(100) not null,
 city varchar(100) not null,
 created_data timestamp
 );
-
-ALTER TABLE client ADD CONSTRAINT cpf_unique UNIQUE (cpf)
