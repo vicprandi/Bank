@@ -1,12 +1,12 @@
 create table account (
 id BIGSERIAL not null primary key,
 account_number bigint not null,
-client bigint not null,
+client_id BIGSERIAL not null,
 balance_money bigint not null,
 amount bigint not null,
 created_data timestamp,
 
-CONSTRAINT fk_client
-FOREIGN KEY (client)
+CONSTRAINT fk_client_id
+FOREIGN KEY (client_id)
 REFERENCES client(id)
-)
+);
