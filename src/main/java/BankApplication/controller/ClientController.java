@@ -1,9 +1,8 @@
 package BankApplication.controller;
 
-import BankApplication.exception.ClientDoesntExistException;
+
 import BankApplication.model.Client;
 import BankApplication.requests.ClientRequest;
-import BankApplication.service.ClientService;
 
 import BankApplication.service.ClientServiceImpl;
 import io.swagger.annotations.Api;
@@ -35,6 +34,7 @@ public class ClientController {
     @ApiOperation(value ="Bring all Clients")
     @GetMapping
     public List<Client> getAllClients() {
+        logger.info("Retornando todos os clientes disponíveis");
         return clientService.getAllClients();
     }
 
@@ -43,6 +43,7 @@ public class ClientController {
     @PostMapping
     public ResponseEntity<Client> registerClient (@RequestBody @Valid ClientRequest clientRequest) {
         Client client = clientService.registerClient(clientRequest);
+        logger.info("Cliente Registrado");
         return new ResponseEntity<>(client, HttpStatus.CREATED);
     }
 
@@ -51,6 +52,7 @@ public class ClientController {
     @PutMapping("/update")
     public ResponseEntity<Client> updateClient (@RequestBody @Valid ClientRequest cpf) {
         Client client = clientService.updateClient(cpf);
+        logger.info("Cliente atualizado");
         return new ResponseEntity<Client>(client, HttpStatus.ACCEPTED);
     }
 
@@ -58,7 +60,7 @@ public class ClientController {
     @ApiOperation(value = "Deleting Client")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteClient(@PathVariable Long id) {
-
+        logger.info("Cliente deletado");
         clientService.deleteClient(id);
 
         return new ResponseEntity<> (HttpStatus.ACCEPTED);

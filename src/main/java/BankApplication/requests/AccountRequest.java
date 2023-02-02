@@ -58,7 +58,6 @@ public class AccountRequest {
     public Account requestAccount() {
         Account account = new Account();
         account.setAccountNumber(this.accountNumber);
-        account.setClient(this.client);
         account.setAmount(this.amount);
         account.setClient(this.requestAccount().getClient());
         account.setCreatedData(LocalDate.now());
