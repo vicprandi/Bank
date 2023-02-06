@@ -1,4 +1,4 @@
-package com.example.bank.ServiceTests;
+package BankApplication.ServiceTests;
 
 import BankApplication.exception.CpfAlreadyExistsException;
 import BankApplication.model.Client;
