@@ -2,6 +2,7 @@ package BankApplication.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "account")
@@ -18,6 +19,9 @@ public class Account {
     @OneToOne
     private Client client;
 
+    @OneToMany(targetEntity = Transaction.class, mappedBy = "id")
+    private List<Transaction> accountTransaction;
+
     @Column(name = "balance_money", nullable = false)
     private Long balanceMoney;
 
@@ -27,10 +31,11 @@ public class Account {
     @Column(name = "created_data")
     private LocalDate createdData;
 
-    public Account(Long id, Long accountNumber, Client client, Long balanceMoney, Long amount, LocalDate createdData) {
+    public Account(Long id, Long accountNumber, Client client, List<Transaction> accountTransaction, Long balanceMoney, Long amount, LocalDate createdData) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.client = client;
+        this.accountTransaction = accountTransaction;
         this.amount = amount;
         this.createdData = createdData;
         this.balanceMoney = balanceMoney;
@@ -83,5 +88,12 @@ public class Account {
         this.createdData = createdData;
     }
 
+    public List<Transaction> getAccountTransaction() {
+        return accountTransaction;
+    }
+
+    public void setAccountTransaction(List<Transaction> accountTransaction) {
+        this.accountTransaction = accountTransaction;
+    }
 }
 
