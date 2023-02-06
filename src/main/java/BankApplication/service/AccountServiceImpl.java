@@ -3,26 +3,54 @@ package BankApplication.service;
 import BankApplication.exception.AccountAlreadyExistsException;
 import BankApplication.exception.AccountDoesntExistException;
 import BankApplication.model.Account;
+import BankApplication.model.Client;
 import BankApplication.repository.AccountRepository;
+import BankApplication.repository.ClientRepository;
 import BankApplication.requests.AccountRequest;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
 
+    private final ClientRepository clientRepository;
+
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository) {
+    public ClientServiceImpl clientService;
+
+    @Autowired
+    public AccountServiceImpl(AccountRepository accountRepository, ClientRepository clientRepository) {
         this.accountRepository = accountRepository;
+        this.clientRepository = clientRepository;
+    }
+
+    /* Registrar uma conta */
+    public Account registerAccount(@Valid AccountRequest accountRequest, String cpf) {
+        Optional<Client> client = clientRepository.findByCpf(cpf);
+        Account account = accountRequest.requestAccount();
+
+        if (accountRepository.existsByAccountNumber(accountRequest.getAccountNumber())) {
+            throw new AccountAlreadyExistsException("Account already registred");
+        }
+
+        accountRequest.setAccountNumber(generateAccountNumber());
+        return accountRepository.save(account);
+    }
+
+    /* Deletar uma Conta */
+    public void deleteAccount(@Valid Long id) {
+        if (!accountRepository.existsById(id)) throw new AccountDoesntExistException("Account doesn't exists!");
+
+        accountRepository.deleteById(id);
     }
 
     /* Trazer todas as Contas */
@@ -36,44 +64,13 @@ public class AccountServiceImpl implements AccountService {
 
     /* Achar conta pelo AccountNumber */
     @Override
-    public Account findByAccountNumber(Long accountNumber) {
-
-        Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
+    public Account findByAccountNumber(Long id) {
+        Optional<Account> account = accountRepository.findById(id);
 
         if (account.isEmpty()) {
             throw new AccountDoesntExistException("Conta não existe!");
         }
         return account.get();
-    }
-
-    /* Registrar uma conta */
-    public Account registerAccount(@Valid AccountRequest accountRequest) {
-
-        Account account = accountRequest.requestAccount();
-
-        if (accountRepository.existsByAccountNumber(accountRequest.getAccountNumber())) {
-            throw new AccountAlreadyExistsException("Account already registred");
-        }
-
-        return accountRepository.save(account);
-    }
-
-    /* Deletar uma Conta */
-    public void deleteAccount(@Valid Long id) {
-        if (!accountRepository.existsById(id)) throw new AccountDoesntExistException("Conta não existe");
-
-        accountRepository.deleteById(id);
-    }
-
-    /* Dar o update numa Conta */
-    public Account updateAccount(@NotNull AccountRequest accountRequest) {
-
-        Account account = findByAccountNumber(accountRequest.getAccountNumber());
-
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        account.setAmount(accountRequest.getAmount());
-
-        return accountRepository.save(account);
     }
 
     /* Regras de Negócio: O saldo (amount) não pode ficar negativo. */
@@ -137,4 +134,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /* Usando o cliente, preciso observar o extrato. No extrato, deve mostrar as trasnferências, depósitos e saques. */
+
+    /*Gerando uma nova AccountNumber*/
+    private Long generateAccountNumber() {
+        Random rd = new Random();
+
+        return rd.nextLong();
+    }
+
 }

@@ -38,19 +38,11 @@ public class AccountController {
     /* Registro da Conta */
     @ApiOperation(value = "Account Register")
     @PostMapping
-    public ResponseEntity<Account> registerAccount (@RequestBody @Valid AccountRequest accountRequest) {
-        Account account = accountService.registerAccount(accountRequest);
+    public ResponseEntity<Account> registerAccount (@RequestBody @Valid AccountRequest accountRequest, String cpf) {
+
+        Account account = accountService.registerAccount(accountRequest, cpf);
         logger.info("Conta registrada");
         return new ResponseEntity<>(account, HttpStatus.CREATED);
-    }
-
-    /* Update na Conta */
-    @ApiOperation(value ="Account Update")
-    @PutMapping("/update")
-    public ResponseEntity<Account> updateAccount (@RequestBody @Valid AccountRequest accountRequest) {
-        Account account = accountService.updateAccount(accountRequest);
-        logger.info("Conta atualizada");
-        return new ResponseEntity<>(account, HttpStatus.ACCEPTED);
     }
 
     /* Deletar a Conta */

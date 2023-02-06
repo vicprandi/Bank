@@ -2,9 +2,11 @@ package BankApplication.requests;
 
 import BankApplication.model.Account;
 import BankApplication.model.Client;
+import BankApplication.model.Transaction;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class AccountRequest {
 
@@ -16,6 +18,9 @@ public class AccountRequest {
 
     @NotNull(message = "{validation.field_required}")
     private Long balanceMoney;
+
+    @NotNull(message = "{validation.field_required}")
+    private List<Transaction> accountTransaction;
 
     @NotNull(message = "{validation.field_required}")
     private Client client;
@@ -60,6 +65,7 @@ public class AccountRequest {
         account.setAccountNumber(this.accountNumber);
         account.setAmount(this.amount);
         account.setClient(this.requestAccount().getClient());
+        account.setAccountTransaction(this.accountTransaction);
         account.setCreatedData(LocalDate.now());
         account.setBalanceMoney(this.balanceMoney);
         return account;
