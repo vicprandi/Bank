@@ -10,15 +10,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class ValueNotAcceptedExceptionHandler {
-        @ExceptionHandler(ValueNotAcceptedException.class)
-        public ResponseEntity<?> handlerCpfAlreadyExistsException (ValueNotAcceptedException valueNotAcceptedException) {
-            ValueNotAcceptedExceptionDetails exceptionDetails = ValueNotAcceptedExceptionDetails.valueNotAcceptedExceptionDetailsBuilder.newBuilder()
-                    .details(valueNotAcceptedException.getMessage())
-                    .build();
-            return new ResponseEntity<>(exceptionDetails, HttpStatus.NOT_FOUND);
-        }
-
+    @ExceptionHandler(ValueNotAcceptedException.class)
+    public ResponseEntity<?> handlerValueAlreadyExistsException (ValueNotAcceptedException valueNotAcceptedException) {
+        ValueNotAcceptedExceptionDetails exceptionDetails = ValueNotAcceptedExceptionDetails.valueNotAcceptedExceptionDetailsBuilder.newBuilder()
+                .details(valueNotAcceptedException.getMessage())
+                .build();
+        return new ResponseEntity<>(exceptionDetails, HttpStatus.NOT_FOUND);
     }
-
-
 }
