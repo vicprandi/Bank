@@ -1,8 +1,6 @@
 package BankApplication.exception;
 
 public class ValueNotAcceptedExceptionDetails {
-
-
     public String title;
     public String details;
 
@@ -18,7 +16,6 @@ public class ValueNotAcceptedExceptionDetails {
     }
 
     public static final class valueNotAcceptedExceptionDetailsBuilder {
-
         public String title;
         public String details;
 
@@ -39,7 +36,7 @@ public class ValueNotAcceptedExceptionDetails {
             return this;
         }
 
-        public ValueNotAcceptedExceptionDetails build () {
+        public ValueNotAcceptedExceptionDetails build() {
 
             ValueNotAcceptedExceptionDetails valueNotAcceptedExceptionDetails = new ValueNotAcceptedExceptionDetails();
             valueNotAcceptedExceptionDetails.title = this.title;
@@ -48,8 +45,6 @@ public class ValueNotAcceptedExceptionDetails {
             return valueNotAcceptedExceptionDetails;
 
         }
-
-
-
     }
+}
 
