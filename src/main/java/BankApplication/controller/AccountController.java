@@ -1,8 +1,11 @@
 package BankApplication.controller;
 
 import BankApplication.model.Account;
+import BankApplication.model.Client;
+import BankApplication.repository.ClientRepository;
 import BankApplication.requests.AccountRequest;
 import BankApplication.service.AccountServiceImpl;
+import BankApplication.service.ClientServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
@@ -12,17 +15,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
+
+import static org.springframework.http.RequestEntity.get;
 
 @RestController
 @RequestMapping("/accounts")
 @Api(value = "account")
 public class AccountController {
 
+    private final ClientRepository clientRepository;
+
+    private final ClientServiceImpl clientService;
     private final AccountServiceImpl accountService;
 
     @Autowired
-    public AccountController(AccountServiceImpl accountService) {
+    public AccountController(ClientRepository clientRepository, ClientServiceImpl clientService, AccountServiceImpl accountService) {
+        this.clientRepository = clientRepository;
+        this.clientService = clientService;
         this.accountService = accountService;
     }
     private static final Logger logger = Logger.getLogger(Account.class.getName());
@@ -37,12 +48,11 @@ public class AccountController {
 
     /* Registro da Conta */
     @ApiOperation(value = "Account Register")
-    @PostMapping
-    public ResponseEntity<Account> registerAccount (@RequestBody @Valid AccountRequest accountRequest, String cpf) {
-
-        Account account = accountService.registerAccount(accountRequest, cpf);
+    @PostMapping("/{cpf}")
+    public ResponseEntity<Account> registerAccount (@RequestBody @Valid AccountRequest accountRequest, @PathVariable String cpf) {
         logger.info("Conta registrada");
-        return new ResponseEntity<>(account, HttpStatus.CREATED);
+        Account response = accountService.registerAccount(accountRequest, cpf);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     /* Deletar a Conta */

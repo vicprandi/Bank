@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 @RestController
@@ -36,6 +37,13 @@ public class ClientController {
     public List<Client> getAllClients() {
         logger.info("Retornando todos os clientes disponíveis");
         return clientService.getAllClients();
+    }
+
+    @ApiOperation(value = "Bring a specific client")
+    @GetMapping("/{id}")
+    public Optional<Client> getClient(@Valid Client client) {
+        logger.info("Retornando cpf de cliente específico");
+        return clientService.getClient(client.getId());
     }
 
     /* Registro do Cliente */

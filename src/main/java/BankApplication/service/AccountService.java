@@ -7,6 +7,7 @@ import java.util.List;
 public interface AccountService {
 
     List<Account> getAllAccounts();
-    Account findByAccountNumber(Long accountNumber);
 
+    /* Achar conta pelo Id do CLiente */
+    Long findByAccountNumberByClientId(Long id);
 }
