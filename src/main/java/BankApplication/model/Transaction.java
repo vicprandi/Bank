@@ -1,6 +1,6 @@
 package BankApplication.model;
 
-import BankApplication.utils.TransactionEnum;
+import BankApplication.transaction.utils.TransactionEnum;
 import jakarta.persistence.*;
 
 @Entity
