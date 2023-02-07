@@ -39,7 +39,7 @@ public class ClientServiceImpl implements ClientService {
     /* Serviço de atualizar os dados do cliente */
     public Client updateClient(@NotNull ClientRequest clientRequest) {
 
-        Client clientObject = findByCpf(clientRequest.getCpf());
+        Client clientObject = getClientCpf(clientRequest.getCpf());
 
         clientObject.setName(clientRequest.getName());
         clientObject.setCity(clientRequest.getCity());
@@ -65,8 +65,15 @@ public class ClientServiceImpl implements ClientService {
         return clients;
     }
 
+    public Optional<Client> getClient(Long id) {
+        Optional<Client> client = clientRepository.findById(id);
+
+        if (client.isEmpty()) throw new ClientDoesntExistException("Não há clientes.");
+        return client;
+    }
+
     @Override
-    public Client findByCpf(String cpf) {
+    public Client getClientCpf(String cpf) {
 
         Optional<Client> clientObject = clientRepository.findByCpf(cpf);
 
@@ -75,5 +82,6 @@ public class ClientServiceImpl implements ClientService {
         }
         return clientObject.get();
     }
+
 }
 

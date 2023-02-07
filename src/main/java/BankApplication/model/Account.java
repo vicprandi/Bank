@@ -1,5 +1,6 @@
 package BankApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +17,7 @@ public class Account {
     private Long accountNumber;
 
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey)
+    @JsonIgnore
     @OneToOne
     private Client client;
 
@@ -25,18 +27,14 @@ public class Account {
     @Column(name = "balance_money", nullable = false)
     private Long balanceMoney;
 
-    @Column(name = "amount", nullable = false)
-    private Long amount;
-
     @Column(name = "created_data")
-    private LocalDate createdData;
+    private LocalDate createdData = LocalDate.now();
 
-    public Account(Long id, Long accountNumber, Client client, List<Transaction> accountTransaction, Long balanceMoney, Long amount, LocalDate createdData) {
+    public Account(Long id, Long accountNumber, Client client, List<Transaction> accountTransaction, Long balanceMoney, LocalDate createdData) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.client = client;
         this.accountTransaction = accountTransaction;
-        this.amount = amount;
         this.createdData = createdData;
         this.balanceMoney = balanceMoney;
     }
@@ -62,14 +60,6 @@ public class Account {
 
     public void setClient(Client client) {
         this.client = client;
-    }
-
-    public Long getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Long amount) {
-        this.amount = amount;
     }
 
     public LocalDate getCreatedData() {
