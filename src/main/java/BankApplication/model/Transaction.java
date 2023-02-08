@@ -1,6 +1,5 @@
 package BankApplication.model;
 
-import BankApplication.transaction.utils.TransactionEnum;
 import jakarta.persistence.*;
 
 @Entity
@@ -56,6 +55,13 @@ public class Transaction {
         this.value = value;
     }
 
+
+    public enum TransactionEnum {
+    DEPOSIT,
+    WITHDRAW,
+    TRANSFER
+    }
+
     public TransactionEnum getTransactionType() {
         return transactionType;
     }
@@ -63,5 +69,5 @@ public class Transaction {
     public void setTransactionType(TransactionEnum transactionType) {
         this.transactionType = transactionType;
     }
-}
 
+}
