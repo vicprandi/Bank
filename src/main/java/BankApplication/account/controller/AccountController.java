@@ -1,10 +1,10 @@
 package BankApplication.account.controller;
 
 import BankApplication.model.Account;
-import BankApplication.client.repository.ClientRepository;
 import BankApplication.account.request.AccountRequest;
 import BankApplication.account.service.AccountServiceImpl;
-import BankApplication.client.service.ClientServiceImpl;
+
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
@@ -16,22 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static org.springframework.http.RequestEntity.get;
-
 @RestController
 @RequestMapping("/accounts")
 @Api(value = "account")
 public class AccountController {
 
-    private final ClientRepository clientRepository;
-
-    private final ClientServiceImpl clientService;
     private final AccountServiceImpl accountService;
 
     @Autowired
-    public AccountController(ClientRepository clientRepository, ClientServiceImpl clientService, AccountServiceImpl accountService) {
-        this.clientRepository = clientRepository;
-        this.clientService = clientService;
+    public AccountController(AccountServiceImpl accountService) {
+
         this.accountService = accountService;
     }
     private static final Logger logger = Logger.getLogger(Account.class.getName());

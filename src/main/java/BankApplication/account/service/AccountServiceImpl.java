@@ -78,18 +78,15 @@ public class AccountServiceImpl implements AccountService {
         return accountNumber;
     }
 
-//    /* Regras de Negócio: O saldo (amount) não pode ficar negativo. */
-//    /* Usando o cliente, preciso realizar depósito. */
-//    public Account depositMoney(AccountRequest accountRequest) {
-//        Account account = accountRepository.getReferenceById(accountRequest.getBalanceMoney());
-//
-//        Long balance = account.getAmount();
-//        balance+= accountRequest.getBalanceMoney();
-//        account.setAmount(balance);
-//
-//        return accountRepository.save(account);
-//    }
-//
+    public Optional<Account> getAccountById(Long id) {
+        Optional<Client> client = clientRepository.findById(id);
+        Account account = client.get().getAccount();
+
+        if (account == null) throw new AccountDoesntExistException("Não há conta.");
+
+        return Optional.of(account);
+    }
+
 //    /* Usando o cliente, preciso realizar o saque. */
 //    public Account withdrawMoney(AccountRequest accountRequest) throws RuntimeException {
 //
