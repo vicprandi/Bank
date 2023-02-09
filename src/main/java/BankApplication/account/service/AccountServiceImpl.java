@@ -1,6 +1,5 @@
 package BankApplication.account.service;
 
-import BankApplication.client.exceptions.ClientDoesntExistException;
 import BankApplication.client.service.ClientServiceImpl;
 import BankApplication.account.exceptions.AccountAlreadyExistsException;
 import BankApplication.account.exceptions.AccountDoesntExistException;
