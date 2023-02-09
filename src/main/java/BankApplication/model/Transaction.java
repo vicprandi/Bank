@@ -1,9 +1,12 @@
 package BankApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
-@Table(name= "transactions")
+@Table(name= "account_transactions")
 public class Transaction {
 
     @Id
@@ -11,11 +14,12 @@ public class Transaction {
     private Long id;
 
     @JoinColumn(name = "account_id", foreignKey = @ForeignKey)
+    @JsonIgnore
     @ManyToOne
     private Account account;
 
     @Column(name="value", nullable = false)
-    private Long value;
+    private BigDecimal value;
 
     @Column(name="transaction_type", length = 50, nullable = false)
     @Enumerated(EnumType.STRING)
@@ -24,7 +28,7 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(Long id, Account account, Long value, TransactionEnum transactionType) {
+    public Transaction(Long id, Account account, BigDecimal value, TransactionEnum transactionType) {
         this.id = id;
         this.account = account;
         this.value = value;
@@ -47,20 +51,21 @@ public class Transaction {
         this.account = account;
     }
 
-    public Long getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(Long value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
 
     public enum TransactionEnum {
-    DEPOSIT,
-    WITHDRAW,
-    TRANSFER
+        WITHDRAW,
+        DEPOSIT,
+        TRANSFER
     }
+
 
     public TransactionEnum getTransactionType() {
         return transactionType;

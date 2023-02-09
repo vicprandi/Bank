@@ -2,19 +2,20 @@ package BankApplication.account.request;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+
 public class AccountRequest {
 
-    @NotNull(message = "{validation.field_required}")
-    private Long balanceMoney;
+    private BigDecimal balanceMoney;
 
     public AccountRequest(){
     }
 
-    public Long getBalanceMoney() {
+    public BigDecimal getBalanceMoney() {
         return balanceMoney;
     }
 
-    public void setBalanceMoney(Long balanceMoney) {
+    public void setBalanceMoney(BigDecimal balanceMoney) {
         this.balanceMoney = balanceMoney;
     }
 

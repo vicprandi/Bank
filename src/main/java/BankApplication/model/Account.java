@@ -2,6 +2,8 @@ package BankApplication.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -25,12 +27,12 @@ public class Account {
     private List<Transaction> accountTransaction;
 
     @Column(name = "balance_money", nullable = false)
-    private Long balanceMoney;
+    private BigDecimal balanceMoney;
 
     @Column(name = "created_data")
     private LocalDate createdData = LocalDate.now();
 
-    public Account(Long id, Long accountNumber, Client client, List<Transaction> accountTransaction, Long balanceMoney, LocalDate createdData) {
+    public Account(Long id, Long accountNumber, Client client, List<Transaction> accountTransaction, BigDecimal balanceMoney, LocalDate createdData) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.client = client;
@@ -66,11 +68,11 @@ public class Account {
         return createdData;
     }
 
-    public Long getBalanceMoney() {
+    public BigDecimal getBalanceMoney() {
         return balanceMoney;
     }
 
-    public void setBalanceMoney(Long balanceMoney) {
+    public void setBalanceMoney(BigDecimal balanceMoney) {
         this.balanceMoney = balanceMoney;
     }
 

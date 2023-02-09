@@ -2,7 +2,7 @@ create table account (
 id BIGSERIAL not null primary key,
 account_number bigint not null,
 client_id BIGSERIAL not null,
-balance_money bigint not null,
+balance_money money not null,
 created_data timestamp,
 
 CONSTRAINT fk_client_id
