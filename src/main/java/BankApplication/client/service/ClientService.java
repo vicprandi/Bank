@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public interface ClientService {
     List<Client> getAllClients();
-
     Client getClientCpf(String cpf);
     Optional<Client> getClient(Long id);
 }

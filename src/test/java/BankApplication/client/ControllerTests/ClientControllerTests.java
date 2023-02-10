@@ -112,7 +112,7 @@ public class ClientControllerTests {
         clientRequest.setState("SP");
         String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
         clientService.registerClient(clientRequest);
-        clientService.deleteClient(clientRequest.clientObjectRequest().getId());
+        clientService.deleteClient(clientRequest.getCpf());
         mockMvc.perform(MockMvcRequestBuilders.delete("/clients/delete/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -123,7 +123,7 @@ public class ClientControllerTests {
     public void shouldReturnStatus404_afterDeletelient() throws Exception {
         ClientRequest clientRequest2 = new ClientRequest();
         String requestBody = new ObjectMapper().valueToTree(clientRequest2).toString();
-        clientService.deleteClient(clientRequest2.clientObjectRequest().getId());
+        clientService.deleteClient(clientRequest2.getCpf());
         mockMvc.perform(MockMvcRequestBuilders.delete("/clients/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))

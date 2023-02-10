@@ -1,6 +1,5 @@
 package BankApplication.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -19,7 +18,6 @@ public class Account {
     private Long accountNumber;
 
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey)
-    @JsonIgnore
     @OneToOne
     private Client client;
 
@@ -72,8 +70,9 @@ public class Account {
         return balanceMoney;
     }
 
-    public void setBalanceMoney(BigDecimal balanceMoney) {
+    public BigDecimal setBalanceMoney(BigDecimal balanceMoney) {
         this.balanceMoney = balanceMoney;
+        return balanceMoney;
     }
 
     public void setCreatedData(LocalDate createdData) {
