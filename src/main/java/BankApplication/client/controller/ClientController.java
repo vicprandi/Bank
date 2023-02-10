@@ -7,6 +7,7 @@ import BankApplication.client.request.ClientRequest;
 import BankApplication.client.service.ClientServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 
@@ -40,10 +41,10 @@ public class ClientController {
     }
 
     @ApiOperation(value = "Bring a specific client")
-    @GetMapping("/{id}")
-    public Optional<Client> getClient(@Valid Client client) {
+    @GetMapping("/{cpf}")
+    public Optional<Client> getClient(@PathVariable @Valid String cpf) {
         logger.info("Retornando cpf de cliente específico");
-        return clientService.getClient(client.getId());
+        return Optional.ofNullable(clientService.getClientCpf(cpf));
     }
 
     /* Registro do Cliente */
@@ -66,10 +67,11 @@ public class ClientController {
 
     /* Deletar o Cliente */
     @ApiOperation(value = "Deleting Client")
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteClient(@PathVariable Long id) {
+    @Transactional
+    @DeleteMapping("/delete/{cpf}")
+    public ResponseEntity<?> deleteClient(@PathVariable String cpf) {
         logger.info("Cliente deletado");
-        clientService.deleteClient(id);
+        clientService.deleteClient(cpf);
 
         return new ResponseEntity<> (HttpStatus.ACCEPTED);
     }

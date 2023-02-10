@@ -1,7 +1,9 @@
 package BankApplication.client.service;
 
+import BankApplication.account.repository.AccountRepository;
 import BankApplication.client.exceptions.ClientDoesntExistException;
 import BankApplication.client.exceptions.CpfAlreadyExistsException;
+import BankApplication.model.Account;
 import BankApplication.model.Client;
 import BankApplication.client.repository.ClientRepository;
 import BankApplication.client.request.ClientRequest;
@@ -19,9 +21,12 @@ public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
 
+    private final AccountRepository accountRepository;
+
     @Autowired
-    public ClientServiceImpl(ClientRepository clientRepository) {
+    public ClientServiceImpl(ClientRepository clientRepository, AccountRepository accountRepository) {
         this.clientRepository = clientRepository;
+        this.accountRepository = accountRepository;
     }
 
     /* Serviço de registrar o Cliente */
@@ -51,10 +56,13 @@ public class ClientServiceImpl implements ClientService {
     }
 
     /* Serviço de deletar o cliente*/
-    public void deleteClient(Long id) {
-        if (!clientRepository.existsById(id)) throw new ClientDoesntExistException("Client does not exist");
+    public void deleteClient(String cpf) {
+        Optional<Client> client = clientRepository.findByCpf(cpf);
+        Account clientAccount = client.get().getAccount();
+        if (!clientRepository.existsByCpf(cpf)) throw new ClientDoesntExistException("Client does not exist");
+        if (clientAccount != null) accountRepository.delete(clientAccount);
 
-        clientRepository.deleteById(id);
+        clientRepository.delete(client.get());
     }
 
     @Override

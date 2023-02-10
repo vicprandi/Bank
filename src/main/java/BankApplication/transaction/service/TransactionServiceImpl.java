@@ -1,11 +1,13 @@
 package BankApplication.transaction.service;
 
+import BankApplication.account.exceptions.AccountAlreadyExistsException;
 import BankApplication.account.repository.AccountRepository;
 import BankApplication.account.service.AccountServiceImpl;
 import BankApplication.client.service.ClientServiceImpl;
 import BankApplication.model.Account;
 import BankApplication.model.Client;
 import BankApplication.model.Transaction;
+import BankApplication.transaction.exception.ValueNotAcceptedException;
 import BankApplication.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +55,15 @@ public class TransactionServiceImpl implements TransactionService {
         Account account = accountRepository.findByAccountNumber(accountNumber);
         Transaction transaction = new Transaction();
         BigDecimal balanceMoney = account.getBalanceMoney();
-        account.setBalanceMoney(balanceMoney.add(amount));
+
+        BigDecimal zero = BigDecimal.valueOf(0);
+
+        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+
+        if (balanceMoney.compareTo(zero) < 0) {
+            throw new ValueNotAcceptedException("Valor não aceito");
+        } else account.setBalanceMoney(balanceMoney.add(amount));
+
 
         transaction.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
         transaction.setValue(amount);
@@ -62,5 +72,44 @@ public class TransactionServiceImpl implements TransactionService {
         accountRepository.save(account);
 
         return transactionRepository.save(transaction);
+    }
+
+    public Transaction withdrawMoneu(Long accountNumber, BigDecimal amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        Transaction transaction = new Transaction();
+        BigDecimal balanceMoney = account.getBalanceMoney();
+        BigDecimal zero = BigDecimal.valueOf(0);
+        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+        if (balanceMoney.compareTo(zero) < 0) {
+            throw new ValueNotAcceptedException("Valor não aceito");
+        } else account.setBalanceMoney(balanceMoney.subtract(amount));
+
+        transaction.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
+        transaction.setValue(amount);
+        transaction.setAccount(account);
+
+        accountRepository.save(account);
+
+        return transactionRepository.save(transaction);
+    }
+
+    public Transaction transferMoney(BigDecimal amount, Account originAccount, Account destinationAccount) {
+        BigDecimal originBalance = originAccount.getBalanceMoney();
+        BigDecimal destinationBalance = destinationAccount.getBalanceMoney();
+
+        BigDecimal zero = BigDecimal.valueOf(0);
+        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+        if (originBalance.compareTo(zero) < 0) {
+            throw new ValueNotAcceptedException("Valor não aceito");
+        } else originAccount.setBalanceMoney(originBalance.subtract(amount));
+
+        if (originAccount == destinationAccount) throw new AccountAlreadyExistsException("Contas iguais");
+
+        destinationAccount.setBalanceMoney(destinationAccount.setBalanceMoney(amount));
+
+        accountRepository.save(destinationAccount.getClient().getAccount());
+        accountRepository.save(originAccount.getClient().getAccount());
+
+        return (Transaction) originAccount.getAccountTransaction();
     }
 }

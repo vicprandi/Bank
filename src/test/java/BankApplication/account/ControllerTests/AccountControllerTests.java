@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +67,7 @@ public class AccountControllerTests {
         clientRequest.setState("SP");
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(Long.valueOf("0"));
+        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
@@ -124,7 +125,7 @@ public class AccountControllerTests {
         clientRequest.setState("SP");
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(Long.valueOf("0"));
+        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
@@ -156,7 +157,7 @@ public class AccountControllerTests {
         clientRequest.setState("SP");
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(Long.valueOf("0"));
+        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
