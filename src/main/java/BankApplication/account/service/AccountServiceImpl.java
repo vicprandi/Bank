@@ -67,9 +67,9 @@ public class AccountServiceImpl implements AccountService {
 
     /* Achar conta pelo AccountNumber */
     @Override
-    public Long findByAccountNumberByClientId(Long id) throws RuntimeException {
+    public Long findAccountNumberByClientId(Long id) throws RuntimeException {
         Optional<Client> client = clientRepository.findById(id);
-        Long accountNumber = findByAccountNumberByClientId(client.get().getId());
+        Long accountNumber = findAccountNumberByClientId(client.get().getId());
 
         if (accountNumber == null) {
             throw new AccountDoesntExistException("Conta não existe!");
