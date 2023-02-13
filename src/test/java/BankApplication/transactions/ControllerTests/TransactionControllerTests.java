@@ -173,8 +173,7 @@ public class TransactionControllerTests {
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+
         clientService.registerClient(clientRequest);
         accountService.registerAccount(accountRequest, clientRequest.getCpf());
 
@@ -183,17 +182,15 @@ public class TransactionControllerTests {
         transactionRequest.setValue(BigDecimal.valueOf(100));
         transactionRequest.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
 
-        Long accountNumber = accountRepository.generateAccountNumber();
-        account.setAccountNumber(accountNumber);
+        Long accountNumber = account.getAccountNumber();
 
-        Map<String, Object> responseMap = new HashMap<>();
+        Map<String, BigDecimal> responseMap = new HashMap<>();
         responseMap.put("amount", transactionRequest.getValue());
 
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit/{accountNumber}", accountNumber)
-                        .param("amount", transactionRequest.getValue())
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit/" + accountNumber, accountNumber)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(MockMvcResultMatchers.status().isOk());
