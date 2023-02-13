@@ -11,25 +11,27 @@ import BankApplication.model.Transaction;
 import BankApplication.transaction.controller.TransactionController;
 import BankApplication.transaction.repository.TransactionRepository;
 import BankApplication.transaction.service.TransactionServiceImpl;
-import com.fasterxml.jackson.core.JsonGenerator;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 import static org.mockito.Mockito.when;
 
@@ -184,15 +186,11 @@ public class TransactionControllerTests {
 
         Long accountNumber = account.getAccountNumber();
 
-        Map<String, BigDecimal> responseMap = new HashMap<>();
-        responseMap.put("amount", transactionRequest.getValue());
-
-        String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit/" + accountNumber, accountNumber)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit/{accountNumber}", accountNumber)
+                        .param("amount", "100")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -213,14 +211,7 @@ public class TransactionControllerTests {
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("accountRegistered", accountRegistered);
-        responseMap.put("balanceMoney", accountRequest.getBalanceMoney());
-
-        String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
         accountService.registerAccount(accountRequest, clientRequest.getCpf());
 
@@ -229,13 +220,13 @@ public class TransactionControllerTests {
         transactionRequest.setValue(BigDecimal.valueOf(100));
         transactionRequest.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
 
-        Long accountNumber = accountRepository.generateAccountNumber();
-        account.setAccountNumber(accountNumber);
+        Long accountNumber = account.getAccountNumber();
+
         when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transactions/deposits")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposisssst/{accountNumber}", accountNumber)
+                        .param("amount", "100")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
@@ -277,14 +268,107 @@ public class TransactionControllerTests {
         when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
         when(transactionService.withdrawMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
 
-        transactionService.depositMoney(accountNumber, new BigDecimal(100));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/withdraw")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/withdraw/{accountNumber}", accountNumber)
+                        .param("amount", "100")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @Test
+    public void shouldReturnStatus4xx_afterWithdrawMoney() throws Exception {
+        ClientRequest clientRequest = new ClientRequest();
+        clientRequest.setName("Victoria");
+        clientRequest.setCity("SP");
+        clientRequest.setStreet("SeiLa");
+        clientRequest.setCpf("12345678901");
+        clientRequest.setPostalCode("02036020");
+        clientRequest.setState("SP");
+        clientRequest.clientObjectRequest().setId(1L);
+
+        AccountRequest accountRequest = new AccountRequest();
+        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+
+        Account account = new Account();
+        account.setAccountNumber(accountRepository.generateAccountNumber());
+        account.setClient(clientRequest.clientObjectRequest());
+        account.setBalanceMoney(accountRequest.getBalanceMoney());
+        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("accountRegistered", accountRegistered);
+        responseMap.put("balanceMoney", accountRequest.getBalanceMoney());
+
+        String requestBody = new ObjectMapper().writeValueAsString(responseMap);
+        clientService.registerClient(clientRequest);
+        accountService.registerAccount(accountRequest, clientRequest.getCpf());
+
+        Transaction transactionRequest = new Transaction();
+        transactionRequest.setAccount(account);
+        transactionRequest.setValue(BigDecimal.valueOf(100));
+        transactionRequest.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
+
+        Long accountNumber = accountRepository.generateAccountNumber();
+        account.setAccountNumber(accountNumber);
+        when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.withdrawMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/withdrasdw/{accountNumber}", accountNumber)
+                        .param("amount", "100")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    public void shouldReturnStatus200_afterTransferMoney() throws Exception {
+        BigDecimal amount = BigDecimal.valueOf(100);
+
+        Account originAccount = new Account();
+        originAccount.setAccountNumber(accountRepository.generateAccountNumber());
+        originAccount.setBalanceMoney(BigDecimal.valueOf(1000));
+
+        Account destinationAccount = new Account();
+        destinationAccount.setAccountNumber(accountRepository.generateAccountNumber());
+        destinationAccount.setBalanceMoney(BigDecimal.valueOf(0));
+
+        Long originAccountNumber = originAccount.getAccountNumber();
+        Long destinationAccountNumber = destinationAccount.getAccountNumber();
+
+        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
+        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/transfer")
+                        .param("amount", "100")
+                        .param("originAccountNumber", originAccountNumber.toString())
+                        .param("destinationAccountNumber", destinationAccountNumber.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void shouldReturnStatus4xx_afterTransferMoney() throws Exception {
+        BigDecimal amount = BigDecimal.valueOf(100);
+
+        Account originAccount = new Account();
+        originAccount.setAccountNumber(accountRepository.generateAccountNumber());
+        originAccount.setBalanceMoney(BigDecimal.valueOf(1000));
+
+        Account destinationAccount = new Account();
+        destinationAccount.setAccountNumber(accountRepository.generateAccountNumber());
+        destinationAccount.setBalanceMoney(BigDecimal.valueOf(0));
+
+        Long originAccountNumber = originAccount.getAccountNumber();
+        Long destinationAccountNumber = destinationAccount.getAccountNumber();
+
+        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
+        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/transferssss")
+                        .param("amount", "100")
+                        .param("originAccountNumber", originAccountNumber.toString())
+                        .param("destinationAccountNumber", destinationAccountNumber.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
 
 
 }
