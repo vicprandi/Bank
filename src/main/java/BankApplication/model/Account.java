@@ -21,7 +21,7 @@ public class Account {
     @OneToOne
     private Client client;
 
-    @OneToMany(targetEntity = Transaction.class, mappedBy = "id")
+    @OneToMany(targetEntity = Transaction.class, mappedBy = "account")
     private List<Transaction> accountTransaction;
 
     @Column(name = "balance_money", nullable = false)

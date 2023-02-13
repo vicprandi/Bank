@@ -1,5 +1,6 @@
 package BankApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ public class Client {
     @Column(name = "created_data")
     private LocalDate createdData = LocalDate.now();
 
+    @JsonIgnore
     @OneToOne(mappedBy = "client")
     private Account account;
 
