@@ -69,15 +69,8 @@ public class ClientServiceImpl implements ClientService {
     public List<Client> getAllClients() {
         List<Client> clients = clientRepository.findAll();
 
-        if (clients.isEmpty()) throw new ClientDoesntExistException("Não há clientes.");
-        return clients;
-    }
-
-    public Optional<Client> getClient(Long id) {
-        Optional<Client> client = clientRepository.findById(id);
-
-        if (client.isEmpty()) throw new ClientDoesntExistException("Não há clientes.");
-        return client;
+        if (!clients.isEmpty()) return clients;
+        else throw new ClientDoesntExistException("Não há clientes");
     }
 
     @Override
@@ -90,6 +83,17 @@ public class ClientServiceImpl implements ClientService {
         }
         return clientObject.get();
     }
+
+    public Long getClientId(String cpf) {
+
+        Optional<Client> clientObject = clientRepository.findByCpf(cpf);
+
+        if (clientObject.isEmpty()) {
+            throw new ClientDoesntExistException("Cliente não existe!");
+        }
+        return clientObject.get().getId();
+    }
+
 
 }
 

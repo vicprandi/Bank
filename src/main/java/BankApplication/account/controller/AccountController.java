@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 @RestController
@@ -36,6 +37,14 @@ public class AccountController {
     public List<Account> getAllAcounts() {
         logger.info("Retornando todos as contas existentes");
         return accountService.getAllAccounts();
+    }
+
+    /*Para uma conta*/
+    @ApiOperation(value ="Bring a client")
+    @GetMapping("/{id}")
+    public Optional<Account> getAccount(@PathVariable Long id) {
+        logger.info("Retornando todos as contas existentes");
+        return accountService.getAccountById(id);
     }
 
     /* Registro da Conta */

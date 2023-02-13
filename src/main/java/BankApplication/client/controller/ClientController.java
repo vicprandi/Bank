@@ -73,7 +73,6 @@ public class ClientController {
         logger.info("Cliente deletado");
         clientService.deleteClient(cpf);
 
-        return new ResponseEntity<> (HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
-
 }

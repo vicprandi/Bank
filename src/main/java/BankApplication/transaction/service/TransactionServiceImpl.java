@@ -5,7 +5,6 @@ import BankApplication.account.repository.AccountRepository;
 import BankApplication.account.service.AccountServiceImpl;
 import BankApplication.client.service.ClientServiceImpl;
 import BankApplication.model.Account;
-import BankApplication.model.Client;
 import BankApplication.model.Transaction;
 import BankApplication.transaction.exception.ValueNotAcceptedException;
 import BankApplication.transaction.repository.TransactionRepository;
@@ -42,7 +41,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction findTransactionByClientId(Long id) {
-        Optional<Client> client = clientService.getClient(id);
         Optional<Account> account = accountService.getAccountById(id);
 
         return (Transaction) account.get().getAccountTransaction();
@@ -57,13 +55,11 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal balanceMoney = account.getBalanceMoney();
 
         BigDecimal zero = BigDecimal.valueOf(0);
-
         if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
 
         if (balanceMoney.compareTo(zero) < 0) {
             throw new ValueNotAcceptedException("Valor não aceito");
         } else account.setBalanceMoney(balanceMoney.add(amount));
-
 
         transaction.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
         transaction.setValue(amount);
@@ -74,7 +70,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public Transaction withdrawMoneu(Long accountNumber, BigDecimal amount) {
+    public Transaction withdrawMoney(Long accountNumber, BigDecimal amount) {
         Account account = accountRepository.findByAccountNumber(accountNumber);
         Transaction transaction = new Transaction();
         BigDecimal balanceMoney = account.getBalanceMoney();
@@ -94,18 +90,20 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public Transaction transferMoney(BigDecimal amount, Account originAccount, Account destinationAccount) {
+        if (originAccount == destinationAccount) throw new AccountAlreadyExistsException("Contas iguais");
+
         BigDecimal originBalance = originAccount.getBalanceMoney();
         BigDecimal destinationBalance = destinationAccount.getBalanceMoney();
 
         BigDecimal zero = BigDecimal.valueOf(0);
         if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+
         if (originBalance.compareTo(zero) < 0) {
             throw new ValueNotAcceptedException("Valor não aceito");
-        } else originAccount.setBalanceMoney(originBalance.subtract(amount));
-
-        if (originAccount == destinationAccount) throw new AccountAlreadyExistsException("Contas iguais");
-
-        destinationAccount.setBalanceMoney(destinationAccount.setBalanceMoney(amount));
+        } else {
+            originAccount.setBalanceMoney(originBalance.subtract(amount));
+            destinationAccount.setBalanceMoney(destinationBalance.add(amount));
+        }
 
         accountRepository.save(destinationAccount.getClient().getAccount());
         accountRepository.save(originAccount.getClient().getAccount());
