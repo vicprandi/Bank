@@ -8,10 +8,14 @@ import BankApplication.model.Account;
 import BankApplication.model.Transaction;
 import BankApplication.transaction.exception.ValueNotAcceptedException;
 import BankApplication.transaction.repository.TransactionRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -21,8 +25,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final AccountRepository accountRepository;
 
+    @Autowired
     public AccountServiceImpl accountService;
-
+    @Autowired
     public ClientServiceImpl clientService;
 
     public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository) {
@@ -40,10 +45,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction findTransactionByClientId(Long id) {
+    public List<Transaction> findTransactionByClientId(Long id) {
         Optional<Account> account = accountService.getAccountById(id);
 
-        return (Transaction) account.get().getAccountTransaction();
+        return account.get().getAccountTransaction();
 
     }
 
@@ -89,25 +94,53 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public Transaction transferMoney(BigDecimal amount, Account originAccount, Account destinationAccount) {
-        if (originAccount == destinationAccount) throw new AccountAlreadyExistsException("Contas iguais");
+    @Transactional
+    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber) {
+        Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
+        Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
+
+        if (Objects.equals(originAccountNumber, destinationAccountNumber))
+            throw new AccountAlreadyExistsException("Contas iguais");
 
         BigDecimal originBalance = originAccount.getBalanceMoney();
         BigDecimal destinationBalance = destinationAccount.getBalanceMoney();
 
         BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+        if (amount.compareTo(zero) <= 0) throw new ValueNotAcceptedException("Valor não aceito");
 
         if (originBalance.compareTo(zero) < 0) {
             throw new ValueNotAcceptedException("Valor não aceito");
-        } else {
-            originAccount.setBalanceMoney(originBalance.subtract(amount));
-            destinationAccount.setBalanceMoney(destinationBalance.add(amount));
         }
 
-        accountRepository.save(destinationAccount.getClient().getAccount());
-        accountRepository.save(originAccount.getClient().getAccount());
+        Transaction originTransaction = new Transaction();
+        originTransaction.setValue(amount);
+        originTransaction.setAccount(originAccount);
+        originTransaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
 
-        return (Transaction) originAccount.getAccountTransaction();
+        Transaction destinationTransaction = new Transaction();
+        destinationTransaction.setValue(amount);
+        destinationTransaction.setAccount(destinationAccount);
+        destinationTransaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
+
+
+        try {
+            // start transaction
+            transactionRepository.save(originTransaction);
+            transactionRepository.save(destinationTransaction);
+
+            originAccount.setBalanceMoney(originBalance.subtract(amount));
+            destinationAccount.setBalanceMoney(destinationBalance.add(amount));
+
+            // persist changes to accounts
+            accountRepository.save(originAccount);
+            accountRepository.save(destinationAccount);
+
+            // commit transaction
+        } catch (Exception e) {
+            // rollback transaction
+            throw new RuntimeException("Não foi possível realizar a transferência");
+        }
+
+        return Arrays.asList(originTransaction, destinationTransaction);
     }
 }

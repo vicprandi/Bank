@@ -9,5 +9,5 @@ public interface TransactionService {
     List<Transaction> getAllTransactions();
 
     /* Achar conta pelo Id do CLiente */
-    Transaction findTransactionByClientId(Long id);
+    List<Transaction> findTransactionByClientId(Long id);
 }
