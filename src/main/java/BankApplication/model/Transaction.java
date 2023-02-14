@@ -2,6 +2,7 @@ package BankApplication.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 
 import java.math.BigDecimal;
 
@@ -19,6 +20,7 @@ public class Transaction {
     private Account account;
 
     @Column(name="value", nullable = false)
+    @DecimalMin(value = "0.00", message = "Value must be positive")
     private BigDecimal value;
 
     @Column(name="transaction_type", length = 50, nullable = false)
