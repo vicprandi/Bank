@@ -32,7 +32,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /* Registrar uma conta */
-    public Account registerAccount(AccountRequest accountRequest, String cpf) {
+    public Account registerAccount(String cpf) {
         Optional<Client> client  = clientRepository.findByCpf(cpf);
 
         Long accountNumber = accountRepository.generateAccountNumber();
@@ -40,6 +40,8 @@ public class AccountServiceImpl implements AccountService {
         if (accountRepository.existsByAccountNumber(accountNumber)) {
             throw new AccountAlreadyExistsException("Account already registred");
         }
+        AccountRequest accountRequest = new AccountRequest();
+
         Account account = new Account();
         account.setAccountNumber(accountNumber);
         account.setClient(client.get());
