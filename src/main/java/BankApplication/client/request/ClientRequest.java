@@ -2,23 +2,29 @@ package BankApplication.client.request;
 
 import BankApplication.model.Client;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public class ClientRequest {
     @NotNull(message = "{validation.field_required")
     private String name;
     @NotNull(message = "{validation.field_required")
+    @Pattern(regexp = "^[0-9]{11}$", message = "Cpf deve conter somente números e ser exatamente 11.")
     private String cpf;
 
     @NotNull(message = "{validation.field_required")
+    @Pattern(regexp = "^[0-9]{8}$", message = "CEP deve conter somente numeros e ser de tamanho exato de 8")
     private String postalCode;
 
     @NotNull(message = "{validation.field_required")
+    @Pattern(regexp = "^[\\p{L}\\-]+(?: [\\p{L}\\-]+)*$", message = "Deve conter somente letras, caracteres especiais e o caractere '-'")
     private String street;
 
     @NotNull(message = "{validation.field_required")
+    @Pattern(regexp = "^[\\p{L}\\-]+(?: [\\p{L}\\-]+)*$", message = "Deve conter somente letras, caracteres especiais e o caractere '-'")
     private String state;
 
     @NotNull(message = "{validation.field_required")
+    @Pattern(regexp = "^[\\p{L}\\-]+(?: [\\p{L}\\-]+)*$", message = "Deve conter somente letras, caracteres especiais e o caractere '-'")
     private String city;
 
     public ClientRequest(){

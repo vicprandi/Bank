@@ -1,11 +1,11 @@
 package BankApplication.account.request;
 
-import jakarta.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
 
 public class AccountRequest {
 
+    @DecimalMin(value = "0.00", message = "Balance must be non-negative")
     private BigDecimal balanceMoney;
 
     public AccountRequest(){

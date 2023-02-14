@@ -1,6 +1,7 @@
 package BankApplication.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ public class Account {
     private List<Transaction> accountTransaction;
 
     @Column(name = "balance_money", nullable = false)
+    @DecimalMin(value = "0.00", message = "Balance must be non-negative")
     private BigDecimal balanceMoney;
 
     @Column(name = "created_data")
