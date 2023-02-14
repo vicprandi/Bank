@@ -2,6 +2,7 @@ package BankApplication.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Pattern;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ public class Account {
     private Long id;
 
     @Column(name ="account_number", length = 50, nullable = false)
+    @Pattern(regexp = "^\\d+$")
     private Long accountNumber;
 
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey)
