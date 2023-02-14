@@ -60,6 +60,8 @@ public class ClientServiceImpl implements ClientService {
         Optional<Client> client = clientRepository.findByCpf(cpf);
         Account clientAccount = client.get().getAccount();
         if (!clientRepository.existsByCpf(cpf)) throw new ClientDoesntExistException("Client does not exist");
+        if (cpf.isEmpty()) throw new ClientDoesntExistException("Client does not exist");
+
         if (clientAccount != null) accountRepository.delete(clientAccount);
 
         clientRepository.delete(client.get());

@@ -17,7 +17,6 @@ public class Account {
     private Long id;
 
     @Column(name ="account_number", length = 50, nullable = false)
-    @Pattern(regexp = "^\\d+$")
     private Long accountNumber;
 
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey)
@@ -28,7 +27,6 @@ public class Account {
     private List<Transaction> accountTransaction;
 
     @Column(name = "balance_money", nullable = false)
-    @DecimalMin(value = "0.00", message = "Balance must be non-negative")
     private BigDecimal balanceMoney;
 
     @Column(name = "created_data")

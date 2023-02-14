@@ -50,9 +50,9 @@ public class AccountController {
     /* Registro da Conta */
     @ApiOperation(value = "Account Register")
     @PostMapping("/{cpf}")
-    public ResponseEntity<Account> registerAccount (@RequestBody @Valid AccountRequest accountRequest, @PathVariable String cpf) {
+    public ResponseEntity<Account> registerAccount (@PathVariable String cpf) {
         logger.info("Conta registrada");
-        Account response = accountService.registerAccount(accountRequest, cpf);
+        Account response = accountService.registerAccount(cpf);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
