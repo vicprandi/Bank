@@ -3,7 +3,7 @@ package BankApplication.transaction.service;
 import BankApplication.account.exceptions.AccountAlreadyExistsException;
 import BankApplication.account.repository.AccountRepository;
 import BankApplication.account.service.AccountServiceImpl;
-import BankApplication.client.service.ClientServiceImpl;
+import BankApplication.account.controller.client.service.ClientServiceImpl;
 import BankApplication.model.Account;
 import BankApplication.model.Transaction;
 import BankApplication.transaction.exception.ValueNotAcceptedException;

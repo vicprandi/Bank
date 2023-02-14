@@ -1,4 +1,4 @@
-package BankApplication.client.response;
+package BankApplication.account.controller.client.response;
 public class ClientResponse {
     private final String name;
 

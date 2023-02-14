@@ -1,12 +1,12 @@
-package BankApplication.client.service;
+package BankApplication.account.controller.client.service;
 
+import BankApplication.account.controller.client.exceptions.ClientDoesntExistException;
+import BankApplication.account.controller.client.exceptions.CpfAlreadyExistsException;
 import BankApplication.account.repository.AccountRepository;
-import BankApplication.client.exceptions.ClientDoesntExistException;
-import BankApplication.client.exceptions.CpfAlreadyExistsException;
 import BankApplication.model.Account;
 import BankApplication.model.Client;
-import BankApplication.client.repository.ClientRepository;
-import BankApplication.client.request.ClientRequest;
+import BankApplication.account.controller.client.repository.ClientRepository;
+import BankApplication.account.controller.client.request.ClientRequest;
 import jakarta.validation.Valid;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;

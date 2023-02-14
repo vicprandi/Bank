@@ -1,8 +1,8 @@
 package BankApplication.client.ControllerTests;
 
-import BankApplication.client.controller.ClientController;
-import BankApplication.client.request.ClientRequest;
-import BankApplication.client.service.ClientServiceImpl;
+import BankApplication.account.controller.client.controller.ClientController;
+import BankApplication.account.controller.client.request.ClientRequest;
+import BankApplication.account.controller.client.service.ClientServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

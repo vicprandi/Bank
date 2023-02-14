@@ -1,12 +1,12 @@
 package BankApplication.account.service;
 
-import BankApplication.client.service.ClientServiceImpl;
+import BankApplication.account.controller.client.service.ClientServiceImpl;
 import BankApplication.account.exceptions.AccountAlreadyExistsException;
 import BankApplication.account.exceptions.AccountDoesntExistException;
 import BankApplication.model.Account;
 import BankApplication.model.Client;
 import BankApplication.account.repository.AccountRepository;
-import BankApplication.client.repository.ClientRepository;
+import BankApplication.account.controller.client.repository.ClientRepository;
 import BankApplication.account.request.AccountRequest;
 
 import jakarta.validation.Valid;

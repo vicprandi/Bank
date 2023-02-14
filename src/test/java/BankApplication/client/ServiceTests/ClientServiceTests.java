@@ -1,10 +1,10 @@
 package BankApplication.client.ServiceTests;
 
-import BankApplication.client.exceptions.CpfAlreadyExistsException;
+import BankApplication.account.controller.client.exceptions.CpfAlreadyExistsException;
 import BankApplication.model.Client;
-import BankApplication.client.repository.ClientRepository;
-import BankApplication.client.request.ClientRequest;
-import BankApplication.client.service.ClientServiceImpl;
+import BankApplication.account.controller.client.repository.ClientRepository;
+import BankApplication.account.controller.client.request.ClientRequest;
+import BankApplication.account.controller.client.service.ClientServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;

@@ -1,4 +1,4 @@
-package BankApplication.client.request;
+package BankApplication.account.controller.client.request;
 
 import BankApplication.model.Client;
 import jakarta.validation.constraints.NotNull;
