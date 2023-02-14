@@ -1,4 +1,4 @@
-package BankApplication.client.repository;
+package BankApplication.account.controller.client.repository;
 
 import BankApplication.model.Client;
 import org.jetbrains.annotations.NotNull;

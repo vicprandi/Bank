@@ -1,7 +1,7 @@
-package BankApplication.client.exceptions.handler;
+package BankApplication.account.controller.client.exceptions.handler;
 
-import BankApplication.client.exceptions.CpfAlreadyExistsException;
-import BankApplication.client.exceptions.details.CpfRegistredExceptionDetails;
+import BankApplication.account.controller.client.exceptions.CpfAlreadyExistsException;
+import BankApplication.account.controller.client.exceptions.details.CpfRegistredExceptionDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

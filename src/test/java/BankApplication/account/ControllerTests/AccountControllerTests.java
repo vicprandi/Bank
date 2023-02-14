@@ -7,9 +7,9 @@ import BankApplication.account.request.AccountRequest;
 import BankApplication.account.service.AccountServiceImpl;
 
 
-import BankApplication.client.repository.ClientRepository;
-import BankApplication.client.request.ClientRequest;
-import BankApplication.client.service.ClientServiceImpl;
+import BankApplication.account.controller.client.repository.ClientRepository;
+import BankApplication.account.controller.client.request.ClientRequest;
+import BankApplication.account.controller.client.service.ClientServiceImpl;
 import BankApplication.model.Account;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -23,8 +23,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(AccountController.class)
@@ -67,24 +65,17 @@ public class AccountControllerTests {
         clientRequest.setState("SP");
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("accountRegistered", accountRegistered);
-        responseMap.put("balanceMoney", accountRequest.getBalanceMoney());
-
-        String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/12345678901")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
@@ -98,19 +89,18 @@ public class AccountControllerTests {
         clientRequest.setPostalCode("02036020");
         clientRequest.setState("SP");
 
+        AccountRequest accountRequest = new AccountRequest();
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
-        /*Não criar o balance money*/
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
 
-        String requestBody = new ObjectMapper().valueToTree(accountRegistered).toString();
         clientService.registerClient(clientRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/12345678901")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+        mockMvc.perform(MockMvcRequestBuilders.post("/accounsts/12345678901")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
@@ -124,26 +114,20 @@ public class AccountControllerTests {
         clientRequest.setPostalCode("02036020");
         clientRequest.setState("SP");
 
+
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("accountRegistered", accountRegistered);
-        responseMap.put("balanceMoney", accountRequest.getBalanceMoney());
-
-        String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
         accountService.deleteAccount(account.getId());
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/delete/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
     }
     @Test
@@ -157,25 +141,20 @@ public class AccountControllerTests {
         clientRequest.setState("SP");
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("accountRegistered", accountRegistered);
-        responseMap.put("balanceMoney", accountRequest.getBalanceMoney());
+        clientService.registerClient(clientRequest);
 
-        String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
         accountService.deleteAccount(account.getId());
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/delete")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 }

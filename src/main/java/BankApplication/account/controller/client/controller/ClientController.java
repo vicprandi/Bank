@@ -1,10 +1,10 @@
-package BankApplication.client.controller;
+package BankApplication.account.controller.client.controller;
 
 
+import BankApplication.account.controller.client.service.ClientServiceImpl;
 import BankApplication.model.Client;
-import BankApplication.client.request.ClientRequest;
+import BankApplication.account.controller.client.request.ClientRequest;
 
-import BankApplication.client.service.ClientServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.transaction.Transactional;

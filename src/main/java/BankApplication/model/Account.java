@@ -1,5 +1,6 @@
 package BankApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Pattern;
@@ -21,6 +22,7 @@ public class Account {
 
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey)
     @OneToOne
+    @JsonIgnoreProperties({"id","cpf","createdData","postalCode","street"})
     private Client client;
 
     @OneToMany(targetEntity = Transaction.class, mappedBy = "account")

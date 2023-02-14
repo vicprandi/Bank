@@ -3,9 +3,9 @@ package BankApplication.transactions.ControllerTests;
 import BankApplication.account.repository.AccountRepository;
 import BankApplication.account.request.AccountRequest;
 import BankApplication.account.service.AccountServiceImpl;
-import BankApplication.client.repository.ClientRepository;
-import BankApplication.client.request.ClientRequest;
-import BankApplication.client.service.ClientServiceImpl;
+import BankApplication.account.controller.client.repository.ClientRepository;
+import BankApplication.account.controller.client.request.ClientRequest;
+import BankApplication.account.controller.client.service.ClientServiceImpl;
 import BankApplication.model.Account;
 import BankApplication.model.Transaction;
 import BankApplication.transaction.controller.TransactionController;
@@ -88,13 +88,13 @@ public class TransactionControllerTests {
         clientRequest.clientObjectRequest().setId(1L);
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
+        Account accountRegistered = accountService.registerAccount(clientRequest.getCpf());
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("accountRegistered", accountRegistered);
@@ -102,7 +102,7 @@ public class TransactionControllerTests {
 
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
-        accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        accountService.registerAccount(clientRequest.getCpf());
 
         Long clientId = clientRequest.clientObjectRequest().getId();
 
@@ -129,13 +129,13 @@ public class TransactionControllerTests {
         clientRequest.clientObjectRequest().setId(1L);
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
+        Account accountRegistered = accountService.registerAccount(clientRequest.getCpf());
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("accountRegistered", accountRegistered);
@@ -143,7 +143,7 @@ public class TransactionControllerTests {
 
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
-        accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        accountService.registerAccount(clientRequest.getCpf());
 
         Long clientId = clientRequest.clientObjectRequest().getId();
 
@@ -177,7 +177,7 @@ public class TransactionControllerTests {
         account.setClient(clientRequest.clientObjectRequest());
 
         clientService.registerClient(clientRequest);
-        accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        accountService.registerAccount(clientRequest.getCpf());
 
         Transaction transactionRequest = new Transaction();
         transactionRequest.setAccount(account);
@@ -206,14 +206,15 @@ public class TransactionControllerTests {
         clientRequest.clientObjectRequest().setId(1L);
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
+        account.setBalanceMoney(balanceMoney);
 
         clientService.registerClient(clientRequest);
-        accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        accountService.registerAccount(clientRequest.getCpf());
 
         Transaction transactionRequest = new Transaction();
         transactionRequest.setAccount(account);
@@ -242,13 +243,13 @@ public class TransactionControllerTests {
         clientRequest.clientObjectRequest().setId(1L);
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
+        Account accountRegistered = accountService.registerAccount(clientRequest.getCpf());
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("accountRegistered", accountRegistered);
@@ -256,7 +257,7 @@ public class TransactionControllerTests {
 
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
-        accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        accountService.registerAccount(clientRequest.getCpf());
 
         Transaction transactionRequest = new Transaction();
         transactionRequest.setAccount(account);
@@ -286,13 +287,13 @@ public class TransactionControllerTests {
         clientRequest.clientObjectRequest().setId(1L);
 
         AccountRequest accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(BigDecimal.valueOf(Long.parseLong("0")));
+        BigDecimal balanceMoney = accountRequest.getBalanceMoney();
 
         Account account = new Account();
         account.setAccountNumber(accountRepository.generateAccountNumber());
         account.setClient(clientRequest.clientObjectRequest());
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        Account accountRegistered = accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        account.setBalanceMoney(balanceMoney);
+        Account accountRegistered = accountService.registerAccount(clientRequest.getCpf());
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("accountRegistered", accountRegistered);
@@ -300,7 +301,7 @@ public class TransactionControllerTests {
 
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
         clientService.registerClient(clientRequest);
-        accountService.registerAccount(accountRequest, clientRequest.getCpf());
+        accountService.registerAccount(clientRequest.getCpf());
 
         Transaction transactionRequest = new Transaction();
         transactionRequest.setAccount(account);

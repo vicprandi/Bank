@@ -1,4 +1,4 @@
-package BankApplication.client.exceptions.details;
+package BankApplication.account.controller.client.exceptions.details;
 
 public class CpfRegistredExceptionDetails {
 

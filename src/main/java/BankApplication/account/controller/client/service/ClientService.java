@@ -1,4 +1,4 @@
-package BankApplication.client.service;
+package BankApplication.account.controller.client.service;
 
 import BankApplication.model.Client;
 
