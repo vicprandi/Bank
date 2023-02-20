@@ -7,9 +7,8 @@ import BankApplication.client.repository.ClientRepository;
 import BankApplication.client.request.ClientRequest;
 import BankApplication.client.service.ClientServiceImpl;
 
-import BankApplication.model.Client;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,10 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-
-import java.util.Objects;
-import java.util.Optional;
 
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.junit.Assert.assertEquals;
@@ -141,23 +136,34 @@ public class ClientControllerTests {
     //Teste das exceções.
     //Cliente não existe caso eu mande um CPF inválido para ele.
     @Test
-    public void getClientWithInvalidCpf() throws Exception {
-        given(clientService.getClientCpf(invalidCpf)).willThrow(new ClientDoesntExistException("Cliente não existe!"));
-
-        mockMvc.perform(get("/clients/" + invalidCpf))
-                .andExpect(status().isNotFound());
+    public void shouldReturnStatus404_afterGettingClientThatDoesntExist() throws Exception {
+        when(clientService.getClientCpf(invalidCpf)).thenReturn(null);
+        // then
+        try {
+            clientService.getClientId(invalidCpf);
+            fail("Deveria ter lançado a exceção CpfAlreadyExistsException");
+        } catch (CpfAlreadyExistsException ex) {
+                mockMvc.perform(get("/clients/" + invalidCpf))
+               .andExpect(status().isNotFound());
+        }
     }
 
     //Testa se o CPF já existe. Se existir, joga uma exceção de cliente já registrado e o teste passa.
     @Test
-    public void testRegisterClientWithExistingCpf() throws Exception {
+    public void shouldReturnStatus409_afterRegisterClientWithExistingCpf() throws Exception {
         // given
         when(clientRepository.existsByCpf(clientRequest.getCpf())).thenReturn(true);
+        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
         // then
         try {
             clientService.registerClient(clientRequest);
+            fail("Deveria ter lançado a exceção CpfAlreadyExistsException");
         } catch (CpfAlreadyExistsException ex) {
+            mockMvc.perform(MockMvcRequestBuilders.get("/client")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestBody));
             assertEquals("Client already registred", ex.getMessage());
+            verify(status().isConflict());
         }
     }
 
@@ -171,8 +177,8 @@ public class ClientControllerTests {
             clientService.getClientCpf(invalidCpf);
             fail("ClientDoesntExistException was expected");
         } catch (ClientDoesntExistException ex) {
-            assertEquals("Cliente não existe!", ex.getMessage());
+            Assertions.assertEquals("Cliente não existe!", ex.getMessage());
+            verify(status().isNotFound());
         }
-
     }
 }
