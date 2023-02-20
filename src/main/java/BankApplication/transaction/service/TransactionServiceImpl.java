@@ -3,7 +3,8 @@ package BankApplication.transaction.service;
 import BankApplication.account.exceptions.AccountAlreadyExistsException;
 import BankApplication.account.repository.AccountRepository;
 import BankApplication.account.service.AccountServiceImpl;
-import BankApplication.account.controller.client.service.ClientServiceImpl;
+import BankApplication.client.exceptions.ClientDoesntExistException;
+import BankApplication.client.service.ClientServiceImpl;
 import BankApplication.model.Account;
 import BankApplication.model.Transaction;
 import BankApplication.transaction.exception.ValueNotAcceptedException;
@@ -46,9 +47,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<Transaction> findTransactionByClientId(Long id) {
-        Optional<Account> account = accountService.getAccountById(id);
+        Account account = accountService.getAccountById(id)
+                .orElseThrow(() -> new ClientDoesntExistException("Cliente inexistente"));
 
-        return account.get().getAccountTransaction();
+        return account.getAccountTransaction();
 
     }
 

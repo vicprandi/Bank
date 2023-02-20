@@ -1,7 +1,7 @@
-package BankApplication.account.controller.client.exceptions.handler;
+package BankApplication.client.exceptions.handler;
 
-import BankApplication.account.controller.client.exceptions.CpfAlreadyExistsException;
-import BankApplication.account.controller.client.exceptions.details.CpfRegistredExceptionDetails;
+import BankApplication.client.exceptions.CpfAlreadyExistsException;
+import BankApplication.client.exceptions.details.CpfAlreadyExistsExceptionDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,10 +12,10 @@ public class CpfAlreadyExistsExceptionHandler {
 
     @ExceptionHandler(CpfAlreadyExistsException.class)
     public ResponseEntity<?> handlerCpfAlreadyExistsException (CpfAlreadyExistsException cpfAlreadyExistsException) {
-        CpfRegistredExceptionDetails exceptionDetails = CpfRegistredExceptionDetails.cpfRegistredExceptionDetailsBuilder.newBuilder()
+        CpfAlreadyExistsExceptionDetails exceptionDetails = CpfAlreadyExistsExceptionDetails.cpfAlreadyExistDetailsBuilder.newBuilder()
                 .details(cpfAlreadyExistsException.getMessage())
                 .build();
-        return new ResponseEntity<>(exceptionDetails, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(exceptionDetails, HttpStatus.CONFLICT);
     }
 
 }

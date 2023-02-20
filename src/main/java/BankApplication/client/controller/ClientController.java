@@ -1,9 +1,9 @@
-package BankApplication.account.controller.client.controller;
+package BankApplication.client.controller;
 
 
-import BankApplication.account.controller.client.service.ClientServiceImpl;
+import BankApplication.client.service.ClientServiceImpl;
 import BankApplication.model.Client;
-import BankApplication.account.controller.client.request.ClientRequest;
+import BankApplication.client.request.ClientRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

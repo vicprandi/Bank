@@ -1,16 +1,20 @@
 package BankApplication.client.ServiceTests;
 
-import BankApplication.account.controller.client.exceptions.CpfAlreadyExistsException;
+import BankApplication.client.exceptions.CpfAlreadyExistsException;
 import BankApplication.model.Client;
-import BankApplication.account.controller.client.repository.ClientRepository;
-import BankApplication.account.controller.client.request.ClientRequest;
-import BankApplication.account.controller.client.service.ClientServiceImpl;
+import BankApplication.client.repository.ClientRepository;
+import BankApplication.client.request.ClientRequest;
+import BankApplication.client.service.ClientServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClientServiceTests {
@@ -35,8 +39,8 @@ public class ClientServiceTests {
         clientSaved.setCpf("12345678901");
 
         //when
-        Mockito.when(clientRepository.existsByCpf(ArgumentMatchers.anyString())).thenReturn(true);
-        Mockito.when(clientRepository.save(ArgumentMatchers.any(Client.class))).thenReturn(clientSaved.clientObjectRequest());
+        when(clientRepository.existsByCpf(ArgumentMatchers.anyString())).thenReturn(true);
+        when(clientRepository.save(ArgumentMatchers.any(Client.class))).thenReturn(clientSaved.clientObjectRequest());
 
         //then
         Client clientRegistered = new Client();
@@ -50,5 +54,4 @@ public class ClientServiceTests {
         Mockito.verify(clientService).registerClient(clientSaved);
 
     }
-
 }

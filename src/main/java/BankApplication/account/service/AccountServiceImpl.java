@@ -1,12 +1,13 @@
 package BankApplication.account.service;
 
-import BankApplication.account.controller.client.service.ClientServiceImpl;
+import BankApplication.client.exceptions.CpfDoesntExistException;
+import BankApplication.client.service.ClientServiceImpl;
 import BankApplication.account.exceptions.AccountAlreadyExistsException;
 import BankApplication.account.exceptions.AccountDoesntExistException;
 import BankApplication.model.Account;
 import BankApplication.model.Client;
 import BankApplication.account.repository.AccountRepository;
-import BankApplication.account.controller.client.repository.ClientRepository;
+import BankApplication.client.repository.ClientRepository;
 import BankApplication.account.request.AccountRequest;
 
 import jakarta.validation.Valid;
@@ -38,8 +39,14 @@ public class AccountServiceImpl implements AccountService {
         Long accountNumber = accountRepository.generateAccountNumber();
 
         if (accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new AccountAlreadyExistsException("Account already registred");
+            throw new AccountAlreadyExistsException("Conta já registrada");
         }
+
+        if (clientRepository.existsByCpf(cpf) == null) {
+            throw new CpfDoesntExistException("Cpf não existe");
+        }
+
+
         AccountRequest accountRequest = new AccountRequest();
 
         Account account = new Account();
@@ -71,7 +78,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Long findAccountNumberByClientId(Long id) throws RuntimeException {
         Optional<Client> client = clientRepository.findById(id);
-        Long accountNumber = findAccountNumberByClientId(client.get().getId());
+        Long accountNumber = client.get().getAccount().getAccountNumber();
 
         if (accountNumber == null) {
             throw new AccountDoesntExistException("Conta não existe!");
@@ -87,55 +94,5 @@ public class AccountServiceImpl implements AccountService {
 
         return Optional.of(account);
     }
-
-//    /* Usando o cliente, preciso realizar o saque. */
-//    public Account withdrawMoney(AccountRequest accountRequest) throws RuntimeException {
-//
-//        Account account = accountRepository.getReferenceById(accountRequest.getBalanceMoney());
-//        Long balance = account.getAmount();
-//
-//        if (balance < accountRequest.getBalanceMoney()) throw new RuntimeException("Dinheiro insuficiente");
-//
-//        balance -= accountRequest.getBalanceMoney();
-//        account.setAmount(balance);
-//
-//        return accountRepository.save(account);
-//    }
-//
-//    /* Usando o cliente, preciso ver o saldo. */
-//    public Long showBalance (AccountRequest accountRequest) {
-//        Account account = accountRepository.getReferenceById(accountRequest.getBalanceMoney());
-//        Long balance = account.getAmount();
-//        balance+= accountRequest.getBalanceMoney();
-//        account.setAmount(balance);
-//
-//        if (balance < accountRequest.getBalanceMoney()) throw new RuntimeException("Não há saldo suficiente");
-//
-//        return balance;
-//    }
-//
-//    /* Usando o cliente, preciso realizar transferência para outra conta. Na transferência, o saldo (amount) deve ser suficiente. Na transferência, as contas (accountNumber) devem ser válidas e diferentes. */
-//    public String transferMoney(Account originAccount, Account destinationAccount, Long amount) {
-//
-//        /* Primeira regra: Precisa existir o account number */
-//        if (originAccount.getAccountNumber() < 0 || destinationAccount.getAccountNumber() < 0) throw new RuntimeException("Conta inexistente");
-//
-//        /* Segunda regra: Ter saldo na conta que vai sair o dinheiro*/
-//        if (originAccount.getBalanceMoney() < amount) throw new RuntimeException("Saldo insuficiente");
-//
-//        /*Terceira regra: Contas não podem ser iguais*/
-//        if (Objects.equals(originAccount.getClient().getCpf(), destinationAccount.getClient().getCpf())) throw new RuntimeException("Contas iguais!");
-//
-//        /* Agora sim, a transferência entre contas. */
-//        originAccount.setBalanceMoney(originAccount.getBalanceMoney() - amount) ;
-//        destinationAccount.setBalanceMoney(destinationAccount.getBalanceMoney() + amount);
-//
-//        accountRepository.save(originAccount);
-//        accountRepository.save(destinationAccount);
-//
-//        return "Transferência realizada com sucesso";
-//    }
-
-    /* Usando o cliente, preciso observar o extrato. No extrato, deve mostrar as trasnferências, depósitos e saques. */
 
 }

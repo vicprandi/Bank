@@ -29,7 +29,7 @@ public class Account {
     private List<Transaction> accountTransaction;
 
     @Column(name = "balance_money", nullable = false)
-    private BigDecimal balanceMoney;
+    private BigDecimal balanceMoney = BigDecimal.valueOf(0);
 
     @Column(name = "created_data")
     private LocalDate createdData = LocalDate.now();

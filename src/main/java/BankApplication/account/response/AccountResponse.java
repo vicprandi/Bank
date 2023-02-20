@@ -2,19 +2,20 @@ package BankApplication.account.response;
 
 import BankApplication.model.Client;
 
+import java.math.BigDecimal;
+
 public class AccountResponse {
 
     private Long id;
     private Long accountNumber;
     private Client client;
     private Long amount;
-
-    private Long balanceMoney;
+    private BigDecimal balanceMoney = BigDecimal.valueOf(0);
 
     public AccountResponse(){
     }
 
-    public AccountResponse(Long id, Long accountNumber, Client client, Long amount, Long balanceMoney) {
+    public AccountResponse(Long id, Long accountNumber, Client client, Long amount, BigDecimal balanceMoney) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.client = client;
@@ -54,11 +55,11 @@ public class AccountResponse {
         this.amount = amount;
     }
 
-    public Long getBalanceMoney() {
+    public BigDecimal getBalanceMoney() {
         return balanceMoney;
     }
 
-    public void setBalanceMoney(Long balanceMoney) {
+    public void setBalanceMoney(BigDecimal balanceMoney) {
         this.balanceMoney = balanceMoney;
     }
 }

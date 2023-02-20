@@ -1,6 +1,7 @@
 package BankApplication.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 
@@ -40,8 +41,8 @@ public class Client {
     @Column(name = "created_data")
     private LocalDate createdData = LocalDate.now();
 
-    @JsonIgnore
     @OneToOne(mappedBy = "client")
+    @JsonIgnore
     private Account account;
 
     public Client() {
