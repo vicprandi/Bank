@@ -1,8 +1,8 @@
 package BankApplication.client.service;
 
 import BankApplication.client.exceptions.ClientDoesntExistException;
-import BankApplication.client.exceptions.CpfAlreadyExistsException;
 import BankApplication.account.repository.AccountRepository;
+import BankApplication.client.exceptions.CpfAlreadyExistsException;
 import BankApplication.model.Account;
 import BankApplication.model.Client;
 import BankApplication.client.repository.ClientRepository;
