@@ -1,4 +1,4 @@
-package BankApplication.account.controller.client.exceptions.details;
+package BankApplication.client.exceptions.details;
 
 public class ClientDoesntExistExceptionDetails {
 

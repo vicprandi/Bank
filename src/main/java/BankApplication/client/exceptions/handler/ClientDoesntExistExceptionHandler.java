@@ -1,7 +1,7 @@
-package BankApplication.account.controller.client.exceptions.handler;
+package BankApplication.client.exceptions.handler;
 
-import BankApplication.account.controller.client.exceptions.ClientDoesntExistException;
-import BankApplication.account.controller.client.exceptions.details.ClientDoesntExistExceptionDetails;
+import BankApplication.client.exceptions.ClientDoesntExistException;
+import BankApplication.client.exceptions.details.ClientDoesntExistExceptionDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

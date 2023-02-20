@@ -7,9 +7,9 @@ import BankApplication.account.request.AccountRequest;
 import BankApplication.account.service.AccountServiceImpl;
 
 
-import BankApplication.account.controller.client.repository.ClientRepository;
-import BankApplication.account.controller.client.request.ClientRequest;
-import BankApplication.account.controller.client.service.ClientServiceImpl;
+import BankApplication.client.repository.ClientRepository;
+import BankApplication.client.request.ClientRequest;
+import BankApplication.client.service.ClientServiceImpl;
 import BankApplication.model.Account;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
