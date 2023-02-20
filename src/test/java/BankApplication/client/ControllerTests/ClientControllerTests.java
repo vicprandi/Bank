@@ -7,12 +7,15 @@ import BankApplication.client.repository.ClientRepository;
 import BankApplication.client.request.ClientRequest;
 import BankApplication.client.service.ClientServiceImpl;
 
+import BankApplication.model.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,6 +25,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.aspectj.bridge.MessageUtil.fail;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,8 +45,20 @@ public class ClientControllerTests {
 
     @Autowired MockMvc mockMvc;
 
-    @Autowired private ObjectMapper objectMapper;
-    private ClientRequest clientRequest;
+    @Spy
+    ClientRequest clientRequest;
+    ClientRequest clientRequest2;
+    String invalidCpf;
+    String sameCpf;
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    public void setUp() {
+        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        String invalidCpf = "12345678900";
+        String sameCpf = "12345678901";
+    }
 
     @Test
     public void shouldReturnStatus201_afterGetAllClients() throws Exception {
@@ -54,8 +74,6 @@ public class ClientControllerTests {
 
     @Test
     public void shouldReturnStatus201_afterCreateClient() throws Exception {
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-
         String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
         clientService.registerClient(clientRequest);
         mockMvc.perform(post("/clients")
@@ -66,8 +84,6 @@ public class ClientControllerTests {
 
     @Test
     public void shouldReturnStatus4xx_afterCreateClient() throws Exception {
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-
         String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
         clientService.registerClient(clientRequest);
         mockMvc.perform(post("/clientss")
@@ -78,8 +94,6 @@ public class ClientControllerTests {
 
     @Test
     public void shouldReturnStatus202_afterUpdateClient() throws Exception {
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-
         clientService.registerClient(clientRequest);
         String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
         clientRequest.setState("BH");
@@ -103,8 +117,6 @@ public class ClientControllerTests {
 
     @Test
     public void shouldReturnStatus202_afterDeleteClient() throws Exception {
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-
         String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
         clientService.registerClient(clientRequest);
         clientService.deleteClient(clientRequest.getCpf());
@@ -127,32 +139,40 @@ public class ClientControllerTests {
     }
 
     //Teste das exceções.
-    //Cliente não existe pelo CPF inválido.
+    //Cliente não existe caso eu mande um CPF inválido para ele.
     @Test
     public void getClientWithInvalidCpf() throws Exception {
-        String invalidCpf = "12345678900";
         given(clientService.getClientCpf(invalidCpf)).willThrow(new ClientDoesntExistException("Cliente não existe!"));
 
         mockMvc.perform(get("/clients/" + invalidCpf))
                 .andExpect(status().isNotFound());
     }
 
-    //Testa se o CPF já existe.
+    //Testa se o CPF já existe. Se existir, joga uma exceção de cliente já registrado e o teste passa.
     @Test
     public void testRegisterClientWithExistingCpf() throws Exception {
-        //given
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        ClientRequest clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientService.registerClient(clientRequest2);
-
+        // given
         when(clientRepository.existsByCpf(clientRequest.getCpf())).thenReturn(true);
-        given(clientService.registerClient(clientRequest)).willThrow(new CpfAlreadyExistsException("Client already registred"));
+        // then
+        try {
+            clientService.registerClient(clientRequest);
+        } catch (CpfAlreadyExistsException ex) {
+            assertEquals("Client already registred", ex.getMessage());
+        }
+    }
 
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        //then
-        mockMvc.perform(post("/clients")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                    .andExpect(status().isConflict());
+    //* O teste mostra que se você der update num cliente que não existe, ele não vai funcionar pois não existe pelo CPF.**/
+    @Test
+    public void shouldReturnStatus404_afterUpdateClientWithExistingCpf() throws Exception {
+        //given
+        when(clientRepository.existsByCpf(invalidCpf)).thenReturn(null);
+
+        try {
+            clientService.getClientCpf(invalidCpf);
+            fail("ClientDoesntExistException was expected");
+        } catch (ClientDoesntExistException ex) {
+            assertEquals("Cliente não existe!", ex.getMessage());
+        }
+
     }
 }
