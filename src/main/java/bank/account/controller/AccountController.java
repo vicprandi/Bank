@@ -38,10 +38,10 @@ public class AccountController {
     }
 
     /*Para uma conta*/
-    @ApiOperation(value ="Bring a client")
+    @ApiOperation(value ="Bring a account")
     @GetMapping("/{id}")
     public Optional<Account> getAccount(@PathVariable Long id) {
-        logger.info("Retornando todos as contas existentes");
+        logger.info("Retornando uma única conta");
         return accountService.getAccountById(id);
     }
 

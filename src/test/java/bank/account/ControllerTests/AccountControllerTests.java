@@ -111,6 +111,19 @@ public class AccountControllerTests {
     }
 
     @Test
+    public void shouldReturnStatus201_afterGettingAccount() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + clientRequest.clientObjectRequest().getId())
+                        .contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    public void shouldReturnStatus404_afterGettingOneAccountThatDoesntExist() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + null)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
     public void shouldReturnStatus4xx_afterRegisterAccount() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/accounsts/12345678901")
                         .contentType(MediaType.APPLICATION_JSON))

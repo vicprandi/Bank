@@ -8,6 +8,7 @@ import bank.client.request.ClientRequest;
 import bank.client.service.ClientServiceImpl;
 
 
+import bank.model.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +43,7 @@ public class ClientControllerTests {
     @Spy
     ClientRequest clientRequest;
     ClientRequest clientRequest2;
+    Client client;
     String invalidCpf;
     String sameCpf;
     ObjectMapper objectMapper = new ObjectMapper();
@@ -50,6 +52,8 @@ public class ClientControllerTests {
     public void setUp() {
         clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
         clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        client = new Client();
+
         String invalidCpf = "12345678900";
         String sameCpf = "12345678901";
     }
@@ -63,6 +67,18 @@ public class ClientControllerTests {
     @Test
     public void shouldReturnStatus404_afterGetAllClients() throws Exception {
         mockMvc.perform(get("/client"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void shouldReturnStatus201_afterGetAClient() throws Exception {
+        mockMvc.perform(get("/clients/" + client.getId()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldReturnStatus4xx_afterGetAClient() throws Exception {
+        mockMvc.perform(get("/clientfdss/" + client.getId()))
                 .andExpect(status().is4xxClientError());
     }
 
