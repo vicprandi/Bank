@@ -1,4 +1,4 @@
-package bank.client.exceptions.details;
+package bank.account.exceptions.details;
 
 public class CpfDoesntExistExceptionDetails {
 

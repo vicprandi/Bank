@@ -1,4 +1,4 @@
-package bank.client.exceptions;
+package bank.account.exceptions;
 
 
 import org.springframework.http.HttpStatus;
