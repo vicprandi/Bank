@@ -1,6 +1,6 @@
 package bank.account.service;
 
-import bank.client.exceptions.CpfDoesntExistException;
+import bank.account.exceptions.CpfDoesntExistException;
 import bank.client.service.ClientServiceImpl;
 import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.exceptions.AccountDoesntExistException;

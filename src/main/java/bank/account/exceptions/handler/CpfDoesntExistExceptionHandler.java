@@ -1,8 +1,8 @@
-package bank.client.exceptions.handler;
+package bank.account.exceptions.handler;
 
 
-import bank.client.exceptions.CpfDoesntExistException;
-import bank.client.exceptions.details.CpfDoesntExistExceptionDetails;
+import bank.account.exceptions.CpfDoesntExistException;
+import bank.account.exceptions.details.CpfDoesntExistExceptionDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

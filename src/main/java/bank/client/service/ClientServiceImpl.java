@@ -20,7 +20,6 @@ import java.util.Optional;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
-
     private final AccountRepository accountRepository;
 
     @Autowired
