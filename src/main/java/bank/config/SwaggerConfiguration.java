@@ -18,7 +18,7 @@ public class SwaggerConfiguration {
                 .apiInfo(apiInfo());
     }
 
-    private ApiInfo apiInfo() {
+    ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Simulacao de Banco para a ZUP")
                 .version("1.0.0")
