@@ -14,7 +14,14 @@ public class AccountRequestTest {
         accountRequest.setBalanceMoney(BigDecimal.valueOf(100.00));
 
         Assertions.assertEquals(BigDecimal.valueOf(100.00), accountRequest.getBalanceMoney());
-
     }
+    @Test
+    public void AccountRequest() {
+        AccountRequest accountRequest = new AccountRequest();
+        AccountRequest requested = accountRequest.requestAccount();
+
+        Assertions.assertNotNull(requested);
+    }
+
 
 }
