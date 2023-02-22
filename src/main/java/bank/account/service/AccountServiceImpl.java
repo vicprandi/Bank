@@ -46,7 +46,6 @@ public class AccountServiceImpl implements AccountService {
             throw new CpfDoesntExistException("Cpf não existe");
         }
 
-
         AccountRequest accountRequest = new AccountRequest();
 
         Account account = new Account();

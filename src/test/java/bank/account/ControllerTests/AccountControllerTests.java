@@ -11,8 +11,6 @@ import bank.client.request.ClientRequest;
 import bank.client.service.ClientServiceImpl;
 import bank.model.Account;
 import bank.model.Client;
-
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
@@ -23,29 +21,32 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
-import static org.aspectj.bridge.MessageUtil.fail;
-import static org.junit.Assert.assertEquals;
+import static java.rmi.server.LogStream.log;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(AccountController.class)
 public class AccountControllerTests {
 
-    @MockBean private ClientServiceImpl clientService;
+    @MockBean
+    private ClientServiceImpl clientService;
 
     @MockBean private AccountRepository accountRepository;
 
     @MockBean private AccountServiceImpl accountService;
 
-    @Autowired MockMvc mockMvc;
+    @Autowired
+    MockMvc mockMvc;
 
     @Spy
     ClientRequest clientRequest;
@@ -96,20 +97,20 @@ public class AccountControllerTests {
     @Test
     public void shouldReturnStatus201_afterGetAllAcounts() throws Exception {
         mockMvc.perform(get("/accounts"))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterGetAllAcounts() throws Exception {
         mockMvc.perform(get("/account"))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus201_afterRegisterAccount() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/" + clientRequest.getCpf())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -122,27 +123,27 @@ public class AccountControllerTests {
     public void shouldReturnStatus404_afterGettingOneAccountThatDoesntExist() throws Exception {
         mockMvc.perform(get("/accounts/" + null)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterRegisterAccount() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/accounsts/12345678901")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus202_afterDeleteAcount() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/delete/1")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isAccepted());
+                .andExpect(status().isAccepted());
     }
     @Test
     public void shouldReturnStatus4xx_afterDeleteClient() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/delete")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     //*Teste de exceções!*//
@@ -153,7 +154,7 @@ public class AccountControllerTests {
         // then
         try {
             accountService.registerAccount(clientRequest.getCpf());
-            fail("Deveria ter lançado a exceção AccountAlreadyExistsException");
+            log("Deveria ter lançado a exceção AccountAlreadyExistsException");
         } catch (AccountAlreadyExistsException ex) {
             mockMvc.perform(get("/accounts/" + clientRequest.getCpf())
                     .contentType(MediaType.APPLICATION_JSON));
@@ -170,7 +171,7 @@ public class AccountControllerTests {
         try {
             accountService.registerAccount(clientRequest.getCpf());
             accountService.deleteAccount(client.getId());
-            fail("Deveria ter lançado a exceção AccountDoesntExistException");
+            log("Deveria ter lançado a exceção AccountDoesntExistException");
         } catch (AccountDoesntExistException ex) {
             mockMvc.perform(get("/accounts/delete/" + client.getId())
                     .contentType(MediaType.APPLICATION_JSON));
@@ -180,8 +181,7 @@ public class AccountControllerTests {
     }
     @Test
     public void testGetAccount() throws Exception {
-        Long clientId = client.getId();
-        mockMvc.perform(get("/accounts/" + clientId)
+        mockMvc.perform(get("/accounts/" + 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

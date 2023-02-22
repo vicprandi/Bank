@@ -70,12 +70,12 @@ public class ClientServiceImplTests {
         clientRepository.save(client);
 
         Client client2 = new Client();
-        client.setName("Thais");
-        client.setCpf("12345678902");
-        client.setCity("SP");
-        client.setState("SP");
-        client.setStreet("SE");
-        client.setPostalCode("02036020");
+        client2.setName("Thais");
+        client2.setCpf("12345678902");
+        client2.setCity("SP");
+        client2.setState("SP");
+        client2.setStreet("SE");
+        client2.setPostalCode("02036020");
         clientRepository.save(client2);
     }
 

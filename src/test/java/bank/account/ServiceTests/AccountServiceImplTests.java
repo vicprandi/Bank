@@ -1,6 +1,7 @@
 package bank.account.ServiceTests;
 
 
+import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.exceptions.AccountDoesntExistException;
 import bank.account.exceptions.CpfDoesntExistException;
 import bank.account.repository.AccountRepository;
@@ -13,7 +14,6 @@ import bank.client.repository.ClientRepository;
 import bank.client.request.ClientRequest;
 import bank.transaction.repository.TransactionRepository;
 import bank.transaction.service.TransactionServiceImpl;
-import bank.account.exceptions.AccountAlreadyExistsException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,9 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
-
 import static org.mockito.Mockito.*;
-
 
 @SpringBootTest
 @Import(ExceptionHandler.class)
@@ -72,10 +70,11 @@ public class AccountServiceImplTests {
 
     @BeforeEach
     public void setUp() {
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
-        ClientRequest clientRequest2 = new ClientRequest("Thais", "12345678902", "02036020", "SE", "SP", "SP");
 
-        Client client = new Client();
+        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
+        clientRequest2 = new ClientRequest("Thais", "12345678902", "02036020", "SE", "SP", "SP");
+
+        client = new Client();
         client.setName("Victoria");
         client.setCpf("12345678901");
         client.setCity("SP");
@@ -84,13 +83,13 @@ public class AccountServiceImplTests {
         client.setPostalCode("02036020");
         clientRepository.save(client);
 
-        Client client2 = new Client();
-        client.setName("Thais");
-        client.setCpf("12345678902");
-        client.setCity("SP");
-        client.setState("SP");
-        client.setStreet("SE");
-        client.setPostalCode("02036020");
+        client2 = new Client();
+        client2.setName("Thais");
+        client2.setCpf("12345678902");
+        client2.setCity("SP");
+        client2.setState("SP");
+        client2.setStreet("SE");
+        client2.setPostalCode("02036020");
         clientRepository.save(client2);
     }
 
@@ -283,7 +282,4 @@ public class AccountServiceImplTests {
             assertEquals("Não há conta.", e.getMessage());
         }
     }
-
-
-
 }
