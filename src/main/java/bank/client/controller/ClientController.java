@@ -68,7 +68,7 @@ public class ClientController {
     /* Deletar o Cliente */
     @ApiOperation(value = "Deleting Client")
     @Transactional
-    @DeleteMapping("/delete/{cpf}")
+    @DeleteMapping("/{cpf}")
     public ResponseEntity<?> deleteClient(@PathVariable String cpf) {
         logger.info("Cliente deletado");
         clientService.deleteClient(cpf);

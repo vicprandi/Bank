@@ -39,11 +39,11 @@ public class AccountServiceImpl implements AccountService {
         Long accountNumber = accountRepository.generateAccountNumber();
 
         if (accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new AccountAlreadyExistsException("Conta já registrada");
+            throw new AccountAlreadyExistsException("Account already registered");
         }
 
         if (clientRepository.existsByCpf(cpf) == null) {
-            throw new CpfDoesntExistException("Cpf não existe");
+            throw new CpfDoesntExistException("CPF doesn't exist");
         }
 
         AccountRequest accountRequest = new AccountRequest();
@@ -69,7 +69,7 @@ public class AccountServiceImpl implements AccountService {
     public List<Account> getAllAccounts() {
         List<Account> accounts = accountRepository.findAll();
 
-        if (accounts.isEmpty()) throw new AccountDoesntExistException("Não há contas.");
+        if (accounts.isEmpty()) throw new AccountDoesntExistException("There's no accounts.");
         return accounts;
     }
 
@@ -80,7 +80,7 @@ public class AccountServiceImpl implements AccountService {
         Long accountNumber = client.get().getAccount().getAccountNumber();
 
         if (accountNumber == null) {
-            throw new AccountDoesntExistException("Conta não existe!");
+            throw new AccountDoesntExistException("Account doesn't exist!");
         }
         return accountNumber;
     }
@@ -89,7 +89,7 @@ public class AccountServiceImpl implements AccountService {
         Optional<Client> client = clientRepository.findById(id);
         Account account = client.get().getAccount();
 
-        if (account == null) throw new AccountDoesntExistException("Não há conta.");
+        if (account == null) throw new AccountDoesntExistException("There is no account.");
 
         return Optional.of(account);
     }
