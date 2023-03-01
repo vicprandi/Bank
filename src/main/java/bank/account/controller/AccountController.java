@@ -33,7 +33,7 @@ public class AccountController {
     @ApiOperation(value ="Bring all Accounts")
     @GetMapping
     public List<Account> getAllAcounts() {
-        logger.info("Retornando todos as contas existentes");
+        logger.info("Returning all accounts");
         return accountService.getAllAccounts();
     }
 
@@ -41,7 +41,7 @@ public class AccountController {
     @ApiOperation(value ="Bring a account")
     @GetMapping("/{id}")
     public Optional<Account> getAccount(@PathVariable Long id) {
-        logger.info("Retornando uma única conta");
+        logger.info("Returning a specific account");
         return accountService.getAccountById(id);
     }
 
@@ -49,7 +49,7 @@ public class AccountController {
     @ApiOperation(value = "Account Register")
     @PostMapping("/{cpf}")
     public ResponseEntity<Account> registerAccount (@PathVariable String cpf) {
-        logger.info("Conta registrada");
+        logger.info("Account registered");
         Account response = accountService.registerAccount(cpf);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -58,7 +58,7 @@ public class AccountController {
     @ApiOperation(value = "Deleting Account")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
-        logger.info("Conta deletada");
+        logger.info("Account deleted");
         accountService.deleteAccount(id);
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);

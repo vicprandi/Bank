@@ -36,14 +36,14 @@ public class ClientController {
     @ApiOperation(value ="Bring all Clients")
     @GetMapping
     public List<Client> getAllClients() {
-        logger.info("Retornando todos os clientes disponíveis");
+        logger.info("Returning all costumer");
         return clientService.getAllClients();
     }
 
     @ApiOperation(value = "Bring a specific client")
     @GetMapping("/{cpf}")
     public Optional<Client> getClient(@PathVariable @Valid String cpf) {
-        logger.info("Retornando cpf de cliente específico");
+        logger.info("Returning a specific costumer");
         return Optional.ofNullable(clientService.getClientCpf(cpf));
     }
 
@@ -52,7 +52,7 @@ public class ClientController {
     @PostMapping
     public ResponseEntity<Client> registerClient (@RequestBody @Valid ClientRequest clientRequest) {
         Client client = clientService.registerClient(clientRequest);
-        logger.info("Cliente Registrado");
+        logger.info("Costumer registered");
         return new ResponseEntity<>(client, HttpStatus.CREATED);
     }
 
@@ -61,7 +61,7 @@ public class ClientController {
     @PutMapping("/update")
     public ResponseEntity<Client> updateClient (@RequestBody @Valid ClientRequest cpf) {
         Client client = clientService.updateClient(cpf);
-        logger.info("Cliente atualizado");
+        logger.info("Costumer updated");
         return new ResponseEntity<Client>(client, HttpStatus.ACCEPTED);
     }
 
@@ -70,7 +70,7 @@ public class ClientController {
     @Transactional
     @DeleteMapping("/{cpf}")
     public ResponseEntity<?> deleteClient(@PathVariable String cpf) {
-        logger.info("Cliente deletado");
+        logger.info("Costumer deleted");
         clientService.deleteClient(cpf);
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
