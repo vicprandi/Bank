@@ -36,14 +36,14 @@ public class TransactionController {
     @ApiOperation(value ="Bring all Transactions")
     @GetMapping
     public List<Transaction> getAllTransactions() {
-        logger.info("Retornando todos as transações existentes");
+        logger.info("Returning all transactions");
         return transactionService.getAllTransactions();
     }
 
     @ApiOperation(value ="Bring transaction by ClientId")
     @GetMapping("/{id}")
     public List<Transaction> findTransactionByClientId(@PathVariable Long id) {
-        logger.info("Retornando transação pelo id da pessoa");
+        logger.info("Returning transaction by ClientId");
         List<Transaction> transactions = transactionService.findTransactionByClientId(id);
         return ResponseEntity.ok(transactions).getBody();
     }
@@ -51,7 +51,7 @@ public class TransactionController {
     @ApiOperation(value ="Depositar o dinheiro")
     @PostMapping("/deposit/{accountNumber}")
     public Transaction depositMoney(@PathVariable (value = "accountNumber") Long accountNumber, @RequestParam BigDecimal amount) {
-        logger.info("Retornando uma transação pelo cliente");
+        logger.info("Depositing money");
         Transaction transaction = transactionService.depositMoney(accountNumber, amount);
         return ResponseEntity.ok(transaction).getBody();
     }
@@ -59,7 +59,7 @@ public class TransactionController {
     @ApiOperation(value ="Sacar o dinheiro")
     @PostMapping("/withdraw/{accountNumber}")
     public Transaction withdrawMoney(@PathVariable (value = "accountNumber")  Long accountNumber, @RequestParam BigDecimal amount) {
-        logger.info("Sacando dinheiro do cliente");
+        logger.info("Withdrawing money");
         Transaction transaction = transactionService.withdrawMoney(accountNumber, amount);
         return ResponseEntity.ok(transaction).getBody();
     }
@@ -67,7 +67,7 @@ public class TransactionController {
     @ApiOperation(value ="Transferencia entre contas")
     @PostMapping("/transfer")
     public ResponseEntity<List<Transaction>> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber ) {
-        logger.info("Transferência entre contas");
+        logger.info("Transfering money between accounts");
         List<Transaction> transaction = transactionService.transferMoney(amount, originAccountNumber, destinationAccountNumber);
 
         return ResponseEntity.ok(transaction);
