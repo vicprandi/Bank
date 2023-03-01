@@ -56,7 +56,7 @@ public class AccountController {
 
     /* Deletar a Conta */
     @ApiOperation(value = "Deleting Account")
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
         logger.info("Conta deletada");
         accountService.deleteAccount(id);

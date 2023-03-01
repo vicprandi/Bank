@@ -3,9 +3,11 @@ package bank.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
+@Data
 @Entity
 @Table(name= "account_transactions")
 public class Transaction {
@@ -27,54 +29,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionEnum transactionType;
 
-    public Transaction() {
-    }
-
-    public Transaction(Long id, Account account, BigDecimal value, TransactionEnum transactionType) {
-        this.id = id;
-        this.account = account;
-        this.value = value;
-        this.transactionType = transactionType;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    public BigDecimal getValue() {
-        return value;
-    }
-
-    public void setValue(BigDecimal value) {
-        this.value = value;
-    }
-
-
     public enum TransactionEnum {
         WITHDRAW,
         DEPOSIT,
         TRANSFER
     }
-
-
-    public TransactionEnum getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(TransactionEnum transactionType) {
-        this.transactionType = transactionType;
-    }
-
 }

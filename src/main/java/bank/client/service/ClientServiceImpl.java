@@ -34,7 +34,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientRequest.clientObjectRequest();
 
         if (clientRepository.existsByCpf(clientRequest.getCpf())) {
-            throw new CpfAlreadyExistsException("Client already registred");
+            throw new CpfAlreadyExistsException("Client already registered");
         }
 
         return clientRepository.save(client);
@@ -58,6 +58,7 @@ public class ClientServiceImpl implements ClientService {
     public void deleteClient(String cpf) {
         Optional<Client> client = clientRepository.findByCpf(cpf);
         Account clientAccount = client.get().getAccount();
+
         if (!clientRepository.existsByCpf(cpf)) throw new ClientDoesntExistException("Client does not exist");
         if (cpf.isEmpty()) throw new ClientDoesntExistException("Client does not exist");
 
@@ -71,7 +72,7 @@ public class ClientServiceImpl implements ClientService {
         List<Client> clients = clientRepository.findAll();
 
         if (!clients.isEmpty()) return clients;
-        else throw new ClientDoesntExistException("Não há clientes");
+        else throw new ClientDoesntExistException("There's no clients");
     }
 
     @Override
@@ -80,7 +81,7 @@ public class ClientServiceImpl implements ClientService {
         Optional<Client> clientObject = clientRepository.findByCpf(cpf);
 
         if (clientObject.isEmpty()) {
-            throw new ClientDoesntExistException("Cliente não existe!");
+            throw new ClientDoesntExistException("There's no clients!");
         }
         return clientObject.get();
     }
@@ -90,7 +91,7 @@ public class ClientServiceImpl implements ClientService {
         Optional<Client> clientObject = clientRepository.findByCpf(cpf);
 
         if (clientObject.isEmpty()) {
-            throw new ClientDoesntExistException("Cliente não existe!");
+            throw new ClientDoesntExistException("There's no clients");
         }
         return clientObject.get().getId();
     }
