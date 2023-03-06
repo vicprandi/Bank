@@ -167,13 +167,6 @@ public class TransactionControllerTests {
 
         Long clientId = clientRequest.clientObjectRequest().getId();
 
-        List<Transaction> transactions = Arrays.asList(
-                new Transaction(1L, account, new BigDecimal(300), Transaction.TransactionEnum.DEPOSIT),
-                new Transaction(1L, account, new BigDecimal(200), Transaction.TransactionEnum.WITHDRAW)
-        );
-
-        when(transactionService.findTransactionByClientId(clientId)).thenReturn(transactions);
-
         mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", clientId))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
