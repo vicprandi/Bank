@@ -22,5 +22,4 @@ public class AccountRequest {
         accountRequest.setBalanceMoney(this.balanceMoney);
         return accountRequest;
     }
-
 }

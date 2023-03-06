@@ -3,13 +3,12 @@ package bank.transactions.ServiceTests;
 import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
-import bank.account.service.AccountService;
 import bank.account.service.AccountServiceImpl;
-import bank.client.service.ClientServiceImpl;
+import bank.customer.service.ClientServiceImpl;
 import bank.model.Account;
-import bank.model.Client;
-import bank.client.repository.ClientRepository;
-import bank.client.request.ClientRequest;
+import bank.model.Customer;
+import bank.customer.repository.ClientRepository;
+import bank.customer.request.ClientRequest;
 import bank.model.Transaction;
 import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
@@ -25,10 +24,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -66,8 +63,8 @@ public class TransactionServiceImplTests {
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
     Transaction transaction;
-    Client client;
-    Client client2;
+    Customer customer;
+    Customer customer2;
     Account account;
     Account account2;
     BigDecimal balanceMoney;

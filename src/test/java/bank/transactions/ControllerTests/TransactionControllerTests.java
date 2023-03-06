@@ -3,11 +3,11 @@ package bank.transactions.ControllerTests;
 import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
-import bank.client.repository.ClientRepository;
-import bank.client.request.ClientRequest;
-import bank.client.service.ClientServiceImpl;
+import bank.customer.repository.ClientRepository;
+import bank.customer.request.ClientRequest;
+import bank.customer.service.ClientServiceImpl;
 import bank.model.Account;
-import bank.model.Client;
+import bank.model.Customer;
 import bank.model.Transaction;
 import bank.transaction.controller.TransactionController;
 import bank.transaction.repository.TransactionRepository;
@@ -72,7 +72,7 @@ public class TransactionControllerTests {
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
 
-    Client client;
+    Customer customer;
 
     Account account;
 
@@ -106,16 +106,16 @@ public class TransactionControllerTests {
         account.setBalanceMoney(accountRequest.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account.setAccountNumber(accountNumber);
-        client = clientRequest.clientObjectRequest();
-        account.setClient(client);
+        customer = clientRequest.clientObjectRequest();
+        account.setCustomer(customer);
 
         Account account2 = new Account();
 
         account.setBalanceMoney(accountRequest2.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account2.setAccountNumber(accountNumber);
-        client = clientRequest2.clientObjectRequest();
-        account2.setClient(client);
+        customer = clientRequest2.clientObjectRequest();
+        account2.setCustomer(customer);
 
         accountService.registerAccount(clientRequest.getCpf());
         accountService.registerAccount(clientRequest2.getCpf());
@@ -166,13 +166,6 @@ public class TransactionControllerTests {
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
 
         Long clientId = clientRequest.clientObjectRequest().getId();
-
-        List<Transaction> transactions = Arrays.asList(
-                new Transaction(1L, account, new BigDecimal(300), Transaction.TransactionEnum.DEPOSIT),
-                new Transaction(1L, account, new BigDecimal(200), Transaction.TransactionEnum.WITHDRAW)
-        );
-
-        when(transactionService.findTransactionByClientId(clientId)).thenReturn(transactions);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", clientId))
                 .andExpect(MockMvcResultMatchers.status().isOk());
