@@ -31,15 +31,15 @@ After you clone the github, you can access the bank package and run the command:
 There are some features inside this project that you can test via Postman, such as:
 
 1. Client
-- POST: Register Client `localhost:8080/clients`
-- DELETE: Delete Client `localhost:8080/clients/delete/{clientCpf}`
-- PUT: Update Client by CPF (body request) `localhost:8080/clients/update`
-- GET: Get a specific client by CPF `localhost:8080/clients/{clientCpf}`
-- GET: Get all clients `localhost:8080/clients`
+- POST: Register Client `localhost:8080/customers`
+- DELETE: Delete Client `localhost:8080/customers/delete/{clientCpf}`
+- PUT: Update Client by CPF (body request) `localhost:8080/customers/update`
+- GET: Get a specific customer by CPF `localhost:8080/customers/{clientCpf}`
+- GET: Get all customers `localhost:8080/customers`
 2. Account
 - POST: Register Account by CPF `localhost:8080/accounts/{clientCpf}`
 - DELETE: Delete Account by AccountId `localhost:8080/accounts/delete/{id}`
-- GET: Get a specific account by AccountId  `localhost:8080/clients/{id}`
+- GET: Get a specific account by AccountId  `localhost:8080/customers/{id}`
 - GET: Get all accounts `localhost:8080/accounts`
 3. Transactions (amount is a number like= 100.00)
 - POST: Deposit Money `localhost:8080/transaction/deposit/{accountNumber}?amount={amount}`

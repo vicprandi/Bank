@@ -7,10 +7,10 @@ import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
 
-import bank.client.request.ClientRequest;
-import bank.client.service.ClientServiceImpl;
+import bank.customer.request.ClientRequest;
+import bank.customer.service.ClientServiceImpl;
 import bank.model.Account;
-import bank.model.Client;
+import bank.model.Customer;
 
 
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +53,7 @@ public class AccountControllerTests {
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
 
-    Client client;
+    Customer customer;
 
     Account account;
 
@@ -80,16 +80,16 @@ public class AccountControllerTests {
         account.setBalanceMoney(accountRequest.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account.setAccountNumber(accountNumber);
-        client = clientRequest.clientObjectRequest();
-        account.setClient(client);
+        customer = clientRequest.clientObjectRequest();
+        account.setCustomer(customer);
 
         Account account2 = new Account();
 
         account.setBalanceMoney(accountRequest2.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account2.setAccountNumber(accountNumber);
-        client = clientRequest2.clientObjectRequest();
-        account2.setClient(client);
+        customer = clientRequest2.clientObjectRequest();
+        account2.setCustomer(customer);
 
     }
 
@@ -165,14 +165,14 @@ public class AccountControllerTests {
     @Test
     public void shouldReturnStatus404_ifIdIsNotRegistred() throws Exception {
         // given
-        when(accountRepository.existsById(client.getId())).thenReturn(false);
+        when(accountRepository.existsById(customer.getId())).thenReturn(false);
         // then
         try {
             accountService.registerAccount(clientRequest.getCpf());
-            accountService.deleteAccount(client.getId());
+            accountService.deleteAccount(customer.getId());
             fail("Deveria ter lançado a exceção AccountDoesntExistException");
         } catch (AccountDoesntExistException ex) {
-            mockMvc.perform(get("/accounts/delete/" + client.getId())
+            mockMvc.perform(get("/accounts/delete/" + customer.getId())
                     .contentType(MediaType.APPLICATION_JSON));
             assertEquals("Account doesn't exists!", ex.getMessage());
             verify(status().isNotFound());
