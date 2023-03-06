@@ -100,48 +100,54 @@ public class TransactionServiceImpl implements TransactionService {
         Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
         Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
 
-        if (Objects.equals(originAccountNumber, destinationAccountNumber))
-            throw new AccountAlreadyExistsException("Contas iguais");
+        validateAccounts(originAccount, destinationAccount);
+        validateAmount(amount, originAccount);
 
-        BigDecimal originBalance = originAccount.getBalanceMoney();
-        BigDecimal destinationBalance = destinationAccount.getBalanceMoney();
-
-        BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) <= 0) throw new ValueNotAcceptedException("Valor não aceito");
-
-        if (originBalance.compareTo(zero) < 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
-        }
-
-        Transaction originTransaction = new Transaction();
-        originTransaction.setValue(amount);
-        originTransaction.setAccount(originAccount);
-        originTransaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-
-        Transaction destinationTransaction = new Transaction();
-        destinationTransaction.setValue(amount);
-        destinationTransaction.setAccount(destinationAccount);
-        destinationTransaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-
+        Transaction originTransaction = createTransaction(amount, originAccount, Transaction.TransactionEnum.TRANSFER);
+        Transaction destinationTransaction = createTransaction(amount, destinationAccount, Transaction.TransactionEnum.TRANSFER);
 
         try {
-            // start transaction
-            transactionRepository.save(originTransaction);
-            transactionRepository.save(destinationTransaction);
-
-            originAccount.setBalanceMoney(originBalance.subtract(amount));
-            destinationAccount.setBalanceMoney(destinationBalance.add(amount));
-
-            // persist changes to accounts
-            accountRepository.save(originAccount);
-            accountRepository.save(destinationAccount);
-
-            // commit transaction
+            saveTransactions(originTransaction, destinationTransaction);
+            updateAccounts(originAccount, destinationAccount, amount);
         } catch (Exception e) {
-            // rollback transaction
             throw new RuntimeException("Não foi possível realizar a transferência");
         }
 
         return Arrays.asList(originTransaction, destinationTransaction);
+    }
+
+    private void validateAccounts(Account originAccount, Account destinationAccount) {
+        if (Objects.equals(originAccount.getAccountNumber(), destinationAccount.getAccountNumber())) {
+            throw new AccountAlreadyExistsException("Contas iguais");
+        }
+    }
+
+    private void validateAmount(BigDecimal amount, Account originAccount) {
+        BigDecimal zero = BigDecimal.valueOf(0);
+        if (amount.compareTo(zero) <= 0) {
+            throw new ValueNotAcceptedException("Valor não aceito");
+        }
+        if (originAccount.getBalanceMoney().compareTo(zero) < 0) {
+            throw new ValueNotAcceptedException("Valor não aceito");
+        }
+    }
+
+    private Transaction createTransaction(BigDecimal amount, Account account, Transaction.TransactionEnum transactionType) {
+        Transaction transaction = new Transaction();
+        transaction.setValue(amount);
+        transaction.setAccount(account);
+        transaction.setTransactionType(transactionType);
+        return transaction;
+    }
+
+    private void saveTransactions(Transaction originTransaction, Transaction destinationTransaction) {
+        transactionRepository.save(originTransaction);
+        transactionRepository.save(destinationTransaction);
+    }
+
+    private void updateAccounts(Account originAccount, Account destinationAccount, BigDecimal amount) {
+        originAccount.setBalanceMoney(originAccount.getBalanceMoney().subtract(amount));
+        destinationAccount.setBalanceMoney(destinationAccount.getBalanceMoney().add(amount));
+        accountRepository.saveAll(Arrays.asList(originAccount, destinationAccount));
     }
 }
