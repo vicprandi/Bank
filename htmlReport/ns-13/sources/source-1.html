@@ -1,0 +1,178 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TransactionController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">bank.transaction.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: TransactionController (bank.transaction.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TransactionController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (17/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package bank.transaction.controller;
+&nbsp;
+&nbsp;
+&nbsp;import bank.model.Account;
+&nbsp;import bank.model.Transaction;
+&nbsp;import bank.transaction.service.TransactionServiceImpl;
+&nbsp;import io.swagger.annotations.Api;
+&nbsp;import io.swagger.annotations.ApiOperation;
+&nbsp;
+&nbsp;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;
+&nbsp;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import java.util.logging.Logger;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/transaction&quot;)
+&nbsp;@Api(value = &quot;transaction&quot;)
+&nbsp;public class TransactionController {
+&nbsp;
+&nbsp;    private final TransactionServiceImpl transactionService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public TransactionController(TransactionServiceImpl transactionService) {</b>
+&nbsp;
+<b class="fc">&nbsp;        this.transactionService = transactionService;</b>
+&nbsp;    }
+<b class="fc">&nbsp;    private static final Logger logger = Logger.getLogger(Account.class.getName());</b>
+&nbsp;
+&nbsp;    @ApiOperation(value =&quot;Bring all Transactions&quot;)
+&nbsp;    @GetMapping
+&nbsp;    public List&lt;Transaction&gt; getAllTransactions() {
+<b class="fc">&nbsp;        logger.info(&quot;Retornando todos as transa��es existentes&quot;);</b>
+<b class="fc">&nbsp;        return transactionService.getAllTransactions();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ApiOperation(value =&quot;Bring transaction by ClientId&quot;)
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public List&lt;Transaction&gt; findTransactionByClientId(@PathVariable Long id) {
+<b class="fc">&nbsp;        logger.info(&quot;Retornando transa��o pelo id da pessoa&quot;);</b>
+<b class="fc">&nbsp;        List&lt;Transaction&gt; transactions = transactionService.findTransactionByClientId(id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(transactions).getBody();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ApiOperation(value =&quot;Depositar o dinheiro&quot;)
+&nbsp;    @PostMapping(&quot;/deposit/{accountNumber}&quot;)
+&nbsp;    public Transaction depositMoney(@PathVariable (value = &quot;accountNumber&quot;) Long accountNumber, @RequestParam BigDecimal amount) {
+<b class="fc">&nbsp;        logger.info(&quot;Retornando uma transa��o pelo cliente&quot;);</b>
+<b class="fc">&nbsp;        Transaction transaction = transactionService.depositMoney(accountNumber, amount);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(transaction).getBody();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ApiOperation(value =&quot;Sacar o dinheiro&quot;)
+&nbsp;    @PostMapping(&quot;/withdraw/{accountNumber}&quot;)
+&nbsp;    public Transaction withdrawMoney(@PathVariable (value = &quot;accountNumber&quot;)  Long accountNumber, @RequestParam BigDecimal amount) {
+<b class="fc">&nbsp;        logger.info(&quot;Sacando dinheiro do cliente&quot;);</b>
+<b class="fc">&nbsp;        Transaction transaction = transactionService.withdrawMoney(accountNumber, amount);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(transaction).getBody();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ApiOperation(value =&quot;Transferencia entre contas&quot;)
+&nbsp;    @PostMapping(&quot;/transfer&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;Transaction&gt;&gt; transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber ) {
+<b class="fc">&nbsp;        logger.info(&quot;Transfer�ncia entre contas&quot;);</b>
+<b class="fc">&nbsp;        List&lt;Transaction&gt; transaction = transactionService.transferMoney(amount, originAccountNumber, destinationAccountNumber);</b>
+&nbsp;
+<b class="fc">&nbsp;        return ResponseEntity.ok(transaction);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-02-20 14:49</div>
+</div>
+</body>
+</html>

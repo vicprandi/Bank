@@ -56,5 +56,18 @@ Things to remember:
 - You cannot withdraw money you don't have.
 - You cannot transfer money between the same accounts.
 
+----
+
+Bank Project - Part II
+-
+
+After creating the bank project, there's the second part of the training plan. I had to implement Kafka. 
+First, I introduced Kafka into docker-compose by dockerizing it. After that, I used the commmand-line:
+
+- bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic transactions
+
+But I realized that implementing it via code it's so much better. So, 
+
+
 Project developed by: victoria.moreira@zup.com.br
 -
