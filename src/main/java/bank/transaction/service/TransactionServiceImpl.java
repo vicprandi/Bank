@@ -11,6 +11,7 @@ import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,22 +26,25 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final AccountRepository accountRepository;
 
+    private final KafkaTemplate<String, Transaction> kafkaTemplate;
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired
     public ClientServiceImpl clientService;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository,  KafkaTemplate<String, Transaction> kafkaTemplate ) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
     public List<Transaction> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
 
-        if (transactions.isEmpty()) throw new RuntimeException("Não há transações");
+        if (transactions.isEmpty()) throw new RuntimeException("There's no transactions");
 
+        kafkaTemplate.send("transactions", (Transaction) transactions);
         return transactions;
     }
 
@@ -48,9 +52,11 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> findTransactionByClientId(Long id) {
         Account account = accountService.getAccountById(id)
                 .orElseThrow(() -> new ClientDoesntExistException("Cliente inexistente"));
+        List<Transaction> transactions = account.getAccountTransaction();
 
-        return account.getAccountTransaction();
-
+        // Envia uma mensagem para o tópico "client-transactions" com a lista de transações encontradas
+        kafkaTemplate.send("transactions", (Transaction) transactions);
+        return transactions;
     }
 
     /* Regras de Negócio: O saldo (balanceMoney) não pode ficar negativo. */
@@ -73,7 +79,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         accountRepository.save(account);
 
-        return transactionRepository.save(transaction);
+        kafkaTemplate.send("transactions", transaction);
+        return transaction;
     }
 
     public Transaction withdrawMoney(Long accountNumber, BigDecimal amount) {
@@ -92,7 +99,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         accountRepository.save(account);
 
-        return transactionRepository.save(transaction);
+        kafkaTemplate.send("transactions", transaction);
+        return transaction;
     }
 
     @Transactional
@@ -109,6 +117,8 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             saveTransactions(originTransaction, destinationTransaction);
             updateAccounts(originAccount, destinationAccount, amount);
+            kafkaTemplate.send("transactions", (Transaction) Arrays.asList(originTransaction, destinationTransaction));
+
         } catch (Exception e) {
             throw new RuntimeException("Não foi possível realizar a transferência");
         }
@@ -137,6 +147,8 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setValue(amount);
         transaction.setAccount(account);
         transaction.setTransactionType(transactionType);
+
+        kafkaTemplate.send("transactions", transaction);
         return transaction;
     }
 
