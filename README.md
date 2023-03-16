@@ -66,7 +66,8 @@ First, I introduced Kafka into docker-compose by dockerizing it. After that, I u
 
 - bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic transactions
 
-But I realized that implementing it via code it's so much better. So, 
+But I realized that implementing it via code it's so much better. So, I created the *topic* inside:
+- KafkaConfiguration.
 
 
 Project developed by: victoria.moreira@zup.com.br
