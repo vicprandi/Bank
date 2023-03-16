@@ -1,0 +1,197 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Account</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">bank.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Account (bank.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Account</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46.2%
+  </span>
+  <span class="absValue">
+    (6/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    41.7%
+  </span>
+  <span class="absValue">
+    (10/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package bank.model;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import jakarta.validation.constraints.DecimalMin;
+&nbsp;import jakarta.validation.constraints.Pattern;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;account&quot;)
+&nbsp;public class Account {
+&nbsp;
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;    private Long id;
+&nbsp;
+&nbsp;    @Column(name =&quot;account_number&quot;, length = 50, nullable = false)
+&nbsp;    private Long accountNumber;
+&nbsp;
+&nbsp;    @JoinColumn(name = &quot;client_id&quot;, foreignKey = @ForeignKey)
+&nbsp;    @OneToOne
+&nbsp;    @JsonIgnoreProperties({&quot;id&quot;,&quot;cpf&quot;,&quot;createdData&quot;,&quot;postalCode&quot;,&quot;street&quot;})
+&nbsp;    private Client customer;
+&nbsp;
+&nbsp;    @OneToMany(targetEntity = Transaction.class, mappedBy = &quot;account&quot;)
+&nbsp;    private List&lt;Transaction&gt; accountTransaction;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;balance_money&quot;, nullable = false)</b>
+<b class="fc">&nbsp;    private BigDecimal balanceMoney = BigDecimal.valueOf(0);</b>
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;created_data&quot;)</b>
+<b class="fc">&nbsp;    private LocalDate createdData = LocalDate.now();</b>
+&nbsp;
+<b class="nc">&nbsp;    public Account(Long id, Long accountNumber, Client customer, List&lt;Transaction&gt; accountTransaction, BigDecimal balanceMoney, LocalDate createdData) {</b>
+<b class="nc">&nbsp;        this.id = id;</b>
+<b class="nc">&nbsp;        this.accountNumber = accountNumber;</b>
+<b class="nc">&nbsp;        this.customer = customer;</b>
+<b class="nc">&nbsp;        this.accountTransaction = accountTransaction;</b>
+<b class="nc">&nbsp;        this.createdData = createdData;</b>
+<b class="nc">&nbsp;        this.balanceMoney = balanceMoney;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    public Account() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long getId() {
+<b class="nc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long getAccountNumber() {
+<b class="fc">&nbsp;        return accountNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setAccountNumber(Long accountNumber) {
+<b class="fc">&nbsp;        this.accountNumber = accountNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Client getClient() {
+<b class="nc">&nbsp;        return customer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setClient(Client customer) {
+<b class="fc">&nbsp;        this.customer = customer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public LocalDate getCreatedData() {
+<b class="nc">&nbsp;        return createdData;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public BigDecimal getBalanceMoney() {
+<b class="nc">&nbsp;        return balanceMoney;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public BigDecimal setBalanceMoney(BigDecimal balanceMoney) {
+<b class="fc">&nbsp;        this.balanceMoney = balanceMoney;</b>
+<b class="fc">&nbsp;        return balanceMoney;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setCreatedData(LocalDate createdData) {
+<b class="nc">&nbsp;        this.createdData = createdData;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;Transaction&gt; getAccountTransaction() {
+<b class="nc">&nbsp;        return accountTransaction;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setAccountTransaction(List&lt;Transaction&gt; accountTransaction) {
+<b class="nc">&nbsp;        this.accountTransaction = accountTransaction;</b>
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-02-20 14:49</div>
+</div>
+</body>
+</html>

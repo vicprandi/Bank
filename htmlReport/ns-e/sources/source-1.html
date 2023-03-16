@@ -1,0 +1,257 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ClientRequest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">bank.customer.request</a>
+</div>
+
+<h1>Coverage Summary for Class: ClientRequest (bank.customer.request)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ClientRequest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (28/28)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$59M2cTPk</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$AUMnxbcN</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$Aw7MHJcM</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$beeLRk2E</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$cxNbUxwv</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$dBjrOtDz</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$eBDaY7Km</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$fLhYUTOf</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$IUrGFcie</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$lIOOsPMj</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$LP1P1yF8</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$OP3HIHmd</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$oujNm3dL</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$qmGLvAka</td>
+  </tr>
+  <tr>
+    <td class="name">ClientRequest$MockitoMock$Wz5zOtTB$auxiliary$s9rWkwfx</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (28/28)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package bank.customer.request;
+&nbsp;
+&nbsp;import bank.model.Customer;
+&nbsp;import jakarta.validation.constraints.NotNull;
+&nbsp;import jakarta.validation.constraints.Pattern;
+&nbsp;
+&nbsp;public class ClientRequest {
+&nbsp;    @NotNull(message = &quot;{validation.field_required&quot;)
+&nbsp;    private String name;
+&nbsp;    @NotNull(message = &quot;{validation.field_required&quot;)
+&nbsp;    @Pattern(regexp = &quot;^[0-9]{11}$&quot;, message = &quot;Cpf deve conter somente n�meros e ser exatamente 11.&quot;)
+&nbsp;    private String cpf;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;{validation.field_required&quot;)
+&nbsp;    @Pattern(regexp = &quot;^[0-9]{8}$&quot;, message = &quot;CEP deve conter somente numeros e ser de tamanho exato de 8&quot;)
+&nbsp;    private String postalCode;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;{validation.field_required&quot;)
+&nbsp;    @Pattern(regexp = &quot;^[\\p{L}\\-]+(?: [\\p{L}\\-]+)*$&quot;, message = &quot;Deve conter somente letras, caracteres especiais e o caractere &#39;-&#39;&quot;)
+&nbsp;    private String street;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;{validation.field_required&quot;)
+&nbsp;    @Pattern(regexp = &quot;^[\\p{L}\\-]+(?: [\\p{L}\\-]+)*$&quot;, message = &quot;Deve conter somente letras, caracteres especiais e o caractere &#39;-&#39;&quot;)
+&nbsp;    private String state;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;{validation.field_required&quot;)
+&nbsp;    @Pattern(regexp = &quot;^[\\p{L}\\-]+(?: [\\p{L}\\-]+)*$&quot;, message = &quot;Deve conter somente letras, caracteres especiais e o caractere &#39;-&#39;&quot;)
+&nbsp;    private String city;
+&nbsp;
+<b class="fc">&nbsp;    public ClientRequest(){</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    public ClientRequest(String name, String cpf, String postalCode, String street, String state, String city) {</b>
+<b class="fc">&nbsp;        this.name = name;</b>
+<b class="fc">&nbsp;        this.cpf = cpf;</b>
+<b class="fc">&nbsp;        this.postalCode = postalCode;</b>
+<b class="fc">&nbsp;        this.street = street;</b>
+<b class="fc">&nbsp;        this.state = state;</b>
+<b class="fc">&nbsp;        this.city = city;</b>
+&nbsp;    }
+&nbsp;    public Client clientObjectRequest() {
+<b class="fc">&nbsp;        Client customer = new Client();</b>
+<b class="fc">&nbsp;        customer.setName(this.name);</b>
+<b class="fc">&nbsp;        customer.setCpf(this.cpf);</b>
+<b class="fc">&nbsp;        customer.setPostalCode(this.postalCode);</b>
+<b class="fc">&nbsp;        customer.setState(this.state);</b>
+<b class="fc">&nbsp;        customer.setStreet(this.street);</b>
+<b class="fc">&nbsp;        customer.setCity(this.city);</b>
+<b class="fc">&nbsp;        return customer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getName() {
+<b class="fc">&nbsp;        return name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setName(String name) {
+<b class="fc">&nbsp;        this.name = name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getCpf() {
+<b class="fc">&nbsp;        return cpf;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setCpf(String cpf) {
+<b class="fc">&nbsp;        this.cpf = cpf;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getPostalCode() {
+<b class="fc">&nbsp;        return postalCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setPostalCode(String postalCode) {
+<b class="fc">&nbsp;        this.postalCode = postalCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStreet() {
+<b class="fc">&nbsp;        return street;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStreet(String street) {
+<b class="fc">&nbsp;        this.street = street;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getState() {
+<b class="fc">&nbsp;        return state;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setState(String state) {
+<b class="fc">&nbsp;        this.state = state;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getCity() {
+<b class="fc">&nbsp;        return city;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setCity(String city) {
+<b class="fc">&nbsp;        this.city = city;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-02-20 14:49</div>
+</div>
+</body>
+</html>
