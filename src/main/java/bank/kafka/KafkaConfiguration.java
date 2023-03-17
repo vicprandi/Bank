@@ -20,6 +20,12 @@ import java.util.Properties;
 @PropertySource("classpath:application.properties")
 public class KafkaConfiguration {
 
+    /***
+     * Comandos a serem utilizados:
+     * docker exec -it bank_kafka_1 bash
+     * docker exec bank kafka-topics --describe --topic transactions --bootstrap-server localhost:9092
+     ***/
+
     public KafkaConfiguration(@Value("${bootstrap-servers}") String bootstrapServers,
                               @Value("${topic.name}") String topicName) {
         createTopic(bootstrapServers, topicName);
