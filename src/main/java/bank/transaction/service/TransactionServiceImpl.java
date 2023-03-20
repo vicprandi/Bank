@@ -44,7 +44,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (transactions.isEmpty()) throw new RuntimeException("There's no transactions");
 
-        kafkaTemplate.send("transactions", (Transaction) transactions);
         return transactions;
     }
 
@@ -55,8 +54,7 @@ public class TransactionServiceImpl implements TransactionService {
         List<Transaction> transactions = account.getAccountTransaction();
 
         // Envia uma mensagem para o tópico "client-transactions" com a lista de transações encontradas
-        kafkaTemplate.send("transactions", (Transaction) transactions);
-        return transactions;
+        return account.getAccountTransaction();
     }
 
     /* Regras de Negócio: O saldo (balanceMoney) não pode ficar negativo. */
@@ -79,8 +77,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         accountRepository.save(account);
 
-        kafkaTemplate.send("transactions", transaction);
-        return transaction;
+        return transactionRepository.save(transaction);
     }
 
     public Transaction withdrawMoney(Long accountNumber, BigDecimal amount) {
@@ -99,8 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         accountRepository.save(account);
 
-        kafkaTemplate.send("transactions", transaction);
-        return transaction;
+        return transactionRepository.save(transaction);
     }
 
     @Transactional
@@ -148,7 +144,6 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAccount(account);
         transaction.setTransactionType(transactionType);
 
-        kafkaTemplate.send("transactions", transaction);
         return transaction;
     }
 
