@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 public class EventDTO {
-    private Event event = Event.SAVE_TRANSFER;
+    private Event event;
     private BigDecimal amount;
     private String originAccount;
     private String recipientAccount;

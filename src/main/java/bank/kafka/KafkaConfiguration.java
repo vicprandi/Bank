@@ -3,19 +3,13 @@ package bank.kafka;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,13 +27,13 @@ public class KafkaConfiguration {
      * docker exec bank kafka-topics --describe --topic transactions --bootstrap-server localhost:9092
      ***/
 
-    @Value("${bootstrap-servers}")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
     @Value("${topic.name}")
     private String topicName;
 
-    public KafkaConfiguration(@Value("${bootstrap-servers}") String bootstrapServers,
+
+    public KafkaConfiguration(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
                               @Value("${topic.name}") String topicName) {
         createTopic(bootstrapServers, topicName);
     }

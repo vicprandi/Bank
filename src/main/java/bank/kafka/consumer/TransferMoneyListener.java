@@ -2,6 +2,7 @@ package bank.kafka.consumer;
 
 import bank.kafka.model.EventDTO;
 import bank.transaction.service.TransactionServiceImpl;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -14,8 +15,9 @@ public class TransferMoneyListener implements TransferMoneyListenerInterface {
     private TransactionServiceImpl transactionService;
 
     @KafkaListener(topics = "transactions", groupId = "group_id")
-    public void consumeTransferMessage(EventDTO event) {
+    public void consumeTransferMessage(ConsumerRecord<String, EventDTO> record) {
         try {
+            EventDTO event = record.value();
             BigDecimal amount = new BigDecimal(String.valueOf(event.getAmount()));
             Long originAccount = Long.valueOf(event.getOriginAccount());
             Long destinationAccount = Long.valueOf(event.getRecipientAccount());

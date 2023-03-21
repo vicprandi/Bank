@@ -14,11 +14,11 @@ import java.math.BigDecimal;
 @Service
 public class KafkaService implements KafkaServicePort {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, EventDTO> kafkaTemplate;
     private final Logger log = LoggerFactory.getLogger(KafkaService.class);
 
     @Autowired
-    public KafkaService(KafkaTemplate<String, Object> kafkaTemplate) {
+    public KafkaService(KafkaTemplate<String, EventDTO> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
