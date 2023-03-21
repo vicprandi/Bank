@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfiguration {
-    @Value("127.0.0.1:9092")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String server;
 
     @Bean
