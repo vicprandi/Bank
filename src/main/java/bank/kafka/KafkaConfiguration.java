@@ -4,19 +4,20 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.core.*;
+
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
-/***
- Essa classe será executada ao iniciar o aplicativo Spring e criará o tópico chamado "transactions" com 1 partição e um fator de replicação de 1.
- Essa operação deve ser realizada apenas uma vez antes de começar a produzir ou consumir mensagens no Kafka.
- Eu tinha colocado o Configuration no lugar errado!
- ***/
-
 @Configuration
+@EnableKafka
 @PropertySource("classpath:application.properties")
 public class KafkaConfiguration {
 
@@ -26,9 +27,22 @@ public class KafkaConfiguration {
      * docker exec bank kafka-topics --describe --topic transactions --bootstrap-server localhost:9092
      ***/
 
-    public KafkaConfiguration(@Value("${bootstrap-servers}") String bootstrapServers,
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+    @Value("${topic.name}")
+    private String topicName;
+
+
+    public KafkaConfiguration(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
                               @Value("${topic.name}") String topicName) {
         createTopic(bootstrapServers, topicName);
+    }
+
+    @Bean
+    public KafkaAdmin kafkaAdmin() {
+        Map<String, Object> configs = new HashMap<>();
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        return new KafkaAdmin(configs);
     }
 
     private void createTopic(String bootstrapServers, String topicName) {

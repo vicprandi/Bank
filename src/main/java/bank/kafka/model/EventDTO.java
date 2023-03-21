@@ -1,24 +1,20 @@
 package bank.kafka.model;
 
 import bank.kafka.TransferStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventDTO {
-    private Event event = Event.SAVE_TRANSFER;
+    private Event event;
     private BigDecimal amount;
     private String originAccount;
     private String recipientAccount;
     private TransferStatus status;
 
-
-    public EventDTO(Event event, BigDecimal amount, String originAccount, String recipientAccount, TransferStatus status) {
-        this.event = event;
-        this.amount = amount;
-        this.originAccount = originAccount;
-        this.recipientAccount = recipientAccount;
-        this.status = status;
-    }
 }

@@ -1,6 +1,7 @@
 package bank.transaction.controller;
 
 
+import bank.kafka.consumer.TransferMoneyListener;
 import bank.model.Account;
 import bank.model.Transaction;
 import bank.transaction.service.TransactionServiceImpl;
@@ -66,9 +67,9 @@ public class TransactionController {
 
     @ApiOperation(value ="Transferencia entre contas")
     @PostMapping("/transfer")
-    public ResponseEntity<List<Transaction>> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber ) {
+    public ResponseEntity<List<Transaction>> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber, TransferMoneyListener listener) {
         logger.info("Transfering money between accounts");
-        List<Transaction> transaction = transactionService.transferMoney(amount, originAccountNumber, destinationAccountNumber);
+        List<Transaction> transaction = transactionService.transferMoney(amount, originAccountNumber, destinationAccountNumber, listener);
 
         return ResponseEntity.ok(transaction);
     }

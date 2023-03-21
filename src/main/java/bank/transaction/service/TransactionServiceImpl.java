@@ -29,15 +29,13 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
 
     private final AccountRepository accountRepository;
-    private List<TransferMoneyListener> listeners;
-
-    private final KafkaTemplate<Object, EventDTO> kafkaTemplate;
+    private final KafkaTemplate<String, EventDTO> kafkaTemplate;
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired
     public ClientServiceImpl clientService;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<Object, EventDTO> kafkaTemplate ) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, EventDTO> kafkaTemplate ) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.kafkaTemplate = kafkaTemplate;
