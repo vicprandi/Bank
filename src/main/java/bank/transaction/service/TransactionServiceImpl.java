@@ -5,6 +5,10 @@ import bank.account.repository.AccountRepository;
 import bank.account.service.AccountServiceImpl;
 import bank.customer.exceptions.ClientDoesntExistException;
 import bank.customer.service.ClientServiceImpl;
+import bank.kafka.TransferStatus;
+import bank.kafka.consumer.TransferMoneyListener;
+import bank.kafka.model.Event;
+import bank.kafka.model.EventDTO;
 import bank.model.Account;
 import bank.model.Transaction;
 import bank.transaction.exception.ValueNotAcceptedException;
@@ -25,14 +29,15 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
 
     private final AccountRepository accountRepository;
+    private List<TransferMoneyListener> listeners;
 
-    private final KafkaTemplate<String, Transaction> kafkaTemplate;
+    private final KafkaTemplate<Object, EventDTO> kafkaTemplate;
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired
     public ClientServiceImpl clientService;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository,  KafkaTemplate<String, Transaction> kafkaTemplate ) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<Object, EventDTO> kafkaTemplate ) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.kafkaTemplate = kafkaTemplate;
@@ -50,7 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> findTransactionByClientId(Long id) {
         Account account = accountService.getAccountById(id)
-                .orElseThrow(() -> new ClientDoesntExistException("Cliente inexistente"));
+                .orElseThrow(() -> new ClientDoesntExistException("Cliente doesnt exist"));
         List<Transaction> transactions = account.getAccountTransaction();
 
         // Envia uma mensagem para o tópico "client-transactions" com a lista de transações encontradas
@@ -65,10 +70,10 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal balanceMoney = account.getBalanceMoney();
 
         BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+        validateAmount(amount, account);
 
         if (balanceMoney.compareTo(zero) < 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
+            throw new ValueNotAcceptedException("Value not accepted");
         } else account.setBalanceMoney(balanceMoney.add(amount));
 
         transaction.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
@@ -85,9 +90,11 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         BigDecimal balanceMoney = account.getBalanceMoney();
         BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+
+        validateAmount(amount, account);
+
         if (balanceMoney.compareTo(zero) < 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
+            throw new ValueNotAcceptedException("Value not accepted");
         } else account.setBalanceMoney(balanceMoney.subtract(amount));
 
         transaction.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
@@ -98,9 +105,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionRepository.save(transaction);
     }
-
     @Transactional
-    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber) {
+    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber, TransferMoneyListener listener) {
         Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
         Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
 
@@ -113,10 +119,14 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             saveTransactions(originTransaction, destinationTransaction);
             updateAccounts(originAccount, destinationAccount, amount);
-            kafkaTemplate.send("transactions", (Transaction) Arrays.asList(originTransaction, destinationTransaction));
+
+            EventDTO event = new EventDTO(Event.SAVE_TRANSFER, amount, originAccountNumber.toString(), destinationAccountNumber.toString(), TransferStatus.SUCCESSFUL);
+            kafkaTemplate.send("transactions", event);
+
+            listener.onMoneyTransfer(); // notifica o listener de que a transferência foi realizada
 
         } catch (Exception e) {
-            throw new RuntimeException("Não foi possível realizar a transferência");
+            throw new RuntimeException("Can't make the transfer");
         }
 
         return Arrays.asList(originTransaction, destinationTransaction);
@@ -124,17 +134,17 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void validateAccounts(Account originAccount, Account destinationAccount) {
         if (Objects.equals(originAccount.getAccountNumber(), destinationAccount.getAccountNumber())) {
-            throw new AccountAlreadyExistsException("Contas iguais");
+            throw new AccountAlreadyExistsException("Same accounts");
         }
     }
 
     private void validateAmount(BigDecimal amount, Account originAccount) {
         BigDecimal zero = BigDecimal.valueOf(0);
         if (amount.compareTo(zero) <= 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
+            throw new ValueNotAcceptedException("Value not accepted");
         }
         if (originAccount.getBalanceMoney().compareTo(zero) < 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
+            throw new ValueNotAcceptedException("Value not accepted");
         }
     }
 
