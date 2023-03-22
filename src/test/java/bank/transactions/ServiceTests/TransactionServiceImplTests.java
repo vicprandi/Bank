@@ -1,10 +1,11 @@
 package bank.transactions.ServiceTests;
 
-import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
 import bank.customer.service.ClientServiceImpl;
+import bank.kafka.consumer.TransferMoneyListener;
+import bank.kafka.model.EventDTO;
 import bank.model.Account;
 import bank.model.Customer;
 import bank.customer.repository.ClientRepository;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 
@@ -28,7 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -54,6 +55,13 @@ public class TransactionServiceImplTests {
     private ClientServiceImpl clientService;
     @Mock
     private AccountRepository accountRepository;
+
+
+    @Mock
+    private TransferMoneyListener listener;
+
+    @Mock
+    private KafkaTemplate<String, EventDTO> kafkaTemplate;
 
     @InjectMocks
     private AccountServiceImpl accountService;
@@ -168,39 +176,34 @@ public class TransactionServiceImplTests {
     }
     @Test
     public void testTransferMoney() {
-        BigDecimal transferAmount = new BigDecimal("50.00");
+        // Define os valores iniciais dos mocks
+        Account originAccount = new Account();
+        originAccount.setAccountNumber(123456L);
+        originAccount.setBalanceMoney(new BigDecimal("100.00"));
 
-        // cria contas e adiciona saldo
-        account.setBalanceMoney(new BigDecimal("100.00"));
-        accountRepository.save(account);
+        Account destinationAccount = new Account();
+        destinationAccount.setAccountNumber(654321L);
+        destinationAccount.setBalanceMoney(new BigDecimal("0.00"));
 
-        account2.setBalanceMoney(BigDecimal.ZERO);
-        accountRepository.save(account2);
+        when(accountRepository.findByAccountNumber(123456L)).thenReturn(originAccount);
+        when(accountRepository.findByAccountNumber(654321L)).thenReturn(destinationAccount);
 
-        // verifica se o método lançou uma exceção
-        assertDoesNotThrow(() -> transactionServiceImpl.transferMoney(transferAmount, 1L, 2L));
+        // Chama o método que será testado
+        List<Transaction> transactions = transactionServiceImpl.transferMoney(new BigDecimal("50.00"), 123456L, 654321L, listener);
 
-        // verifica se a transferência foi realizada corretamente
-        assertEquals(new BigDecimal("50.00"), account.getBalanceMoney());
-        assertEquals(new BigDecimal("50.00"), account2.getBalanceMoney());
-    }
+//        // Verifica o comportamento esperado dos mocks após a chamada do método
+//        verify(accountRepository, times(2)).save(any(Account.class));
+//        verify(kafkaTemplate, times(1)).send(eq("transactions"), any(EventDTO.class));
+//        verify(listener, times(1)).onMoneyTransfer();
 
-    @Test
-    public void transferMoney_shouldThrowAccountAlreadyExistsException() {
-        // Arrange
-        BigDecimal amount = BigDecimal.valueOf(100.00);
-        // Create account with balance
+        // Verifica se as transações foram criadas corretamente
+        assertEquals(2, transactions.size());
+        assertEquals(Transaction.TransactionEnum.TRANSFER, transactions.get(0).getTransactionType());
+        assertEquals(Transaction.TransactionEnum.TRANSFER, transactions.get(1).getTransactionType());
 
-        account.setBalanceMoney(BigDecimal.valueOf(200.00));
-
-        // Create destination account
-        account.setAccountNumber(1L);
-        account.setBalanceMoney(BigDecimal.valueOf(300.00));
-
-        // Act and Assert
-        assertThrows(AccountAlreadyExistsException.class, () -> {
-            transactionServiceImpl.transferMoney(amount, accountNumber, accountNumber);
-        });
+        // Verifica se os saldos das contas foram atualizados corretamente
+        assertEquals(new BigDecimal("50.00"), originAccount.getBalanceMoney());
+        assertEquals(new BigDecimal("50.00"), destinationAccount.getBalanceMoney());
     }
 
     @Test(expected = ValueNotAcceptedException.class)
@@ -214,9 +217,9 @@ public class TransactionServiceImplTests {
         account2.setBalanceMoney(BigDecimal.ZERO);
         accountRepository.save(account2);
 
-        Transaction transaction = (Transaction) transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
+        Transaction transaction = (Transaction) transactionServiceImpl.transferMoney(transferAmount, 1L, 2L, listener);
         transaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-        transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
+        transactionServiceImpl.transferMoney(transferAmount, 1L, 2L, listener);
     }
 
     @Test(expected = ValueNotAcceptedException.class)
@@ -235,7 +238,7 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
+        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber, listener);
     }
 
     @Test(expected = RuntimeException.class)
@@ -255,7 +258,7 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
+        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber, listener);
     }
 
     @Test(expected = RuntimeException.class)

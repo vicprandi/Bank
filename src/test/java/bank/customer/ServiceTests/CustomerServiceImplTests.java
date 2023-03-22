@@ -94,12 +94,19 @@ public class CustomerServiceImplTests {
 
     @Test
     public void shouldThrowCpfAlreadyExistsException_WhenRegisterClient() {
-        when(clientRepository.save(any(Customer.class))).thenReturn(customer);
-        when(clientServiceImpl.registerClient(clientRequest)).thenThrow(CpfAlreadyExistsException.class);
+        // Arrange
+        when(clientRepository.existsByCpf(anyString())).thenThrow(CpfAlreadyExistsException.class); // simulando que o CPF já existe
 
-        Customer result = clientServiceImpl.registerClient(clientRequest);
-        clientRepository.save(result);
-        verify(clientRepository).save(result);
+        // Act and Assert
+        assertThrows(CpfAlreadyExistsException.class, () -> {
+            clientServiceImpl.registerClient(clientRequest);
+        });
+
+        try {
+            clientServiceImpl.registerClient(clientRequest);
+        } catch (CpfAlreadyExistsException e) {
+            verify(clientRepository, never()).save(any(Customer.class));
+        }
     }
 
     @Test
@@ -115,7 +122,7 @@ public class CustomerServiceImplTests {
             fail("Expected CpfAlreadyExistsException was not thrown");
         } catch (CpfAlreadyExistsException ex) {
             // then
-            assertEquals("Customer already registred", ex.getMessage());
+            assertEquals("Customer already registered", ex.getMessage());
         }
     }
     @Test
@@ -151,7 +158,7 @@ public class CustomerServiceImplTests {
             fail("Expected ClientDoesntExistException to be thrown");
         } catch (ClientDoesntExistException ex) {
             // then
-            assertEquals("Não há clientes", ex.getMessage());
+            assertEquals("There's no customers", ex.getMessage());
         }
     }
 
@@ -239,7 +246,7 @@ public class CustomerServiceImplTests {
             fail("ClientDoesntExistException should have been thrown");
         } catch (ClientDoesntExistException e) {
             // then
-            assertEquals("Cliente não existe!", e.getMessage());
+            assertEquals("There's no clients!", e.getMessage());
         }
     }
 
@@ -273,7 +280,7 @@ public class CustomerServiceImplTests {
             fail("ClientDoesntExistException should have been thrown");
         } catch (ClientDoesntExistException e) {
             // then
-            assertEquals("Cliente não existe!", e.getMessage());
+            assertEquals("There's no clients", e.getMessage());
         }
     }
 

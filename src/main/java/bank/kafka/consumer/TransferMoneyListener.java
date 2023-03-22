@@ -12,24 +12,16 @@ import java.math.BigDecimal;
 @Service
 public class TransferMoneyListener implements TransferMoneyListenerInterface {
     @Autowired
-    private TransactionServiceImpl transactionService;
+    public TransactionServiceImpl transactionService;
 
     @KafkaListener(topics = "transactions", groupId = "group_id", containerFactory = "concurrentKafkaListenerContainerFactory")
     public void consumeTransferMessage(ConsumerRecord<String, EventDTO> record) {
         try {
 
-            System.out.println("Starting consumer" );
-
             EventDTO event = record.value();
             BigDecimal amount = new BigDecimal(String.valueOf(event.getAmount()));
             Long originAccount = Long.valueOf(event.getOriginAccount());
             Long destinationAccount = Long.valueOf(event.getRecipientAccount());
-
-            System.out.println("amount: " + amount );
-            System.out.println("originAccount: " + originAccount );
-            System.out.println("destinationAccount: " + destinationAccount );
-            System.out.println("Finishing consumer" );
-
         } catch (Exception e) {
             e.printStackTrace();
         }
