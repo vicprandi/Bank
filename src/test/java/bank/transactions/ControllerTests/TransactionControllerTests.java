@@ -3,9 +3,9 @@ package bank.transactions.ControllerTests;
 import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
-import bank.customer.repository.ClientRepository;
-import bank.customer.request.ClientRequest;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
+import bank.customer.service.CustomerServiceImpl;
 import bank.model.Account;
 import bank.model.Customer;
 import bank.model.Transaction;
@@ -30,9 +30,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -46,7 +44,7 @@ public class TransactionControllerTests {
     private AccountServiceImpl accountService;
 
     @MockBean
-    private ClientServiceImpl clientService;
+    private CustomerServiceImpl customerService;
 
     @MockBean
     private TransactionServiceImpl transactionService;
@@ -55,7 +53,7 @@ public class TransactionControllerTests {
     private AccountRepository accountRepository;
 
     @MockBean
-    private ClientRepository clientRepository;
+    private CustomerRepository customerRepository;
 
     @MockBean
     private TransactionRepository transactionRepository;
@@ -67,8 +65,8 @@ public class TransactionControllerTests {
     private ObjectMapper objectMapper;
 
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
 
@@ -90,10 +88,10 @@ public class TransactionControllerTests {
 
     @BeforeEach
     public void setUp() throws Exception {
-        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientService.registerClient(clientRequest);
-        clientService.registerClient(clientRequest2);
+        customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerRequest2 = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerService.registerCustomer(customerRequest);
+        customerService.registerCustomer(customerRequest2);
 
         accountRequest = new AccountRequest();
         accountRequest.setBalanceMoney(balanceMoney);
@@ -106,7 +104,7 @@ public class TransactionControllerTests {
         account.setBalanceMoney(accountRequest.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account.setAccountNumber(accountNumber);
-        customer = clientRequest.clientObjectRequest();
+        customer = customerRequest.customerObjectRequest();
         account.setCustomer(customer);
 
         Account account2 = new Account();
@@ -114,11 +112,11 @@ public class TransactionControllerTests {
         account.setBalanceMoney(accountRequest2.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account2.setAccountNumber(accountNumber);
-        customer = clientRequest2.clientObjectRequest();
+        customer = customerRequest2.customerObjectRequest();
         account2.setCustomer(customer);
 
-        accountService.registerAccount(clientRequest.getCpf());
-        accountService.registerAccount(clientRequest2.getCpf());
+        accountService.registerAccount(customerRequest.getCpf());
+        accountService.registerAccount(customerRequest2.getCpf());
 
         BigDecimal amount = BigDecimal.valueOf(100);
 
@@ -165,17 +163,17 @@ public class TransactionControllerTests {
 
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
 
-        Long clientId = clientRequest.clientObjectRequest().getId();
+        Long customerId = customerRequest.customerObjectRequest().getId();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", clientId))
+        mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", customerId))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterGetTransactionByClientId() throws Exception {
-        Long clientId = clientRequest.clientObjectRequest().getId();
+        Long customerId = customerRequest.customerObjectRequest().getId();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/transacFStions/1", clientId))
+        mockMvc.perform(MockMvcRequestBuilders.get("/transacFStions/1", customerId))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 

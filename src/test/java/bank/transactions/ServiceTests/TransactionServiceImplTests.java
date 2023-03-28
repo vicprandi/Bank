@@ -3,13 +3,13 @@ package bank.transactions.ServiceTests;
 import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.service.CustomerServiceImpl;
 import bank.kafka.consumer.TransferMoneyListener;
 import bank.kafka.model.EventDTO;
 import bank.model.Account;
 import bank.model.Customer;
-import bank.customer.repository.ClientRepository;
-import bank.customer.request.ClientRequest;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
 import bank.model.Transaction;
 import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
@@ -49,10 +49,10 @@ public class TransactionServiceImplTests {
     private TransactionRepository transactionRepository;
 
     @Mock
-    private ClientRepository clientRepository;
+    private CustomerRepository customerRepository;
 
     @InjectMocks
-    private ClientServiceImpl clientService;
+    private CustomerServiceImpl clientService;
     @Mock
     private AccountRepository accountRepository;
 
@@ -66,8 +66,8 @@ public class TransactionServiceImplTests {
     @InjectMocks
     private AccountServiceImpl accountService;
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
     Transaction transaction;
@@ -189,7 +189,7 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(654321L)).thenReturn(destinationAccount);
 
         // Chama o método que será testado
-        List<Transaction> transactions = transactionServiceImpl.transferMoney(new BigDecimal("50.00"), 123456L, 654321L, listener);
+        List<Transaction> transactions = transactionServiceImpl.transferMoney(new BigDecimal("50.00"), 123456L, 654321L);
 
 //        // Verifica o comportamento esperado dos mocks após a chamada do método
 //        verify(accountRepository, times(2)).save(any(Account.class));
@@ -217,9 +217,9 @@ public class TransactionServiceImplTests {
         account2.setBalanceMoney(BigDecimal.ZERO);
         accountRepository.save(account2);
 
-        Transaction transaction = (Transaction) transactionServiceImpl.transferMoney(transferAmount, 1L, 2L, listener);
+        Transaction transaction = (Transaction) transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
         transaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-        transactionServiceImpl.transferMoney(transferAmount, 1L, 2L, listener);
+        transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
     }
 
     @Test(expected = ValueNotAcceptedException.class)
@@ -238,7 +238,7 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber, listener);
+        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
     }
 
     @Test(expected = RuntimeException.class)
@@ -258,7 +258,7 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber, listener);
+        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
     }
 
     @Test(expected = RuntimeException.class)

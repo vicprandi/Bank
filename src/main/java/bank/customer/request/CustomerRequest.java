@@ -4,7 +4,7 @@ import bank.model.Customer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
-public class ClientRequest {
+public class CustomerRequest {
     @NotNull(message = "{validation.field_required")
     private String name;
     @NotNull(message = "{validation.field_required")
@@ -27,10 +27,10 @@ public class ClientRequest {
     @Pattern(regexp = "^[\\p{L}\\-]+(?: [\\p{L}\\-]+)*$", message = "Deve conter somente letras, caracteres especiais e o caractere '-'")
     private String city;
 
-    public ClientRequest(){
+    public CustomerRequest(){
     }
 
-    public ClientRequest(String name, String cpf, String postalCode, String street, String state, String city) {
+    public CustomerRequest(String name, String cpf, String postalCode, String street, String state, String city) {
         this.name = name;
         this.cpf = cpf;
         this.postalCode = postalCode;
@@ -38,7 +38,7 @@ public class ClientRequest {
         this.state = state;
         this.city = city;
     }
-    public Customer clientObjectRequest() {
+    public Customer customerObjectRequest() {
         Customer customer = new Customer();
         customer.setName(this.name);
         customer.setCpf(this.cpf);

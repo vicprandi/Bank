@@ -4,7 +4,7 @@ import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.repository.AccountRepository;
 import bank.account.service.AccountServiceImpl;
 import bank.customer.exceptions.ClientDoesntExistException;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.service.CustomerServiceImpl;
 import bank.kafka.TransferStatus;
 import bank.kafka.consumer.TransferMoneyListener;
 import bank.kafka.model.Event;
@@ -33,7 +33,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired
-    public ClientServiceImpl clientService;
+    public CustomerServiceImpl clientService;
+    private static final BigDecimal ZERO_AMOUNT = BigDecimal.ZERO;
+
 
     public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, EventDTO> kafkaTemplate ) {
         this.transactionRepository = transactionRepository;
@@ -104,7 +106,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
     @Transactional
-    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber, TransferMoneyListener listener) {
+    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber) {
         Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
         Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
 
@@ -120,6 +122,8 @@ public class TransactionServiceImpl implements TransactionService {
 
             EventDTO event = new EventDTO(Event.SAVE_TRANSFER, amount, originAccountNumber.toString(), destinationAccountNumber.toString(), TransferStatus.SUCCESSFUL);
             kafkaTemplate.send("transactions", event);
+
+            TransferMoneyListener listener = new TransferMoneyListener();
 
             listener.onMoneyTransfer(); // notifica o listener de que a transferência foi realizada
 
@@ -137,11 +141,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void validateAmount(BigDecimal amount, Account originAccount) {
-        BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) <= 0) {
+        if (amount.compareTo(ZERO_AMOUNT) <= 0) {
             throw new ValueNotAcceptedException("Value not accepted");
         }
-        if (originAccount.getBalanceMoney().compareTo(zero) < 0) {
+        if (originAccount.getBalanceMoney().compareTo(ZERO_AMOUNT) < 0) {
             throw new ValueNotAcceptedException("Value not accepted");
         }
     }

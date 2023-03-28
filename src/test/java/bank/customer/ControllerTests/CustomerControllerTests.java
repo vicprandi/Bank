@@ -1,11 +1,11 @@
 package bank.customer.ControllerTests;
 
-import bank.customer.controller.ClientController;
+import bank.customer.controller.CustomerController;
 import bank.customer.exceptions.ClientDoesntExistException;
 import bank.customer.exceptions.CpfAlreadyExistsException;
-import bank.customer.repository.ClientRepository;
-import bank.customer.request.ClientRequest;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
+import bank.customer.service.CustomerServiceImpl;
 
 
 import bank.model.Customer;
@@ -32,17 +32,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(ClientController.class)
+@WebMvcTest(CustomerController.class)
 public class CustomerControllerTests {
-    @MockBean private ClientServiceImpl clientService;
+    @MockBean private CustomerServiceImpl clientService;
 
-    @MockBean private ClientRepository clientRepository;
+    @MockBean private CustomerRepository customerRepository;
 
     @Autowired MockMvc mockMvc;
 
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
     Customer customer;
     String invalidCpf;
     String sameCpf;
@@ -50,8 +50,18 @@ public class CustomerControllerTests {
 
     @BeforeEach
     public void setUp() {
-        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerRequest = new CustomerRequest("Victoria",
+                "12345678901",
+                "02036020",
+                "SE",
+                "SP",
+                "SP");
+        customerRequest2 = new CustomerRequest("Victoria",
+                "12345678901",
+                "02036020",
+                "SE",
+                "SP",
+                "SP");
         customer = new Customer();
 
         String invalidCpf = "12345678900";
@@ -84,8 +94,8 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus201_afterCreateClient() throws Exception {
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientService.registerClient(clientRequest);
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        clientService.registerCustomer(customerRequest);
         mockMvc.perform(post("/clients")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -94,8 +104,8 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus4xx_afterCreateClient() throws Exception {
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientService.registerClient(clientRequest);
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        clientService.registerCustomer(customerRequest);
         mockMvc.perform(post("/clientss")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -104,10 +114,10 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus202_afterUpdateClient() throws Exception {
-        clientService.registerClient(clientRequest);
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientRequest.setState("BH");
-        clientService.updateClient(clientRequest);
+        clientService.registerCustomer(customerRequest);
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        customerRequest.setState("BH");
+        clientService.updateCustomer(customerRequest);
         mockMvc.perform(MockMvcRequestBuilders.put("/clients/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -116,9 +126,9 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus404_afterUpdateClient() throws Exception {
-        ClientRequest clientRequest2 = new ClientRequest();
-        String requestBody = new ObjectMapper().valueToTree(clientRequest2).toString();
-        clientService.updateClient(clientRequest2);
+        CustomerRequest customerRequest2 = new CustomerRequest();
+        String requestBody = new ObjectMapper().valueToTree(customerRequest2).toString();
+        clientService.updateCustomer(customerRequest2);
         mockMvc.perform(MockMvcRequestBuilders.put("/clients/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -127,9 +137,9 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus202_afterDeleteClient() throws Exception {
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientService.registerClient(clientRequest);
-        clientService.deleteClient(clientRequest.getCpf());
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        clientService.registerCustomer(customerRequest);
+        clientService.deleteCustomer(customerRequest.getCpf());
         mockMvc.perform(MockMvcRequestBuilders.delete("/clients/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -138,9 +148,9 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus404_afterDeleteClient() throws Exception {
-        ClientRequest clientRequest2 = new ClientRequest();
-        String requestBody = new ObjectMapper().valueToTree(clientRequest2).toString();
-        clientService.deleteClient(clientRequest2.getCpf());
+        CustomerRequest customerRequest2 = new CustomerRequest();
+        String requestBody = new ObjectMapper().valueToTree(customerRequest2).toString();
+        clientService.deleteCustomer(customerRequest2.getCpf());
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/clients/delete/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -152,7 +162,7 @@ public class CustomerControllerTests {
     //Cliente não existe caso eu mande um CPF inválido para ele.
     @Test
     public void shouldReturnStatus404_afterGettingClientThatDoesntExist() throws Exception {
-        when(clientService.getClientCpf(invalidCpf)).thenReturn(null);
+        when(clientService.getCustomerCpf(invalidCpf)).thenReturn(null);
         // then
         try {
             clientService.getClientId(invalidCpf);
@@ -167,11 +177,11 @@ public class CustomerControllerTests {
     @Test
     public void shouldReturnStatus409_afterRegisterClientWithExistingCpf() throws Exception {
         // given
-        when(clientRepository.existsByCpf(clientRequest.getCpf())).thenReturn(true);
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
+        when(customerRepository.existsByCpf(customerRequest.getCpf())).thenReturn(true);
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         // then
         try {
-            clientService.registerClient(clientRequest);
+            clientService.registerCustomer(customerRequest);
             fail("Deveria ter lançado a exceção CpfAlreadyExistsException");
         } catch (CpfAlreadyExistsException ex) {
             mockMvc.perform(MockMvcRequestBuilders.get("/client")
@@ -186,10 +196,10 @@ public class CustomerControllerTests {
     @Test
     public void shouldReturnStatus404_afterUpdateClientWithExistingCpf() throws Exception {
         //given
-        when(clientRepository.existsByCpf(invalidCpf)).thenReturn(null);
+        when(customerRepository.existsByCpf(invalidCpf)).thenReturn(null);
 
         try {
-            clientService.getClientCpf(invalidCpf);
+            clientService.getCustomerCpf(invalidCpf);
             fail("ClientDoesntExistException was expected");
         } catch (ClientDoesntExistException ex) {
             Assertions.assertEquals("Cliente não existe!", ex.getMessage());
