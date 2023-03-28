@@ -55,8 +55,6 @@ public class TransactionServiceImplTests {
     private CustomerServiceImpl clientService;
     @Mock
     private AccountRepository accountRepository;
-
-
     @Mock
     private TransferMoneyListener listener;
 
@@ -77,7 +75,6 @@ public class TransactionServiceImplTests {
     Account account2;
     BigDecimal balanceMoney;
     Long accountNumber;
-
 
     @Before
     public void setUp() {
@@ -175,7 +172,7 @@ public class TransactionServiceImplTests {
         transactionServiceImpl.withdrawMoney(accountNumber, initialBalance);
     }
     @Test
-    public void testTransferMoney() {
+    public void testProcessEvent() {
         // Define os valores iniciais dos mocks
         Account originAccount = new Account();
         originAccount.setAccountNumber(123456L);
@@ -188,13 +185,13 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(123456L)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(654321L)).thenReturn(destinationAccount);
 
-        // Chama o método que será testado
-        List<Transaction> transactions = transactionServiceImpl.transferMoney(new BigDecimal("50.00"), 123456L, 654321L);
+        EventDTO event = new EventDTO();
+        event.setOriginAccount("123456");
+        event.setRecipientAccount("654321");
+        event.setAmount(new BigDecimal("50.00"));
 
-//        // Verifica o comportamento esperado dos mocks após a chamada do método
-//        verify(accountRepository, times(2)).save(any(Account.class));
-//        verify(kafkaTemplate, times(1)).send(eq("transactions"), any(EventDTO.class));
-//        verify(listener, times(1)).onMoneyTransfer();
+        // Chama o método que será testado
+        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
 
         // Verifica se as transações foram criadas corretamente
         assertEquals(2, transactions.size());
@@ -208,22 +205,33 @@ public class TransactionServiceImplTests {
 
     @Test(expected = ValueNotAcceptedException.class)
     public void testTransferMoneyWithNegativeAmount() {
-        BigDecimal transferAmount = new BigDecimal("-50.00");
+        // given
+        Long originAccountNumber = 1234L;
+        Long destinationAccountNumber = 5678L;
+        BigDecimal amount = BigDecimal.valueOf(-1000);
 
-        // cria contas e adiciona saldo
-        account.setBalanceMoney(new BigDecimal("100.00"));
-        accountRepository.save(account);
+        Account originAccount = new Account();
+        originAccount.setAccountNumber(originAccountNumber);
+        originAccount.setBalanceMoney(BigDecimal.valueOf(-500)); // saldo negativo
+        Account destinationAccount = new Account();
+        destinationAccount.setAccountNumber(destinationAccountNumber);
+        destinationAccount.setBalanceMoney(BigDecimal.valueOf(0));
 
-        account2.setBalanceMoney(BigDecimal.ZERO);
-        accountRepository.save(account2);
+        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
+        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        Transaction transaction = (Transaction) transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
-        transaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-        transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
+        EventDTO event = new EventDTO();
+        event.setOriginAccount(String.valueOf(originAccountNumber));
+        event.setRecipientAccount(String.valueOf(destinationAccountNumber));
+        event.setAmount(amount);
+
+        // chama o método processEvent com o objeto EventDTO criado
+        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
     }
 
     @Test(expected = ValueNotAcceptedException.class)
     public void testTransferMoneyWithNegativeBalance() {
+        // given
         Long originAccountNumber = 1234L;
         Long destinationAccountNumber = 5678L;
         BigDecimal amount = BigDecimal.valueOf(1000);
@@ -238,7 +246,15 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
+        // when
+        EventDTO event = new EventDTO();
+        event.setOriginAccount(String.valueOf(originAccountNumber));
+        event.setRecipientAccount(String.valueOf(destinationAccountNumber));
+        event.setAmount(amount);
+
+        // chama o método processEvent com o objeto EventDTO criado
+        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
+        // then, assert a exceção
     }
 
     @Test(expected = RuntimeException.class)
@@ -258,7 +274,15 @@ public class TransactionServiceImplTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
+        // when
+        EventDTO event = new EventDTO();
+        event.setOriginAccount(String.valueOf(originAccountNumber));
+        event.setRecipientAccount(String.valueOf(destinationAccountNumber));
+        event.setAmount(amount);
+
+        // chama o método processEvent com o objeto EventDTO criado
+        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
+        // then, assert a exceção
     }
 
     @Test(expected = RuntimeException.class)

@@ -70,7 +70,7 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus201_afterGetAllClients() throws Exception {
-        mockMvc.perform(get("/clients"))
+        mockMvc.perform(get("/customer"))
                 .andExpect(status().isOk());
     }
 
@@ -82,7 +82,7 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus201_afterGetAClient() throws Exception {
-        mockMvc.perform(get("/clients/" + customer.getId()))
+        mockMvc.perform(get("/customer/" + customer.getId()))
                 .andExpect(status().isOk());
     }
 
@@ -96,7 +96,7 @@ public class CustomerControllerTests {
     public void shouldReturnStatus201_afterCreateClient() throws Exception {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         clientService.registerCustomer(customerRequest);
-        mockMvc.perform(post("/clients")
+        mockMvc.perform(post("/customer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isCreated());
@@ -118,7 +118,7 @@ public class CustomerControllerTests {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         customerRequest.setState("BH");
         clientService.updateCustomer(customerRequest);
-        mockMvc.perform(MockMvcRequestBuilders.put("/clients/update")
+        mockMvc.perform(MockMvcRequestBuilders.put("/customer/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isAccepted());
@@ -129,7 +129,7 @@ public class CustomerControllerTests {
         CustomerRequest customerRequest2 = new CustomerRequest();
         String requestBody = new ObjectMapper().valueToTree(customerRequest2).toString();
         clientService.updateCustomer(customerRequest2);
-        mockMvc.perform(MockMvcRequestBuilders.put("/clients/update")
+        mockMvc.perform(MockMvcRequestBuilders.put("/customer/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().is4xxClientError());
@@ -140,7 +140,7 @@ public class CustomerControllerTests {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         clientService.registerCustomer(customerRequest);
         clientService.deleteCustomer(customerRequest.getCpf());
-        mockMvc.perform(MockMvcRequestBuilders.delete("/clients/1")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isAccepted());
@@ -152,7 +152,7 @@ public class CustomerControllerTests {
         String requestBody = new ObjectMapper().valueToTree(customerRequest2).toString();
         clientService.deleteCustomer(customerRequest2.getCpf());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/clients/delete/1")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/delete/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().is4xxClientError());
@@ -168,7 +168,7 @@ public class CustomerControllerTests {
             clientService.getCustomerId(invalidCpf);
             fail("Deveria ter lançado a exceção CpfAlreadyExistsException");
         } catch (CpfAlreadyExistsException ex) {
-                mockMvc.perform(get("/clients/" + invalidCpf))
+                mockMvc.perform(get("/customer/" + invalidCpf))
                .andExpect(status().isNotFound());
         }
     }

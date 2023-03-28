@@ -93,23 +93,6 @@ public class CustomerServiceImplTests {
     }
 
     @Test
-    public void shouldThrowCpfAlreadyExistsException_WhenRegisterCustomer() {
-        // Arrange
-        when(customerRepository.existsByCpf(anyString())).thenThrow(CpfAlreadyExistsException.class); // simulando que o CPF já existe
-
-        // Act and Assert
-        assertThrows(CpfAlreadyExistsException.class, () -> {
-            clientServiceImpl.registerCustomer(customerRequest);
-        });
-
-        try {
-            clientServiceImpl.registerCustomer(customerRequest);
-        } catch (CpfAlreadyExistsException e) {
-            verify(customerRepository, never()).save(any(Customer.class));
-        }
-    }
-
-    @Test
     public void shouldThrowCpfAlreadyExistsException() {
         String cpf = "12345678901";
         CustomerRequest customerRequest = new CustomerRequest();
@@ -246,7 +229,7 @@ public class CustomerServiceImplTests {
             fail("CustomerDoesntExistException should have been thrown");
         } catch (ClientDoesntExistException e) {
             // then
-            assertEquals("There's no clients!", e.getMessage());
+            assertEquals("There's no customers!", e.getMessage());
         }
     }
 
@@ -280,7 +263,7 @@ public class CustomerServiceImplTests {
             fail("CustomerDoesntExistException should have been thrown");
         } catch (ClientDoesntExistException e) {
             // then
-            assertEquals("There's no clients", e.getMessage());
+            assertEquals("There's no customers", e.getMessage());
         }
     }
 
