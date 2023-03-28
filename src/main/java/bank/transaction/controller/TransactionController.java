@@ -1,5 +1,6 @@
 package bank.transaction.controller;
 
+import bank.kafka.model.EventDTO;
 import bank.model.Account;
 import bank.model.Transaction;
 import bank.transaction.service.TransactionServiceImpl;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 import java.util.logging.Logger;
@@ -67,8 +69,14 @@ public class TransactionController {
     @PostMapping("/transfer")
     public ResponseEntity<List<Transaction>> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) {
         logger.info("Transfering money between accounts");
-        List<Transaction> transaction = transactionService.transferMoney(amount, originAccountNumber, destinationAccountNumber);
 
-        return ResponseEntity.ok(transaction);
+        EventDTO event = new EventDTO();
+        event.setAmount(amount);
+        event.setOriginAccount(String.valueOf(originAccountNumber));
+        event.setRecipientAccount(String.valueOf(destinationAccountNumber));
+
+        transactionService.processEvent(event);
+
+        return ResponseEntity.ok(Collections.emptyList());
     }
 }
