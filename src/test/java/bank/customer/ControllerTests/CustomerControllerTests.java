@@ -165,7 +165,7 @@ public class CustomerControllerTests {
         when(clientService.getCustomerCpf(invalidCpf)).thenReturn(null);
         // then
         try {
-            clientService.getClientId(invalidCpf);
+            clientService.getCustomerId(invalidCpf);
             fail("Deveria ter lançado a exceção CpfAlreadyExistsException");
         } catch (CpfAlreadyExistsException ex) {
                 mockMvc.perform(get("/clients/" + invalidCpf))
