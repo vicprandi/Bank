@@ -24,7 +24,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.*;
 
 @Service
@@ -38,10 +37,10 @@ public class TransactionServiceImpl implements TransactionService {
     public AccountServiceImpl accountService;
     @Autowired
     public CustomerServiceImpl clientService;
+    private final ConsumerFactory<String, EventDTO> consumerFactory;
+
     private static final BigDecimal ZERO_AMOUNT = BigDecimal.ZERO;
     private final Logger logger = LoggerFactory.getLogger(KafkaService.class);
-
-    private final ConsumerFactory<String, EventDTO> consumerFactory;
 
     public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, EventDTO> kafkaTemplate, ConsumerFactory<String, EventDTO> consumerFactory ) {
         this.transactionRepository = transactionRepository;
@@ -112,76 +111,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionRepository.save(transaction);
     }
-//    @Transactional
-//    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber) {
-//        Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
-//        Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
-//
-//        validateAccounts(originAccount, destinationAccount);
-//        validateAmount(amount, originAccount);
-//
-//        Transaction originTransaction = createTransaction(amount, originAccount, Transaction.TransactionEnum.TRANSFER);
-//        Transaction destinationTransaction = createTransaction(amount, destinationAccount, Transaction.TransactionEnum.TRANSFER);
-//
-//        try {
-//            saveTransactions(originTransaction, destinationTransaction);
-//            updateAccounts(originAccount, destinationAccount, amount);
-//
-//            EventDTO event = new EventDTO(Event.SAVE_TRANSFER, amount, originAccountNumber.toString(), destinationAccountNumber.toString(), TransferStatus.SUCCESSFUL);
-//
-//            // Envia a mensagem para o Kafka e aguarda a resposta síncrona
-//            CompletableFuture<SendResult<String, EventDTO>> future = kafkaTemplate.send("transactions", event);
-//            SendResult<String, EventDTO> result = future.get();
-//
-//            logger.info("Message sent to topic.");
-//
-//        } catch (InterruptedException | ExecutionException e) {
-//            logger.error("Error sending message to Kafka: {}", e.getMessage());
-//            throw new RuntimeException("Can't make the transfer");
-//        }
-//
-//        // Consumir a mensagem em outro método
-//        List<Transaction> transactions = consumeTransactionFromKafka();
-//
-//        return Arrays.asList(originTransaction, destinationTransaction);
-//    }
-//
-//    private List<Transaction> consumeTransactionFromKafka() {
-//        List<Transaction> transactions = new ArrayList<>();
-//
-//        Consumer<String, EventDTO> consumer = consumerFactory.createConsumer();
-//        consumer.subscribe(Collections.singleton("transactions"));
-//
-//        while (true) {
-//            ConsumerRecords<String, EventDTO> records = consumer.poll(Duration.ofMillis(100));
-//
-//            for (ConsumerRecord<String, EventDTO> record : records) {
-//                String message = String.valueOf(record.value());
-//                logger.info("Received message from Kafka: {}", message);
-//
-//                EventDTO event = record.value();
-//                Account originAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount()));
-//                Account destinationAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getRecipientAccount()));
-//                BigDecimal amount = event.getAmount();
-//
-//                Transaction originTransaction = createTransaction(amount, originAccount, Transaction.TransactionEnum.TRANSFER);
-//                Transaction destinationTransaction = createTransaction(amount, destinationAccount, Transaction.TransactionEnum.TRANSFER);
-//
-//                try {
-//                    validateAccounts(originAccount, destinationAccount);
-//                    validateAmount(amount, originAccount);
-//                    saveTransactions(originTransaction, destinationTransaction);
-//                    updateAccounts(originAccount, destinationAccount, amount);
-//                    transactions.add(originTransaction);
-//                    event.setStatus(TransferStatus.SUCCESSFUL);
-//                } catch (TransferValidationException ex) {
-//                    event.setStatus(TransferStatus.FAILED);
-//                    logger.error("Error processing event.", ex);
-//                }
-//            }
-//            consumer.commitSync();
-//        }
-//    }
 public List<Transaction> processEvent(EventDTO event) {
     Account originAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount()));
     Account destinationAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getRecipientAccount()));
@@ -196,6 +125,8 @@ public List<Transaction> processEvent(EventDTO event) {
         saveTransactions(originTransaction, destinationTransaction);
         updateAccounts(originAccount, destinationAccount, amount);
 
+        logger.info("Message processed sucessfully!");
+
         event.setStatus(TransferStatus.SUCCESSFUL);
         return Arrays.asList(originTransaction, destinationTransaction);
     } catch (TransferValidationException ex) {
@@ -204,27 +135,28 @@ public List<Transaction> processEvent(EventDTO event) {
         return Collections.emptyList();
     }
 }
-    private List<Transaction> consumeTransactionFromKafka() {
-        List<Transaction> transactions = new ArrayList<>();
-
-        Consumer<String, EventDTO> consumer = consumerFactory.createConsumer();
-        consumer.subscribe(Collections.singleton("transactions"));
-
-        while (true) {
-            ConsumerRecords<String, EventDTO> records = consumer.poll(Duration.ofMillis(100));
-
-            for (ConsumerRecord<String, EventDTO> record : records) {
-                String message = String.valueOf(record.value());
-                logger.info("Received message from Kafka: {}", message);
-
-                EventDTO event = record.value();
-                processEvent(event);
-                // Salva a transação da conta de origem
-                transactions.add(createTransaction(event.getAmount(), accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount())), Transaction.TransactionEnum.TRANSFER));
-            }
-            consumer.commitSync();
-        }
-    }
+//  Foi colocado no TransferMoneyListener:
+//    private List<Transaction> consumeTransactionFromKafka() {
+//        List<Transaction> transactions = new ArrayList<>();
+//
+//        Consumer<String, EventDTO> consumer = consumerFactory.createConsumer();
+//        consumer.subscribe(Collections.singleton("transactions"));
+//
+//        while (true) {
+//            ConsumerRecords<String, EventDTO> records = consumer.poll(Duration.ofMillis(100));
+//
+//            for (ConsumerRecord<String, EventDTO> record : records) {
+//                String message = String.valueOf(record.value());
+//                logger.info("Received message from Kafka: {}", message);
+//
+//                EventDTO event = record.value();
+//                processEvent(event);
+//                // Salva a transação da conta de origem
+//                transactions.add(createTransaction(event.getAmount(), accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount())), Transaction.TransactionEnum.TRANSFER));
+//            }
+//            consumer.commitSync();
+//        }
+//    }
 
     private void validateAccounts(Account originAccount, Account destinationAccount) {
         if (Objects.equals(originAccount.getAccountNumber(), destinationAccount.getAccountNumber())) {
@@ -241,7 +173,7 @@ public List<Transaction> processEvent(EventDTO event) {
         }
     }
 
-    private Transaction createTransaction(BigDecimal amount, Account account, Transaction.TransactionEnum transactionType) {
+    public Transaction createTransaction(BigDecimal amount, Account account, Transaction.TransactionEnum transactionType) {
         Transaction transaction = new Transaction();
         transaction.setValue(amount);
         transaction.setAccount(account);
