@@ -1,21 +1,20 @@
+
 package bank.transaction.service;
 
 import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.repository.AccountRepository;
 import bank.account.service.AccountServiceImpl;
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.service.CustomerServiceImpl;
 import bank.kafka.TransferStatus;
 import bank.kafka.model.EventDTO;
 import bank.kafka.producer.KafkaService;
 import bank.model.Account;
 import bank.model.Transaction;
+import bank.transaction.exception.TransactionNotFoundException;
 import bank.transaction.exception.TransferValidationException;
 import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -53,7 +54,7 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
 
-        if (transactions.isEmpty()) throw new RuntimeException("There's no transactions");
+        if (transactions.isEmpty()) throw new TransactionNotFoundException("There's no transactions");
 
         return transactions;
     }
@@ -61,11 +62,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> findTransactionByClientId(Long id) {
         Account account = accountService.getAccountById(id)
-                .orElseThrow(() -> new ClientDoesntExistException("Cliente doesnt exist"));
+                .orElseThrow(() -> new CustomerDoesntExistException("Cliente doesnt exist"));
         List<Transaction> transactions = account.getAccountTransaction();
 
         // Envia uma mensagem para o tópico "client-transactions" com a lista de transações encontradas
         return account.getAccountTransaction();
+    }
+
+    public Transaction findTransactionByTransactionId(Long id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction doesn't exist"));
     }
 
     /* Regras de Negócio: O saldo (balanceMoney) não pode ficar negativo. */
@@ -111,52 +117,33 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionRepository.save(transaction);
     }
-public List<Transaction> processEvent(EventDTO event) {
-    Account originAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount()));
-    Account destinationAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getRecipientAccount()));
-    BigDecimal amount = event.getAmount();
+    public Future<List<Transaction>> processEvent(EventDTO event) {
+        CompletableFuture<List<Transaction>> future = new CompletableFuture<>();
 
-    Transaction originTransaction = createTransaction(amount, originAccount, Transaction.TransactionEnum.TRANSFER);
-    Transaction destinationTransaction = createTransaction(amount, destinationAccount, Transaction.TransactionEnum.TRANSFER);
+        Account originAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount()));
+        Account destinationAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getRecipientAccount()));
+        BigDecimal amount = event.getAmount();
 
-    try {
-        validateAccounts(originAccount, destinationAccount);
-        validateAmount(amount, originAccount);
-        saveTransactions(originTransaction, destinationTransaction);
-        updateAccounts(originAccount, destinationAccount, amount);
+        Transaction originTransaction = createTransaction(amount, originAccount, Transaction.TransactionEnum.TRANSFER);
+        Transaction destinationTransaction = createTransaction(amount, destinationAccount, Transaction.TransactionEnum.TRANSFER);
 
-        logger.info("Message processed sucessfully!");
+        try {
+            validateAccounts(originAccount, destinationAccount);
+            validateAmount(amount, originAccount);
+            saveTransactions(originTransaction, destinationTransaction);
+            updateAccounts(originAccount, destinationAccount, amount);
 
-        event.setStatus(TransferStatus.SUCCESSFUL);
-        return Arrays.asList(originTransaction, destinationTransaction);
-    } catch (TransferValidationException ex) {
-        event.setStatus(TransferStatus.FAILED);
-        logger.error("Error processing event.", ex);
-        return Collections.emptyList();
+            logger.info("Message processed successfully!");
+
+            event.setStatus(TransferStatus.SUCCESSFUL);
+            future.complete(Arrays.asList(originTransaction, destinationTransaction));
+        } catch (TransferValidationException ex) {
+            event.setStatus(TransferStatus.FAILED);
+            logger.error("Error processing event.", ex);
+            future.completeExceptionally(new TransferValidationException("Error processing Event"));
+        }
+        return future;
     }
-}
-//  Foi colocado no TransferMoneyListener:
-//    private List<Transaction> consumeTransactionFromKafka() {
-//        List<Transaction> transactions = new ArrayList<>();
-//
-//        Consumer<String, EventDTO> consumer = consumerFactory.createConsumer();
-//        consumer.subscribe(Collections.singleton("transactions"));
-//
-//        while (true) {
-//            ConsumerRecords<String, EventDTO> records = consumer.poll(Duration.ofMillis(100));
-//
-//            for (ConsumerRecord<String, EventDTO> record : records) {
-//                String message = String.valueOf(record.value());
-//                logger.info("Received message from Kafka: {}", message);
-//
-//                EventDTO event = record.value();
-//                processEvent(event);
-//                // Salva a transação da conta de origem
-//                transactions.add(createTransaction(event.getAmount(), accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount())), Transaction.TransactionEnum.TRANSFER));
-//            }
-//            consumer.commitSync();
-//        }
-//    }
 
     private void validateAccounts(Account originAccount, Account destinationAccount) {
         if (Objects.equals(originAccount.getAccountNumber(), destinationAccount.getAccountNumber())) {
@@ -183,8 +170,7 @@ public List<Transaction> processEvent(EventDTO event) {
     }
 
     private void saveTransactions(Transaction originTransaction, Transaction destinationTransaction) {
-        transactionRepository.save(originTransaction);
-        transactionRepository.save(destinationTransaction);
+        transactionRepository.saveAll(Arrays.asList(originTransaction, destinationTransaction));
     }
 
     private void updateAccounts(Account originAccount, Account destinationAccount, BigDecimal amount) {

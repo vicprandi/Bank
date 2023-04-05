@@ -1,6 +1,6 @@
 package bank.customer.service;
 
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.account.repository.AccountRepository;
 import bank.customer.exceptions.CpfAlreadyExistsException;
 import bank.model.Account;
@@ -28,7 +28,7 @@ public class CustomerServiceImpl implements CustomerService {
         this.accountRepository = accountRepository;
     }
 
-    /* Serviço de registrar o Customere */
+    /* Serviço de registrar o Customer */
     public Customer registerCustomer(@Valid CustomerRequest customerRequest) {
 
         Customer customer = customerRequest.customerObjectRequest();
@@ -59,9 +59,8 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> customer = customerRepository.findByCpf(cpf);
         Account customerAccount = customer.get().getAccount();
 
-        if (!customerRepository.existsByCpf(cpf)) throw new ClientDoesntExistException("Customer does not exist");
-        if (cpf.isEmpty()) throw new ClientDoesntExistException("Customer does not exist");
-
+        if (cpf.isEmpty()) throw new CustomerDoesntExistException("Customer does not exist");
+        if (!customerRepository.existsByCpf(cpf)) throw new CustomerDoesntExistException("Customer does not exist");
         if (customerAccount != null) accountRepository.delete(customerAccount);
 
         customerRepository.delete(customer.get());
@@ -72,7 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<Customer> customers = customerRepository.findAll();
 
         if (!customers.isEmpty()) return customers;
-        else throw new ClientDoesntExistException("There's no customers");
+        else throw new CustomerDoesntExistException("There's no customers");
     }
 
     @Override
@@ -81,7 +80,7 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> customerObject = customerRepository.findByCpf(cpf);
 
         if (customerObject.isEmpty()) {
-            throw new ClientDoesntExistException("There's no customers!");
+            throw new CustomerDoesntExistException("There's no customers!");
         }
         return customerObject.get();
     }
@@ -91,7 +90,7 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> customerObject = customerRepository.findByCpf(cpf);
 
         if (customerObject.isEmpty()) {
-            throw new ClientDoesntExistException("There's no customers");
+            throw new CustomerDoesntExistException("There's no customers");
         }
         return customerObject.get().getId();
     }

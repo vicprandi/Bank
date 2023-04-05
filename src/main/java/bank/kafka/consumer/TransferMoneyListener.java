@@ -10,8 +10,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +18,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class TransferMoneyListener implements TransferMoneyListenerInterface {
@@ -34,12 +35,14 @@ public class TransferMoneyListener implements TransferMoneyListenerInterface {
         this.transactionService = transactionService;
     }
 
-    @KafkaListener(topics = "transactions", groupId = "group_id", containerFactory = "concurrentKafkaListenerContainerFactory")
     private List<Transaction> consumeTransactionFromKafka() {
         List<Transaction> transactions = new ArrayList<>();
 
+        //Criando o consumidor
         Consumer<String, EventDTO> consumer = consumerFactory.createConsumer();
         consumer.subscribe(Collections.singleton("transactions"));
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
 
         while (true) {
             ConsumerRecords<String, EventDTO> records = consumer.poll(Duration.ofMillis(100));
@@ -49,11 +52,12 @@ public class TransferMoneyListener implements TransferMoneyListenerInterface {
                 logger.info("Received message from Kafka: {}", message);
 
                 EventDTO event = record.value();
-                transactionService.processEvent(event);
+                Future<List<Transaction>> future = executor.submit(() -> (List<Transaction>) transactionService.processEvent(event));
                 // Salva a transação da conta de origem
                 transactions.add(transactionService.createTransaction(event.getAmount(), accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount())), Transaction.TransactionEnum.TRANSFER));
             }
-            consumer.commitSync();
+            //Assíncrono
+            consumer.commitAsync();
         }
     }
 

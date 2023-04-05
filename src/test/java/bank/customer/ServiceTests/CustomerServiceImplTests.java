@@ -2,7 +2,7 @@ package bank.customer.ServiceTests;
 
 
 import bank.account.repository.AccountRepository;
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.exceptions.CpfAlreadyExistsException;
 import bank.customer.service.CustomerService;
 import bank.model.Account;
@@ -139,7 +139,7 @@ public class CustomerServiceImplTests {
         try {
             clientServiceImpl.getAllCustomers();
             fail("Expected CustomerDoesntExistException to be thrown");
-        } catch (ClientDoesntExistException ex) {
+        } catch (CustomerDoesntExistException ex) {
             // then
             assertEquals("There's no customers", ex.getMessage());
         }
@@ -196,7 +196,7 @@ public class CustomerServiceImplTests {
         try {
             clientServiceImpl.deleteCustomer(customer.getCpf());
             fail("Expected CustomerDoesntExistException to be thrown");
-        } catch (ClientDoesntExistException ex) {
+        } catch (CustomerDoesntExistException ex) {
             // then
             assertEquals("Customer does not exist", ex.getMessage());
         }
@@ -227,7 +227,7 @@ public class CustomerServiceImplTests {
         try {
             clientServiceImpl.getCustomerCpf(cpf);
             fail("CustomerDoesntExistException should have been thrown");
-        } catch (ClientDoesntExistException e) {
+        } catch (CustomerDoesntExistException e) {
             // then
             assertEquals("There's no customers!", e.getMessage());
         }
@@ -261,7 +261,7 @@ public class CustomerServiceImplTests {
         try {
             clientServiceImpl.getCustomerId(cpf);
             fail("CustomerDoesntExistException should have been thrown");
-        } catch (ClientDoesntExistException e) {
+        } catch (CustomerDoesntExistException e) {
             // then
             assertEquals("There's no customers", e.getMessage());
         }

@@ -191,7 +191,7 @@ public class TransactionServiceImplTests {
         event.setAmount(new BigDecimal("50.00"));
 
         // Chama o método que será testado
-        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
+        List<Transaction> transactions = (List<Transaction>) transactionServiceImpl.processEvent(event);
 
         // Verifica se as transações foram criadas corretamente
         assertEquals(2, transactions.size());
@@ -226,7 +226,7 @@ public class TransactionServiceImplTests {
         event.setAmount(amount);
 
         // chama o método processEvent com o objeto EventDTO criado
-        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
+        List<Transaction> transactions = (List<Transaction>) transactionServiceImpl.processEvent(event);
     }
 
     @Test(expected = ValueNotAcceptedException.class)
@@ -253,7 +253,7 @@ public class TransactionServiceImplTests {
         event.setAmount(amount);
 
         // chama o método processEvent com o objeto EventDTO criado
-        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
+        List<Transaction> transactions = (List<Transaction>) transactionServiceImpl.processEvent(event);
         // then, assert a exceção
     }
 
@@ -281,7 +281,7 @@ public class TransactionServiceImplTests {
         event.setAmount(amount);
 
         // chama o método processEvent com o objeto EventDTO criado
-        List<Transaction> transactions = transactionServiceImpl.processEvent(event);
+        List<Transaction> transactions = (List<Transaction>) transactionServiceImpl.processEvent(event);
         // then, assert a exceção
     }
 

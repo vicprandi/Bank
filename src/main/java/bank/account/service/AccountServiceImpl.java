@@ -1,7 +1,7 @@
 package bank.account.service;
 
 import bank.account.exceptions.CpfDoesntExistException;
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.service.CustomerServiceImpl;
 import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.exceptions.AccountDoesntExistException;
@@ -53,7 +53,7 @@ public class AccountServiceImpl implements AccountService {
         account.setAccountNumber(accountNumber);
 
         if (customer.isEmpty()) {
-            throw new ClientDoesntExistException("Client doesn't exist!");
+            throw new CustomerDoesntExistException("Customer doesn't exist!");
         } else {
             account.setCustomer(customer.get());
         }
@@ -74,9 +74,17 @@ public class AccountServiceImpl implements AccountService {
     /* Trazer todas as Contas */
     @Override
     public List<Account> getAllAccounts() {
-        List<Account> accounts = accountRepository.findAll();
+        List<Account> accounts;
+        try {
+            accounts = accountRepository.findAll();
+        } catch (Exception ex) {
+            throw new AccountDoesntExistException("There's no accounts.");
+        }
 
-        if (accounts.isEmpty()) throw new AccountDoesntExistException("There's no accounts.");
+        if (accounts.isEmpty()) {
+            throw new AccountDoesntExistException("There's no accounts.");
+        }
+
         return accounts;
     }
 

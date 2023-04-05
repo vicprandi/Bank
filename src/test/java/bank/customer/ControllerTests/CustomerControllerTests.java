@@ -1,7 +1,7 @@
 package bank.customer.ControllerTests;
 
 import bank.customer.controller.CustomerController;
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.exceptions.CpfAlreadyExistsException;
 import bank.customer.repository.CustomerRepository;
 import bank.customer.request.CustomerRequest;
@@ -201,7 +201,7 @@ public class CustomerControllerTests {
         try {
             clientService.getCustomerCpf(invalidCpf);
             fail("ClientDoesntExistException was expected");
-        } catch (ClientDoesntExistException ex) {
+        } catch (CustomerDoesntExistException ex) {
             Assertions.assertEquals("Cliente não existe!", ex.getMessage());
             verify(status().isNotFound());
         }
