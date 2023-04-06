@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -191,18 +192,22 @@ public class TransactionServiceImplTests {
         event.setAmount(new BigDecimal("50.00"));
 
         // Chama o método que será testado
-        List<Transaction> transactions = (List<Transaction>) transactionServiceImpl.processEvent(event);
+        CompletableFuture<List<Transaction>> transactionsFuture = (CompletableFuture<List<Transaction>>) transactionServiceImpl.processEvent(event);
+        List<Transaction> transactions = transactionsFuture.join();
 
         // Verifica se as transações foram criadas corretamente
-        assertEquals(2, transactions.size());
-        assertEquals(Transaction.TransactionEnum.TRANSFER, transactions.get(0).getTransactionType());
-        assertEquals(Transaction.TransactionEnum.TRANSFER, transactions.get(1).getTransactionType());
+        transactionsFuture.thenApply((result) -> {
+            assertEquals(2, result.size());
+            assertEquals(Transaction.TransactionEnum.TRANSFER, result.get(0).getTransactionType());
+            assertEquals(Transaction.TransactionEnum.TRANSFER, result.get(1).getTransactionType());
 
-        // Verifica se os saldos das contas foram atualizados corretamente
-        assertEquals(new BigDecimal("50.00"), originAccount.getBalanceMoney());
-        assertEquals(new BigDecimal("50.00"), destinationAccount.getBalanceMoney());
+            // Verifica se os saldos das contas foram atualizados corretamente
+            assertEquals(new BigDecimal("50.00"), originAccount.getBalanceMoney());
+            assertEquals(new BigDecimal("50.00"), destinationAccount.getBalanceMoney());
+
+            return result;
+        }).join();
     }
-
     @Test(expected = ValueNotAcceptedException.class)
     public void testTransferMoneyWithNegativeAmount() {
         // given

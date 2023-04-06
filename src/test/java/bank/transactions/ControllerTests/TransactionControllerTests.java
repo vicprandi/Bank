@@ -6,6 +6,7 @@ import bank.account.service.AccountServiceImpl;
 import bank.customer.repository.CustomerRepository;
 import bank.customer.request.CustomerRequest;
 import bank.customer.service.CustomerServiceImpl;
+import bank.kafka.model.EventDTO;
 import bank.model.Account;
 import bank.model.Customer;
 import bank.model.Transaction;
@@ -25,15 +26,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -222,6 +227,23 @@ public class TransactionControllerTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
+        Transaction transaction1 = new Transaction();
+        transaction1.setId(1L);
+        transaction1.setValue(new BigDecimal("50.00"));
+        transaction1.setTransactionType(Transaction.TransactionEnum.TRANSFER);
+
+        Transaction transaction2 = new Transaction();
+        transaction2.setId(2L);
+        transaction2.setValue(new BigDecimal("50.00"));
+        transaction2.setTransactionType(Transaction.TransactionEnum.TRANSFER);
+
+        EventDTO event = new EventDTO();
+        event.setAmount(new BigDecimal("100"));
+        event.setOriginAccount(originAccountNumber.toString());
+        event.setRecipientAccount(destinationAccountNumber.toString());
+
+        when(transactionService.processEvent(event)).thenReturn(CompletableFuture.completedFuture(Arrays.asList(transaction1, transaction2)));
+
         mockMvc.perform(MockMvcRequestBuilders.post("/transaction/transfer")
                         .param("amount", "100")
                         .param("originAccountNumber", originAccountNumber.toString())
@@ -229,6 +251,7 @@ public class TransactionControllerTests {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
+
 
     @Test
     public void shouldReturnStatus4xx_afterTransferMoney() throws Exception {
@@ -241,5 +264,14 @@ public class TransactionControllerTests {
                         .param("destinationAccountNumber", destinationAccountNumber.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    public void shouldReturnTransactionInfo_afterGetTransaction() throws Exception {
+        when(transactionService.findTransactionByTransactionId(transactionRequest.getId())).thenReturn(transactionRequest);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/transaction/getTransfer/{transactionId}", transactionRequest.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"));// aqui você pode definir um corpo de acordo com a necessidade do teste
     }
 }
