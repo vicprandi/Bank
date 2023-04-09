@@ -22,6 +22,8 @@ public class KafkaService implements KafkaServicePort {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    //Este método envia uma mensagem para o Kafka com informações
+    //sobre uma transferência bancária e exibe uma mensagem de log confirmando o envio.
     @Override
     public void sendKafka(
             Event event,

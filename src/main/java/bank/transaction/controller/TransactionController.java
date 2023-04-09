@@ -72,6 +72,7 @@ public class TransactionController {
 
     @ApiOperation(value = "Transferring between accounts")
     @PostMapping("/transfer")
+    // O retorno é uma CompletableFuture com ResponseEntity que pode conter informações sobre o resultado da operação.
     public CompletableFuture<ResponseEntity<?>> transferMoney(@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) {
         logger.info("Transferring money between accounts");
 
@@ -80,8 +81,10 @@ public class TransactionController {
         event.setOriginAccount(String.valueOf(originAccountNumber));
         event.setRecipientAccount(String.valueOf(destinationAccountNumber));
 
-        // processa o evento e retorna o ID da transação
+    // Executa um método assíncrono processEvent() do serviço de transação que retorna uma CompletableFuture com uma lista de transações.
+    // Quando a operação for concluída com sucesso, o resultado é processado no método thenApply(), que retorna uma ResponseEntity vazia com status 200 OK e uma mensagem de log é registrada.
         CompletableFuture<List<Transaction>> future = (CompletableFuture<List<Transaction>>) transactionService.processEvent(event);
+
         return future.thenApply(transactions -> {
             logger.info("Money transferred.");
             return ResponseEntity.ok().build();
@@ -90,6 +93,8 @@ public class TransactionController {
 
     @ApiOperation(value ="Getting transaction information after Kafka")
     @GetMapping("/getTransfer/{transactionId}")
+   //Retorna uma CompletableFuture que contém uma ResponseEntity com o resultado da busca da transação.
+   // O registro de uma mensagem de log informando que a transação está sendo recuperada é feito antes da operação.
     public CompletableFuture<ResponseEntity<Transaction>> getTransaction(@PathVariable String transactionId) {
         logger.info("Retrieving transaction.");
         Transaction transaction = transactionService.findTransactionByTransactionId(Long.valueOf(transactionId));

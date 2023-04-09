@@ -24,6 +24,9 @@ public class KafkaListenerConfiguration {
     private String servers;
 
     @Bean
+    //Este é um método que cria uma fábrica de consumidores Kafka usando Spring Kafka.
+    // Ele define as propriedades da fábrica, como o endereço do servidor Kafka, o ID do grupo do consumidor e o deserializador usado para decodificar as mensagens Kafka.
+    // A propriedade "AUTO_OFFSET_RESET_CONFIG" é definida como "earliest". O método retorna a fábrica criada.
     public ConsumerFactory<String, EventDTO> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
@@ -37,6 +40,9 @@ public class KafkaListenerConfiguration {
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(EventDTO.class));
     }
     @Bean
+  //Este é um método Java que cria uma fábrica de contêineres de ouvinte Kafka concorrente usando a biblioteca Spring Kafka.
+  //Ele define a fábrica com a configuração de dois consumidores, um "AckMode" manual imediato e sincronização de commits ativada.
+  //O método retorna a fábrica criada.
     public ConcurrentKafkaListenerContainerFactory<String, EventDTO> concurrentKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, EventDTO> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConcurrency(2);

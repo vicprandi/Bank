@@ -33,11 +33,16 @@ public class KafkaConfiguration {
     private String topicName;
 
 
+    //Este é um construtor de uma classe Java que cria um tópico no Kafka utilizando
+    // as informações passadas por parâmetro, como o endereço do servidor Kafka e o nome do tópico.
     public KafkaConfiguration(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
                               @Value("${topic.name}") String topicName) {
         createTopic(bootstrapServers, topicName);
     }
 
+    //Este é um método de configuração do KafkaAdmin que cria um bean de administração do Kafka.
+    // Ele define as configurações do KafkaAdmin a partir do endereço do servidor Kafka,
+    // utilizando uma estrutura de mapas.
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
@@ -45,6 +50,10 @@ public class KafkaConfiguration {
         return new KafkaAdmin(configs);
     }
 
+
+   //Este é um método que cria um tópico no Kafka com um nome especificado e configurações padrão,
+   //como a quantidade de partições e a replicação dos dados.
+   //Ele utiliza o KafkaAdmin para criar o tópico e fecha a conexão ao final.
     private void createTopic(String bootstrapServers, String topicName) {
         Properties props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

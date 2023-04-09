@@ -38,13 +38,16 @@ public class TransferMoneyListener implements TransferMoneyListenerInterface {
     private List<Transaction> consumeTransactionFromKafka() {
         List<Transaction> transactions = new ArrayList<>();
 
-        //Criando o consumidor
+        //Criando o consumidor com o createConsumer.
         Consumer<String, EventDTO> consumer = consumerFactory.createConsumer();
+        //O método subscribe  inscreve o consumidor no tópico "transactions" para começar a receber mensagens Kafka desse tópico.
         consumer.subscribe(Collections.singleton("transactions"));
 
         ExecutorService executor = Executors.newFixedThreadPool(10);
 
         while (true) {
+            //Poll é responsável por realizar a leitura de registros do Kafka.
+            //Deve esperar no máximo 100 milissegundos para obter registros antes de retornar vazio.
             ConsumerRecords<String, EventDTO> records = consumer.poll(Duration.ofMillis(100));
 
             for (ConsumerRecord<String, EventDTO> record : records) {
@@ -52,11 +55,11 @@ public class TransferMoneyListener implements TransferMoneyListenerInterface {
                 logger.info("Received message from Kafka: {}", message);
 
                 EventDTO event = record.value();
-                Future<List<Transaction>> future = executor.submit(() -> (List<Transaction>) transactionService.processEvent(event));
+                executor.submit(() -> (List<Transaction>) transactionService.processEvent(event));
                 // Salva a transação da conta de origem
                 transactions.add(transactionService.createTransaction(event.getAmount(), accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount())), Transaction.TransactionEnum.TRANSFER));
             }
-            //Assíncrono
+            //Assíncrono!
             consumer.commitAsync();
         }
     }
