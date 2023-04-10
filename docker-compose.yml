@@ -2,7 +2,7 @@ version: "3"
 
 services:
   postgres:
-    image: postgres:alpine
+    image: postgres:15.2-alpine
     container_name: dbBank
     ports:
       - "5432:5432"
