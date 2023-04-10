@@ -31,15 +31,15 @@ After you clone the github, you can access the bank package and run the command:
 There are some features inside this project that you can test via Postman, such as:
 
 1. Client
-- POST: Register Client `localhost:8080/clients`
-- DELETE: Delete Client `localhost:8080/clients/delete/{clientCpf}`
-- PUT: Update Client by CPF (body request) `localhost:8080/clients/update`
-- GET: Get a specific client by CPF `localhost:8080/clients/{clientCpf}`
-- GET: Get all clients `localhost:8080/clients`
+- POST: Register Client `localhost:8080/customers`
+- DELETE: Delete Client `localhost:8080/customers/delete/{clientCpf}`
+- PUT: Update Client by CPF (body request) `localhost:8080/customers/update`
+- GET: Get a specific customer by CPF `localhost:8080/customers/{clientCpf}`
+- GET: Get all customers `localhost:8080/customers`
 2. Account
 - POST: Register Account by CPF `localhost:8080/accounts/{clientCpf}`
 - DELETE: Delete Account by AccountId `localhost:8080/accounts/delete/{id}`
-- GET: Get a specific account by AccountId  `localhost:8080/clients/{id}`
+- GET: Get a specific account by AccountId  `localhost:8080/customers/{id}`
 - GET: Get all accounts `localhost:8080/accounts`
 3. Transactions (amount is a number like= 100.00)
 - POST: Deposit Money `localhost:8080/transaction/deposit/{accountNumber}?amount={amount}`
@@ -55,6 +55,29 @@ Things to remember:
 - You cannot transfer money you don't have.
 - You cannot withdraw money you don't have.
 - You cannot transfer money between the same accounts.
+
+----
+
+Bank Project - Part II
+-
+
+After creating the bank project, there's the second part of the training plan. I had to implement Kafka. 
+First, I introduced Kafka into docker-compose by dockerizing it. After that, I used the commmand-line:
+
+- bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic transactions
+
+But I realized that implementing it via code it's so much better. So, I created the *topic* inside:
+- KafkaConfiguration.
+
+I needed to make two important and essencial things: the producer and the consumer. 
+
+1. Producer:
+- KafkaProducerConfiguration -> In a Spring Boot application that uses Apache Kafka, the KafkaProducerConfiguration class is used to configure the Kafka producer that sends messages to Kafka topics.
+a. Ccntains a method named producerFactory(), which is used to create an instance of the Kafka producer factory that will be used to create Kafka producer instances. The producer factory is responsible for creating and configuring Kafka producers that will send messages to Kafka topics. The producerFactory() method typically takes in configuration properties for the Kafka producer, such as the bootstrap servers, the serializer for the key and value of the Kafka message, and other properties that control the behavior of the producer. These properties are used to create a ProducerFactory instance that is used to create Kafka producer instances.
+2. Consumer:
+- KafkaListenerConfiguration -> In a Spring Boot application that uses Apache Kafka, the KafkaListenerConfiguration class is used to configure the Kafka consumer that reads messages from Kafka topics. 
+a. The consumerFactory() method in KafkaListenerConfiguration is used to create an instance of the Kafka consumer factory that will be used to create Kafka consumer instances. The consumer factory is responsible for creating and configuring Kafka consumers that will read messages from Kafka topics. The method typically takes in configuration properties for the Kafka consumer such as the bootstrap servers, the deserializer for the key and value of the Kafka message, the group ID for the consumer, and other properties that control the behavior of the consumer. These properties are used to create a ConsumerFactory instance that is used to create Kafka consumer instances. 
+- Also have a TransferMoneyListener inside the Consumer to consume the message and transfer the money.
 
 Project developed by: victoria.moreira@zup.com.br
 -

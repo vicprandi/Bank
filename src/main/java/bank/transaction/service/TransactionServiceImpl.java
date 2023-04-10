@@ -1,22 +1,31 @@
+
 package bank.transaction.service;
 
 import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.repository.AccountRepository;
 import bank.account.service.AccountServiceImpl;
-import bank.client.exceptions.ClientDoesntExistException;
-import bank.client.service.ClientServiceImpl;
+import bank.customer.exceptions.CustomerDoesntExistException;
+import bank.customer.service.CustomerServiceImpl;
+import bank.kafka.TransferStatus;
+import bank.kafka.model.EventDTO;
+import bank.kafka.producer.KafkaService;
 import bank.model.Account;
 import bank.model.Transaction;
+import bank.transaction.exception.TransactionNotFoundException;
+import bank.transaction.exception.TransferValidationException;
 import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
-import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -24,22 +33,28 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
 
     private final AccountRepository accountRepository;
-
+    private final KafkaTemplate<String, EventDTO> kafkaTemplate;
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired
-    public ClientServiceImpl clientService;
+    public CustomerServiceImpl clientService;
+    private final ConsumerFactory<String, EventDTO> consumerFactory;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository) {
+    private static final BigDecimal ZERO_AMOUNT = BigDecimal.ZERO;
+    private final Logger logger = LoggerFactory.getLogger(KafkaService.class);
+
+    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, EventDTO> kafkaTemplate, ConsumerFactory<String, EventDTO> consumerFactory ) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.consumerFactory = consumerFactory;
     }
 
     @Override
     public List<Transaction> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
 
-        if (transactions.isEmpty()) throw new RuntimeException("Não há transações");
+        if (transactions.isEmpty()) throw new TransactionNotFoundException("There's no transactions");
 
         return transactions;
     }
@@ -47,10 +62,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> findTransactionByClientId(Long id) {
         Account account = accountService.getAccountById(id)
-                .orElseThrow(() -> new ClientDoesntExistException("Cliente inexistente"));
+                .orElseThrow(() -> new CustomerDoesntExistException("Cliente doesnt exist"));
+        List<Transaction> transactions = account.getAccountTransaction();
 
+        // Envia uma mensagem para o tópico "client-transactions" com a lista de transações encontradas
         return account.getAccountTransaction();
+    }
 
+    public Transaction findTransactionByTransactionId(Long id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction doesn't exist"));
     }
 
     /* Regras de Negócio: O saldo (balanceMoney) não pode ficar negativo. */
@@ -61,10 +82,10 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal balanceMoney = account.getBalanceMoney();
 
         BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+        validateAmount(amount, account);
 
         if (balanceMoney.compareTo(zero) < 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
+            throw new ValueNotAcceptedException("Value not accepted");
         } else account.setBalanceMoney(balanceMoney.add(amount));
 
         transaction.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
@@ -81,9 +102,11 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         BigDecimal balanceMoney = account.getBalanceMoney();
         BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) < 0) throw new ValueNotAcceptedException("Valor não aceito");
+
+        validateAmount(amount, account);
+
         if (balanceMoney.compareTo(zero) < 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
+            throw new ValueNotAcceptedException("Value not accepted");
         } else account.setBalanceMoney(balanceMoney.subtract(amount));
 
         transaction.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
@@ -94,54 +117,65 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionRepository.save(transaction);
     }
+    public Future<List<Transaction>> processEvent(EventDTO event) {
+        CompletableFuture<List<Transaction>> future = new CompletableFuture<>();
 
-    @Transactional
-    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber) {
-        Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
-        Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
+        Account originAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount()));
+        Account destinationAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getRecipientAccount()));
+        BigDecimal amount = event.getAmount();
 
-        if (Objects.equals(originAccountNumber, destinationAccountNumber))
-            throw new AccountAlreadyExistsException("Contas iguais");
-
-        BigDecimal originBalance = originAccount.getBalanceMoney();
-        BigDecimal destinationBalance = destinationAccount.getBalanceMoney();
-
-        BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) <= 0) throw new ValueNotAcceptedException("Valor não aceito");
-
-        if (originBalance.compareTo(zero) < 0) {
-            throw new ValueNotAcceptedException("Valor não aceito");
-        }
-
-        Transaction originTransaction = new Transaction();
-        originTransaction.setValue(amount);
-        originTransaction.setAccount(originAccount);
-        originTransaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-
-        Transaction destinationTransaction = new Transaction();
-        destinationTransaction.setValue(amount);
-        destinationTransaction.setAccount(destinationAccount);
-        destinationTransaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-
+        Transaction originTransaction = createTransaction(amount, originAccount, Transaction.TransactionEnum.TRANSFER);
+        Transaction destinationTransaction = createTransaction(amount, destinationAccount, Transaction.TransactionEnum.TRANSFER);
 
         try {
-            // start transaction
-            transactionRepository.save(originTransaction);
-            transactionRepository.save(destinationTransaction);
+            validateAccounts(originAccount, destinationAccount);
+            validateAmount(amount, originAccount);
+            saveTransactions(originTransaction, destinationTransaction);
+            updateAccounts(originAccount, destinationAccount, amount);
 
-            originAccount.setBalanceMoney(originBalance.subtract(amount));
-            destinationAccount.setBalanceMoney(destinationBalance.add(amount));
+            logger.info("Message processed successfully!");
 
-            // persist changes to accounts
-            accountRepository.save(originAccount);
-            accountRepository.save(destinationAccount);
-
-            // commit transaction
-        } catch (Exception e) {
-            // rollback transaction
-            throw new RuntimeException("Não foi possível realizar a transferência");
+            event.setStatus(TransferStatus.SUCCESSFUL);
+            future.complete(Arrays.asList(originTransaction, destinationTransaction));
+        } catch (TransferValidationException ex) {
+            event.setStatus(TransferStatus.FAILED);
+            logger.error("Error processing event.", ex);
+            future.completeExceptionally(new TransferValidationException("Error processing Event"));
         }
+        return future;
+    }
 
-        return Arrays.asList(originTransaction, destinationTransaction);
+    private void validateAccounts(Account originAccount, Account destinationAccount) {
+        if (Objects.equals(originAccount.getAccountNumber(), destinationAccount.getAccountNumber())) {
+            throw new AccountAlreadyExistsException("Same accounts");
+        }
+    }
+
+    private void validateAmount(BigDecimal amount, Account originAccount) {
+        if (amount.compareTo(ZERO_AMOUNT) <= 0) {
+            throw new ValueNotAcceptedException("Value not accepted");
+        }
+        if (originAccount.getBalanceMoney().compareTo(ZERO_AMOUNT) < 0) {
+            throw new ValueNotAcceptedException("Value not accepted");
+        }
+    }
+
+    public Transaction createTransaction(BigDecimal amount, Account account, Transaction.TransactionEnum transactionType) {
+        Transaction transaction = new Transaction();
+        transaction.setValue(amount);
+        transaction.setAccount(account);
+        transaction.setTransactionType(transactionType);
+
+        return transaction;
+    }
+
+    private void saveTransactions(Transaction originTransaction, Transaction destinationTransaction) {
+        transactionRepository.saveAll(Arrays.asList(originTransaction, destinationTransaction));
+    }
+
+    private void updateAccounts(Account originAccount, Account destinationAccount, BigDecimal amount) {
+        originAccount.setBalanceMoney(originAccount.getBalanceMoney().subtract(amount));
+        destinationAccount.setBalanceMoney(destinationAccount.getBalanceMoney().add(amount));
+        accountRepository.saveAll(Arrays.asList(originAccount, destinationAccount));
     }
 }
