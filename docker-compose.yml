@@ -2,7 +2,7 @@ version: "3"
 
 services:
   postgres:
-    image: postgres
+    image: postgres:15.2-alpine
     container_name: dbBank
     ports:
       - "5432:5432"
@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: "postgres"
 
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: wurstmeister/zookeeper:3.8.1
     ports:
       - "2181:2181"
   kafka:

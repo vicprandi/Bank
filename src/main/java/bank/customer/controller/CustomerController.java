@@ -1,9 +1,9 @@
 package bank.customer.controller;
 
 
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.service.CustomerServiceImpl;
 import bank.model.Customer;
-import bank.customer.request.ClientRequest;
+import bank.customer.request.CustomerRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,37 +21,37 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 @RestController
-@RequestMapping("/clients")
-@Api(value = "client")
-public class ClientController {
-    private final ClientServiceImpl clientService;
+@RequestMapping("/customer")
+@Api(value = "customer")
+public class CustomerController {
+    private final CustomerServiceImpl customerService;
 
     @Autowired
-    public ClientController(ClientServiceImpl clientService) {
-        this.clientService = clientService;
+    public CustomerController(CustomerServiceImpl customerService) {
+        this.customerService = customerService;
     }
     private static final Logger logger = Logger.getLogger(Customer.class.getName());
 
     /*Para todos os CLientes*/
-    @ApiOperation(value ="Bring all Clients")
+    @ApiOperation(value ="Bring all Customer")
     @GetMapping
-    public List<Customer> getAllClients() {
+    public List<Customer> getAllCustomer() {
         logger.info("Returning all costumer");
-        return clientService.getAllClients();
+        return customerService.getAllCustomers();
     }
 
-    @ApiOperation(value = "Bring a specific client")
+    @ApiOperation(value = "Bring a specific customer")
     @GetMapping("/{cpf}")
     public Optional<Customer> getClient(@PathVariable @Valid String cpf) {
         logger.info("Returning a specific costumer");
-        return Optional.ofNullable(clientService.getClientCpf(cpf));
+        return Optional.ofNullable(customerService.getCustomerCpf(cpf));
     }
 
     /* Registro do Cliente */
     @ApiOperation(value = "Customer Register")
     @PostMapping
-    public ResponseEntity<Customer> registerClient (@RequestBody @Valid ClientRequest clientRequest) {
-        Customer customer = clientService.registerClient(clientRequest);
+    public ResponseEntity<Customer> registerClient (@RequestBody @Valid CustomerRequest customerRequest) {
+        Customer customer = customerService.registerCustomer(customerRequest);
         logger.info("Costumer registered");
         return new ResponseEntity<>(customer, HttpStatus.CREATED);
     }
@@ -59,8 +59,8 @@ public class ClientController {
     /* Atualizar o Cliente */
     @ApiOperation(value = "Customer Update")
     @PutMapping("/update")
-    public ResponseEntity<Customer> updateClient (@RequestBody @Valid ClientRequest cpf) {
-        Customer customer = clientService.updateClient(cpf);
+    public ResponseEntity<Customer> updateClient (@RequestBody @Valid CustomerRequest cpf) {
+        Customer customer = customerService.updateCustomer(cpf);
         logger.info("Costumer updated");
         return new ResponseEntity<Customer>(customer, HttpStatus.ACCEPTED);
     }
@@ -71,7 +71,7 @@ public class ClientController {
     @DeleteMapping("/{cpf}")
     public ResponseEntity<?> deleteClient(@PathVariable String cpf) {
         logger.info("Costumer deleted");
-        clientService.deleteClient(cpf);
+        customerService.deleteCustomer(cpf);
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

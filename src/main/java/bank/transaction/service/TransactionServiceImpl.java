@@ -1,27 +1,31 @@
+
 package bank.transaction.service;
 
 import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.repository.AccountRepository;
 import bank.account.service.AccountServiceImpl;
-import bank.customer.exceptions.ClientDoesntExistException;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.exceptions.CustomerDoesntExistException;
+import bank.customer.service.CustomerServiceImpl;
 import bank.kafka.TransferStatus;
-import bank.kafka.consumer.TransferMoneyListener;
-import bank.kafka.model.Event;
 import bank.kafka.model.EventDTO;
+import bank.kafka.producer.KafkaService;
 import bank.model.Account;
 import bank.model.Transaction;
+import bank.transaction.exception.TransactionNotFoundException;
+import bank.transaction.exception.TransferValidationException;
 import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
-import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -33,19 +37,24 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired
-    public ClientServiceImpl clientService;
+    public CustomerServiceImpl clientService;
+    private final ConsumerFactory<String, EventDTO> consumerFactory;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, EventDTO> kafkaTemplate ) {
+    private static final BigDecimal ZERO_AMOUNT = BigDecimal.ZERO;
+    private final Logger logger = LoggerFactory.getLogger(KafkaService.class);
+
+    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, EventDTO> kafkaTemplate, ConsumerFactory<String, EventDTO> consumerFactory ) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.consumerFactory = consumerFactory;
     }
 
     @Override
     public List<Transaction> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
 
-        if (transactions.isEmpty()) throw new RuntimeException("There's no transactions");
+        if (transactions.isEmpty()) throw new TransactionNotFoundException("There's no transactions");
 
         return transactions;
     }
@@ -53,11 +62,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> findTransactionByClientId(Long id) {
         Account account = accountService.getAccountById(id)
-                .orElseThrow(() -> new ClientDoesntExistException("Cliente doesnt exist"));
+                .orElseThrow(() -> new CustomerDoesntExistException("Cliente doesnt exist"));
         List<Transaction> transactions = account.getAccountTransaction();
 
         // Envia uma mensagem para o tópico "client-transactions" com a lista de transações encontradas
         return account.getAccountTransaction();
+    }
+
+    public Transaction findTransactionByTransactionId(Long id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction doesn't exist"));
     }
 
     /* Regras de Negócio: O saldo (balanceMoney) não pode ficar negativo. */
@@ -103,31 +117,32 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionRepository.save(transaction);
     }
-    @Transactional
-    public List<Transaction> transferMoney(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber, TransferMoneyListener listener) {
-        Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
-        Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
+    public Future<List<Transaction>> processEvent(EventDTO event) {
+        CompletableFuture<List<Transaction>> future = new CompletableFuture<>();
 
-        validateAccounts(originAccount, destinationAccount);
-        validateAmount(amount, originAccount);
+        Account originAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getOriginAccount()));
+        Account destinationAccount = accountRepository.findByAccountNumber(Long.valueOf(event.getRecipientAccount()));
+        BigDecimal amount = event.getAmount();
 
         Transaction originTransaction = createTransaction(amount, originAccount, Transaction.TransactionEnum.TRANSFER);
         Transaction destinationTransaction = createTransaction(amount, destinationAccount, Transaction.TransactionEnum.TRANSFER);
 
         try {
+            validateAccounts(originAccount, destinationAccount);
+            validateAmount(amount, originAccount);
             saveTransactions(originTransaction, destinationTransaction);
             updateAccounts(originAccount, destinationAccount, amount);
 
-            EventDTO event = new EventDTO(Event.SAVE_TRANSFER, amount, originAccountNumber.toString(), destinationAccountNumber.toString(), TransferStatus.SUCCESSFUL);
-            kafkaTemplate.send("transactions", event);
+            logger.info("Message processed successfully!");
 
-            listener.onMoneyTransfer(); // notifica o listener de que a transferência foi realizada
-
-        } catch (Exception e) {
-            throw new RuntimeException("Can't make the transfer");
+            event.setStatus(TransferStatus.SUCCESSFUL);
+            future.complete(Arrays.asList(originTransaction, destinationTransaction));
+        } catch (TransferValidationException ex) {
+            event.setStatus(TransferStatus.FAILED);
+            logger.error("Error processing event.", ex);
+            future.completeExceptionally(new TransferValidationException("Error processing Event"));
         }
-
-        return Arrays.asList(originTransaction, destinationTransaction);
+        return future;
     }
 
     private void validateAccounts(Account originAccount, Account destinationAccount) {
@@ -137,16 +152,15 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void validateAmount(BigDecimal amount, Account originAccount) {
-        BigDecimal zero = BigDecimal.valueOf(0);
-        if (amount.compareTo(zero) <= 0) {
+        if (amount.compareTo(ZERO_AMOUNT) <= 0) {
             throw new ValueNotAcceptedException("Value not accepted");
         }
-        if (originAccount.getBalanceMoney().compareTo(zero) < 0) {
+        if (originAccount.getBalanceMoney().compareTo(ZERO_AMOUNT) < 0) {
             throw new ValueNotAcceptedException("Value not accepted");
         }
     }
 
-    private Transaction createTransaction(BigDecimal amount, Account account, Transaction.TransactionEnum transactionType) {
+    public Transaction createTransaction(BigDecimal amount, Account account, Transaction.TransactionEnum transactionType) {
         Transaction transaction = new Transaction();
         transaction.setValue(amount);
         transaction.setAccount(account);
@@ -156,8 +170,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void saveTransactions(Transaction originTransaction, Transaction destinationTransaction) {
-        transactionRepository.save(originTransaction);
-        transactionRepository.save(destinationTransaction);
+        transactionRepository.saveAll(Arrays.asList(originTransaction, destinationTransaction));
     }
 
     private void updateAccounts(Account originAccount, Account destinationAccount, BigDecimal amount) {
