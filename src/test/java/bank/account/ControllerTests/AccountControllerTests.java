@@ -88,6 +88,7 @@ public class AccountControllerTests {
         account.setBalanceMoney(accountRequest2.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account2.setAccountNumber(accountNumber);
+
         customer = customerRequest2.customerObjectRequest();
         account2.setCustomer(customer);
 

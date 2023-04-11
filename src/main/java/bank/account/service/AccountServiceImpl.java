@@ -36,7 +36,6 @@ public class AccountServiceImpl implements AccountService {
     /* Registrar uma conta */
     public Account registerAccount(String cpf) {
         Optional<Customer> customer  = customerRepository.findByCpf(cpf);
-
         Long accountNumber = accountRepository.generateAccountNumber();
 
         if (accountRepository.existsByAccountNumber(accountNumber)) {
@@ -51,13 +50,11 @@ public class AccountServiceImpl implements AccountService {
 
         Account account = new Account();
         account.setAccountNumber(accountNumber);
-
         if (customer.isEmpty()) {
             throw new CustomerDoesntExistException("Customer doesn't exist!");
         } else {
             account.setCustomer(customer.get());
         }
-
         account.setBalanceMoney(accountRequest.getBalanceMoney());
 
         return accountRepository.save(account);
@@ -93,7 +90,7 @@ public class AccountServiceImpl implements AccountService {
     public Long findAccountNumberByCustomerId(Long id) throws RuntimeException {
         Optional<Customer> customer = customerRepository.findById(id);
         Long accountNumber = customer.get().getAccount().getAccountNumber();
-
+        
         if (accountNumber == null) {
             throw new AccountDoesntExistException("Account doesn't exist!");
         }
@@ -103,7 +100,6 @@ public class AccountServiceImpl implements AccountService {
     public Optional<Account> getAccountById(Long id) {
         Optional<Customer> customer = customerRepository.findById(id);
         Account account = customer.get().getAccount();
-
         if (account == null) throw new AccountDoesntExistException("There is no account.");
 
         return Optional.of(account);

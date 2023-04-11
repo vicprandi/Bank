@@ -60,6 +60,7 @@ public class AccountServiceImplTests {
     @Spy
     CustomerRequest customerRequest;
     CustomerRequest customerRequest2;
+
     Customer customer;
     Customer customer2;
 
@@ -83,6 +84,7 @@ public class AccountServiceImplTests {
         customer.setPostalCode("02036020");
         customerRepository.save(customer);
 
+
         customer2 = new Customer();
         customer2.setName("Thais");
         customer2.setCpf("12345678902");
@@ -91,6 +93,7 @@ public class AccountServiceImplTests {
         customer2.setStreet("SE");
         customer2.setPostalCode("02036020");
         customerRepository.save(customer2);
+
     }
 
     @Test
@@ -123,6 +126,7 @@ public class AccountServiceImplTests {
         account.setAccountNumber(1L);
         account.setCustomer(new Customer());
         when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(new Customer()));
+
         when(accountRepository.generateAccountNumber()).thenReturn(account.getAccountNumber());
         when(accountRepository.existsByAccountNumber(account.getAccountNumber())).thenReturn(true);
 
@@ -144,6 +148,7 @@ public class AccountServiceImplTests {
         account.setAccountNumber(1L);
         account.setCustomer(new Customer());
         when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(new Customer()));
+
         when(accountRepository.generateAccountNumber()).thenReturn(account.getAccountNumber());
         when(accountRepository.existsByAccountNumber(account.getAccountNumber())).thenReturn(false);
         when(customerRepository.existsByCpf(cpf)).thenReturn(null);
@@ -224,6 +229,7 @@ public class AccountServiceImplTests {
         // Define o comportamento do mock do repository
         when(customerRepository.findById(clientId)).thenReturn(Optional.of(customer));
 
+
         // Chama o método que deve retornar o número da conta
         Long result = accountServiceImpl.findAccountNumberByCustomerId(clientId);
 
@@ -243,8 +249,8 @@ public class AccountServiceImplTests {
         account.setCustomer(customer);
 
         customer.setAccount(account);
-
         Mockito.when(customerRepository.findById(clientId)).thenReturn(Optional.of(customer));
+
 
         try {
             accountServiceImpl.findAccountNumberByCustomerId(clientId);
@@ -263,6 +269,7 @@ public class AccountServiceImplTests {
 
         Mockito.when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
 
+
         Optional<Account> returnedAccount = accountServiceImpl.getAccountById(1L);
 
         assertEquals(Optional.of(account), returnedAccount);
@@ -272,6 +279,7 @@ public class AccountServiceImplTests {
         // given
         Long clientId = 1L;
         Mockito.when(customerRepository.findById(clientId)).thenReturn(Optional.of(new Customer()));
+
 
         try {
             // when

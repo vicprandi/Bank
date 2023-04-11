@@ -38,11 +38,13 @@ public class CustomerControllerTests {
 
     @MockBean private CustomerRepository customerRepository;
 
+
     @Autowired MockMvc mockMvc;
 
     @Spy
     CustomerRequest customerRequest;
     CustomerRequest customerRequest2;
+
     Customer customer;
     String invalidCpf;
     String sameCpf;
@@ -52,6 +54,7 @@ public class CustomerControllerTests {
     public void setUp() {
         customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
         customerRequest2 = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+
         customer = new Customer();
 
         String invalidCpf = "12345678900";
@@ -61,12 +64,14 @@ public class CustomerControllerTests {
     @Test
     public void shouldReturnStatus201_afterGetAllCustomers() throws Exception {
         mockMvc.perform(get("/customers"))
+
                 .andExpect(status().isOk());
     }
 
     @Test
     public void shouldReturnStatus404_afterGetAllCustomers() throws Exception {
         mockMvc.perform(get("/customer"))
+
                 .andExpect(status().is4xxClientError());
     }
 
@@ -79,6 +84,7 @@ public class CustomerControllerTests {
     @Test
     public void shouldReturnStatus4xx_afterGetACustomer() throws Exception {
         mockMvc.perform(get("/customerfdss/" + customer.getId()))
+
                 .andExpect(status().is4xxClientError());
     }
 
@@ -87,6 +93,7 @@ public class CustomerControllerTests {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         customerService.registerCustomer(customerRequest);
         mockMvc.perform(post("/customers")
+
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isCreated());
@@ -97,6 +104,7 @@ public class CustomerControllerTests {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         customerService.registerCustomer(customerRequest);
         mockMvc.perform(post("/customerss")
+
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().is4xxClientError());

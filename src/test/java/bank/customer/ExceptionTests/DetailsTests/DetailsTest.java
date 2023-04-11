@@ -10,6 +10,7 @@ public class DetailsTest {
     @Test
     public void testClientDoesntExistExceptionDetailsBuilder() {
         CustomerDoesntExistExceptionDetails exceptionDetails = CustomerDoesntExistExceptionDetails
+
                 .ClientDoesntExistExceptionDetailsBuilder
                 .newBuilder()
                 .title("Title")

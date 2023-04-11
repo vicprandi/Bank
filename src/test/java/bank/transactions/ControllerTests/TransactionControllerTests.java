@@ -6,6 +6,7 @@ import bank.account.service.AccountServiceImpl;
 import bank.customer.repository.CustomerRepository;
 import bank.customer.request.CustomerRequest;
 import bank.customer.service.CustomerServiceImpl;
+
 import bank.model.Account;
 import bank.model.Customer;
 import bank.model.Transaction;
@@ -107,6 +108,7 @@ public class TransactionControllerTests {
         accountNumber = accountRepository.generateAccountNumber();
         account.setAccountNumber(accountNumber);
         customer = customerRequest.customerObjectRequest();
+
         account.setCustomer(customer);
 
         Account account2 = new Account();
@@ -114,7 +116,9 @@ public class TransactionControllerTests {
         account.setBalanceMoney(accountRequest2.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account2.setAccountNumber(accountNumber);
+
         customer = customerRequest2.customerObjectRequest();
+
         account2.setCustomer(customer);
 
         accountService.registerAccount(customerRequest.getCpf());
@@ -166,8 +170,8 @@ public class TransactionControllerTests {
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
 
         Long customerId = customerRequest.customerObjectRequest().getId();
-
         mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", customerId))
+
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 

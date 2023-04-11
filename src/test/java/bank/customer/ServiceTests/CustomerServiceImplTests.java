@@ -33,6 +33,7 @@ import static org.mockito.Mockito.*;
 public class CustomerServiceImplTests {
     /*Antes dos testes*/
     @InjectMocks
+
     private CustomerServiceImpl clientServiceImpl;
 
     @Mock
@@ -60,6 +61,7 @@ public class CustomerServiceImplTests {
         CustomerRequest customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
         CustomerRequest customerRequest2 = new CustomerRequest("Thais", "12345678902", "02036020", "SE", "SP", "SP");
 
+
         Customer customer = new Customer();
         customer.setName("Victoria");
         customer.setCpf("12345678901");
@@ -68,6 +70,7 @@ public class CustomerServiceImplTests {
         customer.setStreet("SE");
         customer.setPostalCode("02036020");
         customerRepository.save(customer);
+
 
         Customer customer2 = new Customer();
         customer2.setName("Thais");
@@ -124,7 +127,6 @@ public class CustomerServiceImplTests {
         //given
         when(customerRepository.save(any(Customer.class))).thenReturn(customer);
         when(customerRepository.save(any(Customer.class))).thenReturn(customer2);
-
         List<Customer> customers = new ArrayList<>();
         customers.add(customer);
         customers.add(customer2);
@@ -157,13 +159,13 @@ public class CustomerServiceImplTests {
 
     @Test
     public void shouldDeleteCustomer() {
+
         // given
         String cpf = "12345678901";
         Customer customer = new Customer();
         Account account = new Account();
         customer.setAccount(account);
         customer.setCpf(cpf);
-
         when(customerRepository.existsByCpf(cpf)).thenReturn(true);
         when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
         doNothing().when(accountRepository).delete(account);
@@ -245,6 +247,7 @@ public class CustomerServiceImplTests {
 
     @Test
     public void shouldReturnCustomerId_byCpf() {
+
         String cpf = "12345678901";
         Long id = 1L;
         Customer customer = new Customer();
@@ -289,7 +292,6 @@ public class CustomerServiceImplTests {
         customer.setState("SP");
         customer.setStreet("SE");
         customer.setPostalCode("02036020");
-
         when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
         when(customerRepository.save(customer)).thenReturn(customer);
 
