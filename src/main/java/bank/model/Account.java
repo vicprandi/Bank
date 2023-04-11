@@ -20,10 +20,10 @@ public class Account {
     @Column(name = "account_number", length = 50, nullable = false)
     private Long accountNumber;
 
-    @JoinColumn(name = "client_id", foreignKey = @ForeignKey)
+    @JoinColumn(name = "customer_id", foreignKey = @ForeignKey)
     @OneToOne
     @JsonIgnoreProperties({"id", "cpf", "createdData", "postalCode", "street"})
-    private Client client;
+    private Customer customer;
 
     @OneToMany(targetEntity = Transaction.class, mappedBy = "account")
     private List<Transaction> accountTransaction;

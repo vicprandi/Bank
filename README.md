@@ -8,7 +8,7 @@ The project was first created at spring.io website, which is a website that help
 The main request was to simulate a bank application with some operations, as:
 - Deposit money.
 - Withdraw money.
-- Transferm money between accounts.
+- Transfer money between accounts.
 - Show the balance.
 - Show the exctract with all transactions.
 
@@ -30,23 +30,23 @@ After you clone the github, you can access the bank package and run the command:
 
 There are some features inside this project that you can test via Postman, such as:
 
-1. Client
-- POST: Register Client `localhost:8080/clients`
-- DELETE: Delete Client `localhost:8080/clients/delete/{clientCpf}`
-- PUT: Update Client by CPF (body request) `localhost:8080/clients/update`
-- GET: Get a specific client by CPF `localhost:8080/clients/{clientCpf}`
-- GET: Get all clients `localhost:8080/clients`
+1. Customer
+- POST: Register Customer `localhost:8080/customers`
+- DELETE: Delete Customer `localhost:8080/customers/{customerCpf}`
+- PUT: Update Customer by CPF (body request) `localhost:8080/customers/update`
+- GET: Get a specific customer by CPF `localhost:8080/customers/{customerCpf}`
+- GET: Get all customers `localhost:8080/customers`
 2. Account
-- POST: Register Account by CPF `localhost:8080/accounts/{clientCpf}`
-- DELETE: Delete Account by AccountId `localhost:8080/accounts/delete/{id}`
-- GET: Get a specific account by AccountId  `localhost:8080/clients/{id}`
+- POST: Register Account by CPF `localhost:8080/accounts/{customerCpf}`
+- DELETE: Delete Account by AccountId `localhost:8080/accounts/{id}`
+- GET: Get a specific account by AccountId  `localhost:8080/customers/{id}`
 - GET: Get all accounts `localhost:8080/accounts`
 3. Transactions (amount is a number like= 100.00)
 - POST: Deposit Money `localhost:8080/transaction/deposit/{accountNumber}?amount={amount}`
 - POST: Withdraw Money `localhost:8080/transaction/withdraw/{accountNumber}?amount={amount}`
 - POST: Transfer Money between Accounts  `localhost:8080/transaction/transfer?amount={amount}&originAccountNumber={originAccountNumber}}&destinationAccountNumber={destinationAccountNumber}`
 - GET: Bring all transactions `localhost:8080/transaction`
-- GET: Bring specific transaction of a Client by ClientId `localhost:8080/transaction/{clientId}`
+- GET: Bring specific transaction of a Customer by CustomerId `localhost:8080/transaction/{customerId}`
 
 Things to remember:
 - The id is auto generated.
