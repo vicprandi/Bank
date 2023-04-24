@@ -1,8 +1,8 @@
 package bank.customer.response;
-public class ClientResponse {
+public class CustomerResponse {
     private final String name;
 
-    public ClientResponse( String name) {
+    public CustomerResponse(String name) {
         this.name = name;
     }
 

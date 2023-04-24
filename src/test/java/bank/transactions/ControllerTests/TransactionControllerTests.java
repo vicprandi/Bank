@@ -3,14 +3,16 @@ package bank.transactions.ControllerTests;
 import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
-import bank.customer.repository.ClientRepository;
-import bank.customer.request.ClientRequest;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
+import bank.customer.service.CustomerServiceImpl;
+
 import bank.model.Account;
 import bank.model.Customer;
 import bank.model.Transaction;
 import bank.transaction.controller.TransactionController;
 import bank.transaction.repository.TransactionRepository;
+import bank.transaction.request.TransactionRequest;
 import bank.transaction.service.TransactionServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -46,7 +49,7 @@ public class TransactionControllerTests {
     private AccountServiceImpl accountService;
 
     @MockBean
-    private ClientServiceImpl clientService;
+    private CustomerServiceImpl customerService;
 
     @MockBean
     private TransactionServiceImpl transactionService;
@@ -55,7 +58,7 @@ public class TransactionControllerTests {
     private AccountRepository accountRepository;
 
     @MockBean
-    private ClientRepository clientRepository;
+    private CustomerRepository customerRepository;
 
     @MockBean
     private TransactionRepository transactionRepository;
@@ -67,8 +70,8 @@ public class TransactionControllerTests {
     private ObjectMapper objectMapper;
 
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
 
@@ -90,10 +93,10 @@ public class TransactionControllerTests {
 
     @BeforeEach
     public void setUp() throws Exception {
-        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientService.registerClient(clientRequest);
-        clientService.registerClient(clientRequest2);
+        customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerRequest2 = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerService.registerCustomer(customerRequest);
+        customerService.registerCustomer(customerRequest2);
 
         accountRequest = new AccountRequest();
         accountRequest.setBalanceMoney(balanceMoney);
@@ -106,7 +109,8 @@ public class TransactionControllerTests {
         account.setBalanceMoney(accountRequest.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account.setAccountNumber(accountNumber);
-        customer = clientRequest.clientObjectRequest();
+        customer = customerRequest.customerObjectRequest();
+
         account.setCustomer(customer);
 
         Account account2 = new Account();
@@ -114,11 +118,13 @@ public class TransactionControllerTests {
         account.setBalanceMoney(accountRequest2.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account2.setAccountNumber(accountNumber);
-        customer = clientRequest2.clientObjectRequest();
+
+        customer = customerRequest2.customerObjectRequest();
+
         account2.setCustomer(customer);
 
-        accountService.registerAccount(clientRequest.getCpf());
-        accountService.registerAccount(clientRequest2.getCpf());
+        accountService.registerAccount(customerRequest.getCpf());
+        accountService.registerAccount(customerRequest2.getCpf());
 
         BigDecimal amount = BigDecimal.valueOf(100);
 
@@ -134,12 +140,12 @@ public class TransactionControllerTests {
         destinationAccountNumber = destinationAccount.getAccountNumber();
 
         transactionRequest = new Transaction();
-        transactionRequest.setAccount(account);
+        transactionRequest.setOriginAccount(account);
         transactionRequest.setValue(BigDecimal.valueOf(100));
         transactionRequest.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
 
         transactionRequest2 = new Transaction();
-        transactionRequest2.setAccount(account);
+        transactionRequest2.setOriginAccount(account);
         transactionRequest2.setValue(BigDecimal.valueOf(100));
         transactionRequest2.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
     }
@@ -157,7 +163,7 @@ public class TransactionControllerTests {
     }
 
     @Test
-    public void shouldReturnStatus200_afterGetTransactionByClientId() throws Exception {
+    public void shouldReturnStatus200_afterGetTransactionByCustomerId() throws Exception {
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("accountRegistered", accountRequest);
@@ -165,58 +171,71 @@ public class TransactionControllerTests {
 
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
 
-        Long clientId = clientRequest.clientObjectRequest().getId();
+        Long customerId = customerRequest.customerObjectRequest().getId();
+        mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", customerId))
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", clientId))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterGetTransactionByClientId() throws Exception {
-        Long clientId = clientRequest.clientObjectRequest().getId();
+        Long customerId = customerRequest.customerObjectRequest().getId();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/transacFStions/1", clientId))
+        mockMvc.perform(MockMvcRequestBuilders.get("/transacFStions/1", customerId))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus200_afterDepositMoney() throws Exception {
-        when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.depositMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterDepositMoney() throws Exception {
-        when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.depositMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transactions/deposit/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus200_afterWithdrawMoney() throws Exception {
-        when(transactionService.withdrawMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.withdrawMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transaction/withdraw/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterWithdrawMoney() throws Exception {
-        when(transactionService.withdrawMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.withdrawMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transactions/withdraw/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    private static String asJsonString(final Object obj) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -234,8 +253,8 @@ public class TransactionControllerTests {
 
     @Test
     public void shouldReturnStatus4xx_afterTransferMoney() throws Exception {
-        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
-        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
+        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(null);
+        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transactions/transfer")
                         .param("amount", "100")

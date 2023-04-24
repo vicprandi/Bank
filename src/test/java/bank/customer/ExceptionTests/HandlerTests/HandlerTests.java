@@ -1,10 +1,10 @@
 package bank.customer.ExceptionTests.HandlerTests;
 
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.exceptions.CpfAlreadyExistsException;
-import bank.customer.exceptions.details.ClientDoesntExistExceptionDetails;
+import bank.customer.exceptions.details.CustomerDoesntExistExceptionDetails;
 import bank.customer.exceptions.details.CpfAlreadyExistsExceptionDetails;
-import bank.customer.exceptions.handler.ClientDoesntExistExceptionHandler;
+import bank.customer.exceptions.handler.CustomerDoesntExistExceptionHandler;
 import bank.customer.exceptions.handler.CpfAlreadyExistsExceptionHandler;
 
 import org.junit.Before;
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.when;
 public class HandlerTests {
 
     @Mock
-    private ClientDoesntExistException clientDoesntExistException;
+    private CustomerDoesntExistException customerDoesntExistException;
 
     @InjectMocks
-    private ClientDoesntExistExceptionHandler handlerClientDoesntExistException;
+    private CustomerDoesntExistExceptionHandler handlerClientDoesntExistException;
 
     @Mock
     private CpfAlreadyExistsException cpfAlreadyExistsException;
@@ -45,12 +45,12 @@ public class HandlerTests {
     @Test
     public void testHandlerClientDoesntExistException() {
         String errorMessage = "Customer does not exist";
-        when(clientDoesntExistException.getMessage()).thenReturn(errorMessage);
+        when(customerDoesntExistException.getMessage()).thenReturn(errorMessage);
 
-        ResponseEntity<?> responseEntity = handlerClientDoesntExistException.handlerClientDoesntExistException(clientDoesntExistException);
+        ResponseEntity<?> responseEntity = handlerClientDoesntExistException.handlerClientDoesntExistException(customerDoesntExistException);
         assertEquals(responseEntity.getStatusCode(), HttpStatus.NOT_FOUND);
 
-        ClientDoesntExistExceptionDetails exceptionDetails = (ClientDoesntExistExceptionDetails) responseEntity.getBody();
+        CustomerDoesntExistExceptionDetails exceptionDetails = (CustomerDoesntExistExceptionDetails) responseEntity.getBody();
         assertEquals(exceptionDetails.getDetails(), errorMessage);
         assertNull(exceptionDetails.getTitle());
     }

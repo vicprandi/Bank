@@ -1,6 +1,6 @@
 package bank.customer.ResponseTests;
 
-import bank.customer.response.ClientResponse;
+import bank.customer.response.CustomerResponse;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -10,8 +10,8 @@ public class CustomerResponseTest {
     @Test
     public void shouldCreateClientResponse() {
         String name = "Victoria";
-        ClientResponse clientResponse = new ClientResponse(name);
-        assertEquals(name, clientResponse.getName());
+        CustomerResponse customerResponse = new CustomerResponse(name);
+        assertEquals(name, customerResponse.getName());
     }
 
 }

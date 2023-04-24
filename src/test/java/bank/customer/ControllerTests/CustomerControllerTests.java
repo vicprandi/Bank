@@ -1,11 +1,11 @@
 package bank.customer.ControllerTests;
 
-import bank.customer.controller.ClientController;
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.controller.CustomerController;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.exceptions.CpfAlreadyExistsException;
-import bank.customer.repository.ClientRepository;
-import bank.customer.request.ClientRequest;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
+import bank.customer.service.CustomerServiceImpl;
 
 
 import bank.model.Customer;
@@ -32,17 +32,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(ClientController.class)
+@WebMvcTest(CustomerController.class)
 public class CustomerControllerTests {
-    @MockBean private ClientServiceImpl clientService;
+    @MockBean private CustomerServiceImpl customerService;
 
-    @MockBean private ClientRepository clientRepository;
+    @MockBean private CustomerRepository customerRepository;
+
 
     @Autowired MockMvc mockMvc;
 
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
+
     Customer customer;
     String invalidCpf;
     String sameCpf;
@@ -50,8 +52,9 @@ public class CustomerControllerTests {
 
     @BeforeEach
     public void setUp() {
-        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerRequest2 = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+
         customer = new Customer();
 
         String invalidCpf = "12345678900";
@@ -59,122 +62,127 @@ public class CustomerControllerTests {
     }
 
     @Test
-    public void shouldReturnStatus201_afterGetAllClients() throws Exception {
-        mockMvc.perform(get("/clients"))
+    public void shouldReturnStatus201_afterGetAllCustomers() throws Exception {
+        mockMvc.perform(get("/customer"))
+
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldReturnStatus404_afterGetAllClients() throws Exception {
-        mockMvc.perform(get("/client"))
+    public void shouldReturnStatus404_afterGetAllCustomers() throws Exception {
+        mockMvc.perform(get("/customers"))
+
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
-    public void shouldReturnStatus201_afterGetAClient() throws Exception {
-        mockMvc.perform(get("/clients/" + customer.getId()))
+    public void shouldReturnStatus201_afterGetACustomer() throws Exception {
+        mockMvc.perform(get("/customer/" + customer.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldReturnStatus4xx_afterGetAClient() throws Exception {
-        mockMvc.perform(get("/clientfdss/" + customer.getId()))
+    public void shouldReturnStatus4xx_afterGetACustomer() throws Exception {
+        mockMvc.perform(get("/customerfdss/" + customer.getId()))
+
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
-    public void shouldReturnStatus201_afterCreateClient() throws Exception {
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientService.registerClient(clientRequest);
-        mockMvc.perform(post("/clients")
+    public void shouldReturnStatus201_afterCreateCustomer() throws Exception {
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        customerService.registerCustomer(customerRequest);
+        mockMvc.perform(post("/customer/")
+
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    public void shouldReturnStatus4xx_afterCreateClient() throws Exception {
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientService.registerClient(clientRequest);
-        mockMvc.perform(post("/clientss")
+    public void shouldReturnStatus4xx_afterCreateCustomer() throws Exception {
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        customerService.registerCustomer(customerRequest);
+        mockMvc.perform(post("/customerss")
+
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
-    public void shouldReturnStatus202_afterUpdateClient() throws Exception {
-        clientService.registerClient(clientRequest);
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientRequest.setState("BH");
-        clientService.updateClient(clientRequest);
-        mockMvc.perform(MockMvcRequestBuilders.put("/clients/update")
+    public void shouldReturnStatus202_afterUpdateCustomer() throws Exception {
+        customerService.registerCustomer(customerRequest);
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        customerRequest.setState("BH");
+        customerService.updateCustomer(customerRequest);
+        mockMvc.perform(MockMvcRequestBuilders.put("/customer/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isAccepted());
     }
 
     @Test
-    public void shouldReturnStatus404_afterUpdateClient() throws Exception {
-        ClientRequest clientRequest2 = new ClientRequest();
-        String requestBody = new ObjectMapper().valueToTree(clientRequest2).toString();
-        clientService.updateClient(clientRequest2);
-        mockMvc.perform(MockMvcRequestBuilders.put("/clients/update")
+    public void shouldReturnStatus404_afterUpdateCustomer() throws Exception {
+        CustomerRequest customerRequest2 = new CustomerRequest();
+        String requestBody = new ObjectMapper().valueToTree(customerRequest2).toString();
+        customerService.updateCustomer(customerRequest2);
+        mockMvc.perform(MockMvcRequestBuilders.put("/customers/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
-    public void shouldReturnStatus202_afterDeleteClient() throws Exception {
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
-        clientService.registerClient(clientRequest);
-        clientService.deleteClient(clientRequest.getCpf());
-        mockMvc.perform(MockMvcRequestBuilders.delete("/clients/1")
+    public void shouldReturnStatus202_afterDeleteCustomer() throws Exception {
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
+        customerService.registerCustomer(customerRequest);
+        customerService.deleteCustomer(customerRequest.getCpf());
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isAccepted());
     }
 
     @Test
-    public void shouldReturnStatus404_afterDeleteClient() throws Exception {
-        ClientRequest clientRequest2 = new ClientRequest();
-        String requestBody = new ObjectMapper().valueToTree(clientRequest2).toString();
-        clientService.deleteClient(clientRequest2.getCpf());
+    public void shouldReturnStatus404_afterDeleteCustomer() throws Exception {
+        CustomerRequest customerRequest2 = new CustomerRequest();
+        String requestBody = new ObjectMapper().valueToTree(customerRequest2).toString();
+        customerService.deleteCustomer(customerRequest2.getCpf());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/clients/delete/1")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customers/delete/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().is4xxClientError());
     }
 
     //Teste das exceções.
-    //Cliente não existe caso eu mande um CPF inválido para ele.
+    //Customere não existe caso eu mande um CPF inválido para ele.
     @Test
-    public void shouldReturnStatus404_afterGettingClientThatDoesntExist() throws Exception {
-        when(clientService.getClientCpf(invalidCpf)).thenReturn(null);
+    public void shouldReturnStatus404_afterGettingCustomerThatDoesntExist() throws Exception {
+        when(customerService.getCustomerCpf(invalidCpf)).thenReturn(null);
         // then
         try {
-            clientService.getClientId(invalidCpf);
+            customerService.getCustomerId(invalidCpf);
             fail("Deveria ter lançado a exceção CpfAlreadyExistsException");
         } catch (CpfAlreadyExistsException ex) {
-                mockMvc.perform(get("/clients/" + invalidCpf))
+                mockMvc.perform(get("/customers/" + invalidCpf))
                .andExpect(status().isNotFound());
         }
     }
 
-    //Testa se o CPF já existe. Se existir, joga uma exceção de cliente já registrado e o teste passa.
+    //Testa se o CPF já existe. Se existir, joga uma exceção de customere já registrado e o teste passa.
     @Test
-    public void shouldReturnStatus409_afterRegisterClientWithExistingCpf() throws Exception {
+    public void shouldReturnStatus409_afterRegisterCustomerWithExistingCpf() throws Exception {
         // given
-        when(clientRepository.existsByCpf(clientRequest.getCpf())).thenReturn(true);
-        String requestBody = new ObjectMapper().valueToTree(clientRequest).toString();
+        when(customerRepository.existsByCpf(customerRequest.getCpf())).thenReturn(true);
+        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         // then
         try {
-            clientService.registerClient(clientRequest);
+            customerService.registerCustomer(customerRequest);
             fail("Deveria ter lançado a exceção CpfAlreadyExistsException");
         } catch (CpfAlreadyExistsException ex) {
-            mockMvc.perform(MockMvcRequestBuilders.get("/client")
+            mockMvc.perform(MockMvcRequestBuilders.get("/customer")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody));
             assertEquals("Customer already registred", ex.getMessage());
@@ -182,17 +190,17 @@ public class CustomerControllerTests {
         }
     }
 
-    //* O teste mostra que se você der update num cliente que não existe, ele não vai funcionar pois não existe pelo CPF.**/
+    //* O teste mostra que se você der update num customere que não existe, ele não vai funcionar pois não existe pelo CPF.**/
     @Test
-    public void shouldReturnStatus404_afterUpdateClientWithExistingCpf() throws Exception {
+    public void shouldReturnStatus404_afterUpdateCustomerWithExistingCpf() throws Exception {
         //given
-        when(clientRepository.existsByCpf(invalidCpf)).thenReturn(null);
+        when(customerRepository.existsByCpf(invalidCpf)).thenReturn(null);
 
         try {
-            clientService.getClientCpf(invalidCpf);
-            fail("ClientDoesntExistException was expected");
-        } catch (ClientDoesntExistException ex) {
-            Assertions.assertEquals("Cliente não existe!", ex.getMessage());
+            customerService.getCustomerCpf(invalidCpf);
+            fail("CustomerDoesntExistException was expected");
+        } catch (CustomerDoesntExistException ex) {
+            Assertions.assertEquals("Customer não existe!", ex.getMessage());
             verify(status().isNotFound());
         }
     }

@@ -2,14 +2,14 @@ package bank.customer.ServiceTests;
 
 
 import bank.account.repository.AccountRepository;
-import bank.customer.exceptions.ClientDoesntExistException;
+import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.exceptions.CpfAlreadyExistsException;
-import bank.customer.service.ClientService;
+import bank.customer.service.CustomerService;
 import bank.model.Account;
 import bank.model.Customer;
-import bank.customer.repository.ClientRepository;
-import bank.customer.request.ClientRequest;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
+import bank.customer.service.CustomerServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,20 +33,21 @@ import static org.mockito.Mockito.*;
 public class CustomerServiceImplTests {
     /*Antes dos testes*/
     @InjectMocks
-    private ClientServiceImpl clientServiceImpl;
+
+    private CustomerServiceImpl clientServiceImpl;
 
     @Mock
-    private ClientService clientService;
+    private CustomerService customerService;
 
     @Mock
-    private ClientRepository clientRepository;
+    private CustomerRepository customerRepository;
 
     @Mock
     private AccountRepository accountRepository;
 
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
     Customer customer;
     Customer customer2;
 
@@ -57,8 +58,9 @@ public class CustomerServiceImplTests {
 
     @BeforeEach
     public void setUp() {
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
-        ClientRequest clientRequest2 = new ClientRequest("Thais", "12345678902", "02036020", "SE", "SP", "SP");
+        CustomerRequest customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
+        CustomerRequest customerRequest2 = new CustomerRequest("Thais", "12345678902", "02036020", "SE", "SP", "SP");
+
 
         Customer customer = new Customer();
         customer.setName("Victoria");
@@ -67,7 +69,8 @@ public class CustomerServiceImplTests {
         customer.setState("SP");
         customer.setStreet("SE");
         customer.setPostalCode("02036020");
-        clientRepository.save(customer);
+        customerRepository.save(customer);
+
 
         Customer customer2 = new Customer();
         customer2.setName("Thais");
@@ -76,116 +79,115 @@ public class CustomerServiceImplTests {
         customer2.setState("SP");
         customer2.setStreet("SE");
         customer2.setPostalCode("02036020");
-        clientRepository.save(customer2);
+        customerRepository.save(customer2);
     }
 
     @Test
-    public void shouldRegisterClient() {
+    public void shouldRegisterCustomer() {
         // when
-        when(clientRepository.save(any(Customer.class))).thenReturn(customer);
+        when(customerRepository.save(any(Customer.class))).thenReturn(customer);
 
         //then
-        Customer result = clientServiceImpl.registerClient(clientRequest);
+        Customer result = clientServiceImpl.registerCustomer(customerRequest);
 
         //verify
-        clientRepository.save(result);
-        verify(clientRepository).save(result);
+        customerRepository.save(result);
+        verify(customerRepository).save(result);
     }
 
     @Test
-    public void shouldThrowCpfAlreadyExistsException_WhenRegisterClient() {
-        when(clientRepository.save(any(Customer.class))).thenReturn(customer);
-        when(clientServiceImpl.registerClient(clientRequest)).thenThrow(CpfAlreadyExistsException.class);
+    public void shouldThrowCpfAlreadyExistsException_WhenRegisterCustomer() {
+        when(customerRepository.save(any(Customer.class))).thenReturn(customer);
+        when(clientServiceImpl.registerCustomer(customerRequest)).thenThrow(CpfAlreadyExistsException.class);
 
-        Customer result = clientServiceImpl.registerClient(clientRequest);
-        clientRepository.save(result);
-        verify(clientRepository).save(result);
+        Customer result = clientServiceImpl.registerCustomer(customerRequest);
+        customerRepository.save(result);
+        verify(customerRepository).save(result);
     }
 
     @Test
     public void shouldThrowCpfAlreadyExistsException() {
         String cpf = "12345678901";
-        ClientRequest clientRequest = new ClientRequest();
-        clientRequest.setCpf(cpf);
-        when(clientRepository.existsByCpf(cpf)).thenReturn(true);
+        CustomerRequest customerRequest = new CustomerRequest();
+        customerRequest.setCpf(cpf);
+        when(customerRepository.existsByCpf(cpf)).thenReturn(true);
 
         // when
         try {
-            clientServiceImpl.registerClient(clientRequest);
+            clientServiceImpl.registerCustomer(customerRequest);
             fail("Expected CpfAlreadyExistsException was not thrown");
         } catch (CpfAlreadyExistsException ex) {
             // then
-            assertEquals("Customer already registred", ex.getMessage());
+            assertEquals("Customer already registered", ex.getMessage());
         }
     }
     @Test
-    public void shouldReturnAllClients() {
+    public void shouldReturnAllCustomers() {
 
         //given
-        when(clientRepository.save(any(Customer.class))).thenReturn(customer);
-        when(clientRepository.save(any(Customer.class))).thenReturn(customer2);
-
+        when(customerRepository.save(any(Customer.class))).thenReturn(customer);
+        when(customerRepository.save(any(Customer.class))).thenReturn(customer2);
         List<Customer> customers = new ArrayList<>();
         customers.add(customer);
         customers.add(customer2);
-        when(clientRepository.findAll()).thenReturn(customers);
+        when(customerRepository.findAll()).thenReturn(customers);
 
         // when
-        List<Customer> result = clientServiceImpl.getAllClients();
+        List<Customer> result = clientServiceImpl.getAllCustomers();
 
         // then
-        verify(clientRepository, times(1)).findAll();
+        verify(customerRepository, times(1)).findAll();
         assertEquals(2, result.size());
         assertTrue(result.contains(customer));
         assertTrue(result.contains(customer2));
     }
 
     @Test
-    public void shouldThrowClientDoesntExistException_whenReturnAllClients() {
+    public void shouldThrowCustomerDoesntExistException_whenReturnAllCustomers() {
         // given
-        when(clientRepository.findAll()).thenReturn(new ArrayList<>());
+        when(customerRepository.findAll()).thenReturn(new ArrayList<>());
 
         // when
         try {
-            clientServiceImpl.getAllClients();
-            fail("Expected ClientDoesntExistException to be thrown");
-        } catch (ClientDoesntExistException ex) {
+            clientServiceImpl.getAllCustomers();
+            fail("Expected CustomerDoesntExistException to be thrown");
+        } catch (CustomerDoesntExistException ex) {
             // then
-            assertEquals("Não há clientes", ex.getMessage());
+            assertEquals("There's no customers", ex.getMessage());
         }
     }
 
     @Test
-    public void shouldDeleteClient() {
+    public void shouldDeleteCustomer() {
+
         // given
         String cpf = "12345678901";
         Customer customer = new Customer();
         Account account = new Account();
         customer.setAccount(account);
         customer.setCpf(cpf);
-
-        when(clientRepository.existsByCpf(cpf)).thenReturn(true);
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
+        when(customerRepository.existsByCpf(cpf)).thenReturn(true);
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
         doNothing().when(accountRepository).delete(account);
-        doNothing().when(clientRepository).delete(customer);
+        doNothing().when(customerRepository).delete(customer);
 
         // when
-        clientServiceImpl.deleteClient(cpf);
+        clientServiceImpl.deleteCustomer(cpf);
 
         // then
-        verify(clientRepository, times(1)).delete(customer);
+        verify(customerRepository, times(1)).delete(customer);
         verify(accountRepository, times(1)).delete(account);
     }
 
     @Test
-    public void shouldThrowException_WhenDeletingNonExistentClient() {
+    public void shouldThrowException_WhenDeletingNonExistentCustomer() {
         // given
         String cpf = "12345678901";
-        when(clientRepository.existsByCpf(cpf)).thenReturn(false);
+        when(customerRepository.existsByCpf(cpf)).thenReturn(false);
 
         // when and then
-        verify(clientRepository, never()).findByCpf(cpf);
-        verify(clientRepository, never()).delete(any(Customer.class));
+        verify(customerRepository, never()).findByCpf(cpf);
+        verify(customerRepository, never()).delete(any(Customer.class));
         verify(accountRepository, never()).delete(any(Account.class));
     }
 
@@ -198,53 +200,54 @@ public class CustomerServiceImplTests {
         customer.setAccount(account);
         customer.setCpf(cpf);
 
-        when(clientRepository.existsByCpf(cpf)).thenReturn(true);
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
+        when(customerRepository.existsByCpf(cpf)).thenReturn(true);
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
         doNothing().when(accountRepository).delete(account);
-        doNothing().when(clientRepository).delete(customer);
+        doNothing().when(customerRepository).delete(customer);
 
         try {
-            clientServiceImpl.deleteClient(customer.getCpf());
-            fail("Expected ClientDoesntExistException to be thrown");
-        } catch (ClientDoesntExistException ex) {
+            clientServiceImpl.deleteCustomer(customer.getCpf());
+            fail("Expected CustomerDoesntExistException to be thrown");
+        } catch (CustomerDoesntExistException ex) {
             // then
             assertEquals("Customer does not exist", ex.getMessage());
         }
     }
 
     @Test
-    public void shouldReturnClientByCpf() {
+    public void shouldReturnCustomerByCpf() {
         String cpf = "12345678901";
         Customer customer = new Customer();
         Account account = new Account();
         customer.setAccount(account);
         customer.setCpf(cpf);
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
 
         // when
-        Customer result = clientServiceImpl.getClientCpf(cpf);
+        Customer result = clientServiceImpl.getCustomerCpf(cpf);
 
         // then
-        verify(clientRepository, times(1)).findByCpf(cpf);
+        verify(customerRepository, times(1)).findByCpf(cpf);
         assertEquals(customer, result);
     }
     @Test
-    public void shouldThrowClientDoesntExistException_whenReturnClientByCpf() {
+    public void shouldThrowCustomerDoesntExistException_whenReturnCustomerByCpf() {
         String cpf = "12345678901";
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.empty());
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.empty());
 
         // when
         try {
-            clientServiceImpl.getClientCpf(cpf);
-            fail("ClientDoesntExistException should have been thrown");
-        } catch (ClientDoesntExistException e) {
+            clientServiceImpl.getCustomerCpf(cpf);
+            fail("CustomerDoesntExistException should have been thrown");
+        } catch (CustomerDoesntExistException e) {
             // then
-            assertEquals("Cliente não existe!", e.getMessage());
+            assertEquals("There's no customers!", e.getMessage());
         }
     }
 
     @Test
-    public void shouldReturnClientId_byCpf() {
+    public void shouldReturnCustomerId_byCpf() {
+
         String cpf = "12345678901";
         Long id = 1L;
         Customer customer = new Customer();
@@ -252,35 +255,35 @@ public class CustomerServiceImplTests {
         customer.setAccount(account);
         customer.setCpf(cpf);
         customer.setId(id);
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
 
         // when
-        Long result = clientServiceImpl.getClientId(cpf);
+        Long result = clientServiceImpl.getCustomerId(cpf);
 
         // then
-        verify(clientRepository, times(1)).findByCpf(cpf);
+        verify(customerRepository, times(1)).findByCpf(cpf);
         assertEquals(id, customer.getId());
     }
 
     @Test
-    public void shouldThrowClientDoesntExistException_whenGetId() {
+    public void shouldThrowCustomerDoesntExistException_whenGetId() {
         String cpf = "12345678901";
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.empty());
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.empty());
 
         // when
         try {
-            clientServiceImpl.getClientId(cpf);
-            fail("ClientDoesntExistException should have been thrown");
-        } catch (ClientDoesntExistException e) {
+            clientServiceImpl.getCustomerId(cpf);
+            fail("CustomerDoesntExistException should have been thrown");
+        } catch (CustomerDoesntExistException e) {
             // then
-            assertEquals("Cliente não existe!", e.getMessage());
+            assertEquals("There's no customers", e.getMessage());
         }
     }
 
     @Test
-    public void shouldUpdateClient() {
+    public void shouldUpdateCustomer() {
         String cpf = "12345678901";
-        ClientRequest clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
+        CustomerRequest customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
 
         Customer customer = new Customer();
         customer.setName("Victoria");
@@ -289,19 +292,18 @@ public class CustomerServiceImplTests {
         customer.setState("SP");
         customer.setStreet("SE");
         customer.setPostalCode("02036020");
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
+        when(customerRepository.save(customer)).thenReturn(customer);
 
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.of(customer));
-        when(clientRepository.save(customer)).thenReturn(customer);
+        Customer updatedCustomer = clientServiceImpl.updateCustomer(customerRequest);
 
-        Customer updatedCustomer = clientServiceImpl.updateClient(clientRequest);
+        verify(customerRepository).findByCpf(cpf);
+        verify(customerRepository).save(customer);
 
-        verify(clientRepository).findByCpf(cpf);
-        verify(clientRepository).save(customer);
-
-        assertEquals(clientRequest.getName(), updatedCustomer.getName());
-        assertEquals(clientRequest.getCity(), updatedCustomer.getCity());
-        assertEquals(clientRequest.getStreet(), updatedCustomer.getStreet());
-        assertEquals(clientRequest.getState(), updatedCustomer.getState());
-        assertEquals(clientRequest.getPostalCode(), updatedCustomer.getPostalCode());
+        assertEquals(customerRequest.getName(), updatedCustomer.getName());
+        assertEquals(customerRequest.getCity(), updatedCustomer.getCity());
+        assertEquals(customerRequest.getStreet(), updatedCustomer.getStreet());
+        assertEquals(customerRequest.getState(), updatedCustomer.getState());
+        assertEquals(customerRequest.getPostalCode(), updatedCustomer.getPostalCode());
     }
 }

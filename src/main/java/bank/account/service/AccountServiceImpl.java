@@ -1,13 +1,14 @@
 package bank.account.service;
 
 import bank.account.exceptions.CpfDoesntExistException;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.exceptions.CustomerDoesntExistException;
+import bank.customer.service.CustomerServiceImpl;
 import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.exceptions.AccountDoesntExistException;
 import bank.model.Account;
 import bank.model.Customer;
 import bank.account.repository.AccountRepository;
-import bank.customer.repository.ClientRepository;
+import bank.customer.repository.CustomerRepository;
 import bank.account.request.AccountRequest;
 
 import jakarta.validation.Valid;
@@ -22,27 +23,26 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
 
-    private final ClientRepository clientRepository;
+    private final CustomerRepository customerRepository;
 
-    public ClientServiceImpl clientService;
+    public CustomerServiceImpl customerService;
 
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository, ClientRepository clientRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository, CustomerRepository customerRepository) {
         this.accountRepository = accountRepository;
-        this.clientRepository = clientRepository;
+        this.customerRepository = customerRepository;
     }
 
     /* Registrar uma conta */
     public Account registerAccount(String cpf) {
-        Optional<Customer> client  = clientRepository.findByCpf(cpf);
-
+        Optional<Customer> customer  = customerRepository.findByCpf(cpf);
         Long accountNumber = accountRepository.generateAccountNumber();
 
         if (accountRepository.existsByAccountNumber(accountNumber)) {
             throw new AccountAlreadyExistsException("Account already registered");
         }
 
-        if (clientRepository.existsByCpf(cpf) == null) {
+        if (customerRepository.existsByCpf(cpf) == null) {
             throw new CpfDoesntExistException("CPF doesn't exist");
         }
 
@@ -50,7 +50,11 @@ public class AccountServiceImpl implements AccountService {
 
         Account account = new Account();
         account.setAccountNumber(accountNumber);
-        account.setCustomer(client.get());
+        if (customer.isEmpty()) {
+            throw new CustomerDoesntExistException("Customer doesn't exist!");
+        } else {
+            account.setCustomer(customer.get());
+        }
         account.setBalanceMoney(accountRequest.getBalanceMoney());
 
         return accountRepository.save(account);
@@ -67,18 +71,26 @@ public class AccountServiceImpl implements AccountService {
     /* Trazer todas as Contas */
     @Override
     public List<Account> getAllAccounts() {
-        List<Account> accounts = accountRepository.findAll();
+        List<Account> accounts;
+        try {
+            accounts = accountRepository.findAll();
+        } catch (Exception ex) {
+            throw new AccountDoesntExistException("There's no accounts.");
+        }
 
-        if (accounts.isEmpty()) throw new AccountDoesntExistException("There's no accounts.");
+        if (accounts.isEmpty()) {
+            throw new AccountDoesntExistException("There's no accounts.");
+        }
+
         return accounts;
     }
 
     /* Achar conta pelo AccountNumber */
     @Override
-    public Long findAccountNumberByClientId(Long id) throws RuntimeException {
-        Optional<Customer> client = clientRepository.findById(id);
-        Long accountNumber = client.get().getAccount().getAccountNumber();
-
+    public Long findAccountNumberByCustomerId(Long id) throws RuntimeException {
+        Optional<Customer> customer = customerRepository.findById(id);
+        Long accountNumber = customer.get().getAccount().getAccountNumber();
+        
         if (accountNumber == null) {
             throw new AccountDoesntExistException("Account doesn't exist!");
         }
@@ -86,12 +98,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public Optional<Account> getAccountById(Long id) {
-        Optional<Customer> client = clientRepository.findById(id);
-        Account account = client.get().getAccount();
-
+        Optional<Customer> customer = customerRepository.findById(id);
+        Account account = customer.get().getAccount();
         if (account == null) throw new AccountDoesntExistException("There is no account.");
 
         return Optional.of(account);
     }
-
 }

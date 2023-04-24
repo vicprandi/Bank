@@ -1,6 +1,6 @@
 package bank.customer.ExceptionTests.DetailsTests;
 
-import bank.customer.exceptions.details.ClientDoesntExistExceptionDetails;
+import bank.customer.exceptions.details.CustomerDoesntExistExceptionDetails;
 import bank.customer.exceptions.details.CpfAlreadyExistsExceptionDetails;
 import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +9,8 @@ public class DetailsTest {
 
     @Test
     public void testClientDoesntExistExceptionDetailsBuilder() {
-        ClientDoesntExistExceptionDetails exceptionDetails = ClientDoesntExistExceptionDetails
+        CustomerDoesntExistExceptionDetails exceptionDetails = CustomerDoesntExistExceptionDetails
+
                 .ClientDoesntExistExceptionDetailsBuilder
                 .newBuilder()
                 .title("Title")

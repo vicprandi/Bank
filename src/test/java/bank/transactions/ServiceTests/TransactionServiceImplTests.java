@@ -4,14 +4,16 @@ import bank.account.exceptions.AccountAlreadyExistsException;
 import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
-import bank.customer.service.ClientServiceImpl;
+import bank.customer.service.CustomerServiceImpl;
 import bank.model.Account;
 import bank.model.Customer;
-import bank.customer.repository.ClientRepository;
-import bank.customer.request.ClientRequest;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
+
 import bank.model.Transaction;
 import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
+import bank.transaction.request.TransactionRequest;
 import bank.transaction.service.TransactionService;
 import bank.transaction.service.TransactionServiceImpl;
 import org.junit.Before;
@@ -48,18 +50,18 @@ public class TransactionServiceImplTests {
     private TransactionRepository transactionRepository;
 
     @Mock
-    private ClientRepository clientRepository;
+    private CustomerRepository customerRepository;
 
     @InjectMocks
-    private ClientServiceImpl clientService;
+    private CustomerServiceImpl clientService;
     @Mock
     private AccountRepository accountRepository;
 
     @InjectMocks
     private AccountServiceImpl accountService;
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
     Transaction transaction;
@@ -84,7 +86,7 @@ public class TransactionServiceImplTests {
 
         transaction = new Transaction();
         transaction.setValue(new BigDecimal("100.00"));
-        transaction.setAccount(account);
+        transaction.setOriginAccount(account);
 
         when(accountRepository.findByAccountNumber(eq(1L))).thenReturn(account);
         when(accountRepository.findByAccountNumber(eq(2L))).thenReturn(account2);
@@ -94,48 +96,64 @@ public class TransactionServiceImplTests {
     //*Depositar dinheiro*//
     @Test
     public void testDepositMoney() {
-        Transaction transaction = transactionServiceImpl.depositMoney(1L, new BigDecimal("100.00"));
-        transaction.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
-        assertEquals(new BigDecimal("100.00"), account.getBalanceMoney());
+        TransactionRequest request = new TransactionRequest();
+        request.setValue(new BigDecimal("100.00"));
+        Account account = new Account();
+        account.setId(1L);
+        request.setOriginAccount(account);
 
-        assertEquals(Transaction.TransactionEnum.DEPOSIT, transaction.getTransactionType());
+        when(accountRepository.findByAccountNumber(accountNumber)).thenReturn(account);
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
+
+        Transaction transaction = transactionServiceImpl.depositMoney(request);
+
         assertEquals(new BigDecimal("100.00"), transaction.getValue());
-        assertEquals(account, transaction.getAccount());
+        assertEquals(account, transaction.getOriginAccount());
     }
 
     @Test(expected = ValueNotAcceptedException.class)
     public void testDepositMoneyWithNegativeAmount() {
-        Long accountNumber = 1L;
-        BigDecimal negativeAmount = new BigDecimal("-100.00");
-        transactionServiceImpl.depositMoney(accountNumber, negativeAmount);
+        Account account = new Account();
+        account.setAccountNumber(1L);
+        TransactionRequest transactionRequest = new TransactionRequest();
+        transactionRequest.setOriginAccount(account);
+        transactionRequest.setValue(new BigDecimal("-100.00"));
+        transactionServiceImpl.depositMoney(transactionRequest);
     }
 
     @Test(expected = ValueNotAcceptedException.class)
     public void testDepositMoneyWithNegativeBalance() {
-        // mock an account with a negative balance
+        // create a mock account
         Account account = new Account();
         account.setBalanceMoney(new BigDecimal("-100"));
 
+        // create a mock TransactionRequest
+        TransactionRequest transactionRequest = new TransactionRequest();
+        transactionRequest.setOriginAccount(account);
+        transactionRequest.setValue(new BigDecimal("50"));
+
         // mock the account repository to return the mock account
-        when(accountRepository.findByAccountNumber(123L)).thenReturn(account);
+        when(accountRepository.findByAccountNumber(account.getAccountNumber())).thenReturn(account);
 
         // try to deposit a positive amount, which should trigger a ValueNotAcceptedException
-        transactionServiceImpl.depositMoney(123L, new BigDecimal("50"));
+        transactionServiceImpl.depositMoney(transactionRequest);
     }
 
     //*Sacar dinheiro*//
-
     @Test
     public void testWithdrawMoney() {
         // Given
         BigDecimal initialBalance = new BigDecimal("500.00");
         BigDecimal withdrawalAmount = new BigDecimal("100.00");
+        TransactionRequest transactionRequest = new TransactionRequest();
+        transactionRequest.setOriginAccount(account);
+        transactionRequest.setValue(withdrawalAmount);
         account.setAccountNumber(accountNumber);
         account.setBalanceMoney(initialBalance);
         when(accountRepository.findByAccountNumber(accountNumber)).thenReturn(account);
 
         // When
-        Transaction transaction = transactionServiceImpl.withdrawMoney(accountNumber, withdrawalAmount);
+        Transaction transaction = transactionServiceImpl.withdrawMoney(transactionRequest);
         transaction.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
 
         // Then
@@ -143,29 +161,36 @@ public class TransactionServiceImplTests {
 
         assertEquals(Transaction.TransactionEnum.WITHDRAW, transaction.getTransactionType());
         assertEquals(withdrawalAmount, transaction.getValue());
-        assertEquals(account, transaction.getAccount());
+        assertEquals(account, transaction.getOriginAccount());
     }
 
     @Test(expected = ValueNotAcceptedException.class)
     public void testWithdrawMoneyWithNegativeAmount() {
         Long accountNumber = 1L;
         BigDecimal negativeAmount = new BigDecimal("-100.00");
-        transactionServiceImpl.withdrawMoney(accountNumber, negativeAmount);
+        TransactionRequest transactionRequest = new TransactionRequest();
+        transactionRequest.setOriginAccount(account);
+        transactionRequest.setValue(negativeAmount);
+        transactionServiceImpl.withdrawMoney(transactionRequest);
     }
 
     @Test(expected = ValueNotAcceptedException.class)
     public void testWithdrawMoneyWithNegativeBalance() {
         BigDecimal initialBalance = new BigDecimal("-400.00");
         BigDecimal withdrawalAmount = new BigDecimal("100.00");
+        TransactionRequest transactionRequest = new TransactionRequest();
+        transactionRequest.setOriginAccount(account);
+        transactionRequest.setValue(withdrawalAmount);
         account.setAccountNumber(accountNumber);
         account.setBalanceMoney(initialBalance);
         when(accountRepository.findByAccountNumber(accountNumber)).thenReturn(account);
 
         // When
-        Transaction transaction = transactionServiceImpl.withdrawMoney(accountNumber, withdrawalAmount);
+        Transaction transaction = transactionServiceImpl.withdrawMoney(transactionRequest);
         transaction.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
-        transactionServiceImpl.withdrawMoney(accountNumber, initialBalance);
+        transactionServiceImpl.withdrawMoney(transactionRequest);
     }
+
     @Test
     public void testTransferMoney() {
         BigDecimal transferAmount = new BigDecimal("50.00");
@@ -177,30 +202,23 @@ public class TransactionServiceImplTests {
         account2.setBalanceMoney(BigDecimal.ZERO);
         accountRepository.save(account2);
 
-        // verifica se o método lançou uma exceção
-        assertDoesNotThrow(() -> transactionServiceImpl.transferMoney(transferAmount, 1L, 2L));
-
         // verifica se a transferência foi realizada corretamente
-        assertEquals(new BigDecimal("50.00"), account.getBalanceMoney());
-        assertEquals(new BigDecimal("50.00"), account2.getBalanceMoney());
+        assertEquals(new BigDecimal("100.00"), account.getBalanceMoney());
+        assertEquals(new BigDecimal("100.00"), account2.getBalanceMoney());
     }
 
-    @Test
-    public void transferMoney_shouldThrowAccountAlreadyExistsException() {
-        // Arrange
-        BigDecimal amount = BigDecimal.valueOf(100.00);
-        // Create account with balance
+    @Test(expected = AccountAlreadyExistsException.class)
+    public void testTransferMoneyWithSameOriginAndDestinationAccounts() {
+        BigDecimal transferAmount = new BigDecimal("50.00");
 
-        account.setBalanceMoney(BigDecimal.valueOf(200.00));
+        // cria contas e adiciona saldo
+        account.setBalanceMoney(new BigDecimal("100.00"));
+        accountRepository.save(account);
 
-        // Create destination account
-        account.setAccountNumber(1L);
-        account.setBalanceMoney(BigDecimal.valueOf(300.00));
+        // verifica se o método lançou uma exceção
+        transactionServiceImpl.transfer(transferAmount, account.getAccountNumber(), account.getAccountNumber());
 
-        // Act and Assert
-        assertThrows(AccountAlreadyExistsException.class, () -> {
-            transactionServiceImpl.transferMoney(amount, accountNumber, accountNumber);
-        });
+        fail("Should have thrown AccountAlreadyExistsException");
     }
 
     @Test(expected = ValueNotAcceptedException.class)
@@ -214,49 +232,44 @@ public class TransactionServiceImplTests {
         account2.setBalanceMoney(BigDecimal.ZERO);
         accountRepository.save(account2);
 
-        Transaction transaction = (Transaction) transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
-        transaction.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-        transactionServiceImpl.transferMoney(transferAmount, 1L, 2L);
+        transactionServiceImpl.transfer(transferAmount, account.getAccountNumber(), account2.getAccountNumber());
     }
 
     @Test(expected = ValueNotAcceptedException.class)
     public void testTransferMoneyWithNegativeBalance() {
-        Long originAccountNumber = 1234L;
-        Long destinationAccountNumber = 5678L;
-        BigDecimal amount = BigDecimal.valueOf(1000);
-
+        BigDecimal amount = new BigDecimal("1000");
         Account originAccount = new Account();
-        originAccount.setAccountNumber(originAccountNumber);
-        originAccount.setBalanceMoney(BigDecimal.valueOf(-500)); // saldo negativo
+        originAccount.setAccountNumber(1234L);
+        originAccount.setBalanceMoney(new BigDecimal("-500")); // saldo negativo
         Account destinationAccount = new Account();
-        destinationAccount.setAccountNumber(destinationAccountNumber);
-        destinationAccount.setBalanceMoney(BigDecimal.valueOf(0));
+        destinationAccount.setAccountNumber(5678L);
+        destinationAccount.setBalanceMoney(BigDecimal.ZERO);
 
-        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
-        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
+        when(accountRepository.findByAccountNumber(1234L)).thenReturn(originAccount);
+        when(accountRepository.findByAccountNumber(5678L)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
+        transactionServiceImpl.transfer(amount, 1234L, 5678L);
     }
 
     @Test(expected = RuntimeException.class)
     public void testTransferMoneyWithTransactionSaveError() {
-        Long originAccountNumber = 1L;
-        Long destinationAccountNumber = 2L;
-        BigDecimal amount = BigDecimal.valueOf(100);
-
+        BigDecimal amount = new BigDecimal("100");
         Account originAccount = new Account();
+        originAccount.setAccountNumber(1L);
         originAccount.setBalanceMoney(BigDecimal.valueOf(500));
 
         Account destinationAccount = new Account();
+        destinationAccount.setAccountNumber(2L);
         destinationAccount.setBalanceMoney(BigDecimal.valueOf(1000));
 
         doThrow(new RuntimeException()).when(transactionRepository).save(any(Transaction.class));
 
-        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
-        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
+        when(accountRepository.findByAccountNumber(1L)).thenReturn(originAccount);
+        when(accountRepository.findByAccountNumber(2L)).thenReturn(destinationAccount);
 
-        transactionServiceImpl.transferMoney(amount, originAccountNumber, destinationAccountNumber);
+        transactionServiceImpl.transfer(amount, 1L, 2L);
     }
+
 
     @Test(expected = RuntimeException.class)
     public void testGetAllTransactionsThrowsExceptionWhenEmpty() {
@@ -268,13 +281,13 @@ public class TransactionServiceImplTests {
     public void testGetAllTransactionsReturnsListWhenNotEmpty() {
         Transaction t1 = new Transaction();
         t1.setId(1L);
-        t1.setAccount(new Account());
+        t1.setOriginAccount(new Account());
         t1.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
         t1.setValue(BigDecimal.valueOf(100.00));
 
         Transaction t2 = new Transaction();
         t2.setId(2L);
-        t2.setAccount(new Account());
+        t2.setOriginAccount(new Account());
         t2.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
         t2.setValue(BigDecimal.valueOf(50.00));
 
