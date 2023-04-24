@@ -135,7 +135,7 @@ public class AccountControllerTests {
 
     @Test
     public void shouldReturnStatus202_afterDeleteAcount() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/delete/1")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
     }

@@ -46,10 +46,4 @@ public class TransferMoneyListener implements TransferMoneyListenerInterface {
             e.printStackTrace();
         }
     }
-
-//    @Override
-//    public void onMoneyTransfer() {
-//        synchronized (this) {
-//            this.notifyAll();
-//        }
 }

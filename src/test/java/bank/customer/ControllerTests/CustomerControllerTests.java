@@ -63,21 +63,21 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus201_afterGetAllCustomers() throws Exception {
-        mockMvc.perform(get("/customers"))
+        mockMvc.perform(get("/customer"))
 
                 .andExpect(status().isOk());
     }
 
     @Test
     public void shouldReturnStatus404_afterGetAllCustomers() throws Exception {
-        mockMvc.perform(get("/customer"))
+        mockMvc.perform(get("/customers"))
 
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus201_afterGetACustomer() throws Exception {
-        mockMvc.perform(get("/customers/" + customer.getId()))
+        mockMvc.perform(get("/customer/" + customer.getId()))
                 .andExpect(status().isOk());
     }
 
@@ -92,7 +92,7 @@ public class CustomerControllerTests {
     public void shouldReturnStatus201_afterCreateCustomer() throws Exception {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         customerService.registerCustomer(customerRequest);
-        mockMvc.perform(post("/customers")
+        mockMvc.perform(post("/customer/")
 
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -116,7 +116,7 @@ public class CustomerControllerTests {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         customerRequest.setState("BH");
         customerService.updateCustomer(customerRequest);
-        mockMvc.perform(MockMvcRequestBuilders.put("/customers/update")
+        mockMvc.perform(MockMvcRequestBuilders.put("/customer/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isAccepted());
@@ -138,7 +138,7 @@ public class CustomerControllerTests {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         customerService.registerCustomer(customerRequest);
         customerService.deleteCustomer(customerRequest.getCpf());
-        mockMvc.perform(MockMvcRequestBuilders.delete("/customers/1")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isAccepted());

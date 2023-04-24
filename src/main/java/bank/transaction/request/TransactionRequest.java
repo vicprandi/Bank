@@ -2,10 +2,12 @@ package bank.transaction.request;
 
 import bank.model.Account;
 import bank.model.Transaction;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
+@JsonInclude(JsonInclude.Include. NON_NULL)
 public class TransactionRequest {
     @NotNull(message = "{validation.field_required")
     private Account originAccount;

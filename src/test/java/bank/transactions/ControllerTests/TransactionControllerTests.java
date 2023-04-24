@@ -253,8 +253,8 @@ public class TransactionControllerTests {
 
     @Test
     public void shouldReturnStatus4xx_afterTransferMoney() throws Exception {
-        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
-        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
+        when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(null);
+        when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transactions/transfer")
                         .param("amount", "100")

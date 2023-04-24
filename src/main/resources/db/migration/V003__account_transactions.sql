@@ -4,7 +4,7 @@ CREATE TABLE account_transactions(
     destination_account_id BIGINT NULL,
     value NUMERIC NOT NULL,
     transaction_type VARCHAR(50),
-
+    status VARCHAR(50),
 
     CONSTRAINT fk_origin_account_id
         FOREIGN KEY (origin_account_id)

@@ -14,6 +14,4 @@ public class EventDTO {
     private Event event;
     private BigDecimal amount;
     private Long transactionId;
-    private TransferStatus status;
-
 }

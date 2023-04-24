@@ -118,7 +118,7 @@ public class CustomerServiceImplTests {
             fail("Expected CpfAlreadyExistsException was not thrown");
         } catch (CpfAlreadyExistsException ex) {
             // then
-            assertEquals("Customer already registred", ex.getMessage());
+            assertEquals("Customer already registered", ex.getMessage());
         }
     }
     @Test
@@ -153,7 +153,7 @@ public class CustomerServiceImplTests {
             fail("Expected CustomerDoesntExistException to be thrown");
         } catch (CustomerDoesntExistException ex) {
             // then
-            assertEquals("Não há clientes", ex.getMessage());
+            assertEquals("There's no customers", ex.getMessage());
         }
     }
 
@@ -241,7 +241,7 @@ public class CustomerServiceImplTests {
             fail("CustomerDoesntExistException should have been thrown");
         } catch (CustomerDoesntExistException e) {
             // then
-            assertEquals("Customere não existe!", e.getMessage());
+            assertEquals("There's no customers!", e.getMessage());
         }
     }
 
@@ -276,7 +276,7 @@ public class CustomerServiceImplTests {
             fail("CustomerDoesntExistException should have been thrown");
         } catch (CustomerDoesntExistException e) {
             // then
-            assertEquals("Customer não existe!", e.getMessage());
+            assertEquals("There's no customers", e.getMessage());
         }
     }
 

@@ -30,8 +30,7 @@ public class KafkaService implements KafkaServicePort {
         EventDTO eventDTO = new EventDTO(
                 event,
                 amount,
-                transactionId,
-                TransferStatus.PENDING
+                transactionId
         );
 
         kafkaTemplate.send("transactions", eventDTO);

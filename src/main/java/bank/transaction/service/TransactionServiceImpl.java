@@ -34,6 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final KafkaTemplate<String, EventDTO> kafkaTemplate;
+    private static long sequenceNumber = 0;
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired
@@ -87,11 +88,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public Transaction withdrawMoney(@Valid TransactionRequest transactionRequest) {
-        Account account = transactionRequest.getOriginAccount();
+        Account account = accountRepository.findByAccountNumber(transactionRequest.getOriginAccount().getAccountNumber());
         Transaction transaction = transactionRequest.transactionObjectRequest();
         BigDecimal value = transactionRequest.getValue();
         BigDecimal balanceMoney = account.getBalanceMoney();
-        BigDecimal zero = BigDecimal.valueOf(0);
+        BigDecimal zero = BigDecimal.ZERO;
 
         validateAmount(value, account);
 
@@ -107,6 +108,7 @@ public class TransactionServiceImpl implements TransactionService {
             return transactionRepository.save(transaction);
         }
     }
+
     @Transactional
     public Long transfer(BigDecimal amount, Long originAccountNumber, Long destinationAccountNumber) {
         Account originAccount = accountRepository.findByAccountNumber(originAccountNumber);
@@ -127,11 +129,14 @@ public class TransactionServiceImpl implements TransactionService {
             logger.info("Sending event to Kafka...");
             EventDTO event = new EventDTO(Event.SAVE_TRANSFER,
                     amount,
-                    transaction.getId(),
-                    TransferStatus.PENDING);
-            kafkaTemplate.send("transactions", event);
+                    transaction.getId());
+
+            String key = transaction.getId().toString();
+
+            kafkaTemplate.send("transactions", key, event);
 
         } catch (Exception e) {
+            transaction.setStatus(TransferStatus.FAILED);
             throw new RuntimeException("Can't make the transfer");
         }
 
@@ -160,6 +165,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setOriginAccount(account);
         transaction.setDestinationAccount(destinationAccount);
         transaction.setTransactionType(transactionType);
+        transaction.setStatus(TransferStatus.PENDING);
 
         return transaction;
     }
@@ -177,7 +183,6 @@ public class TransactionServiceImpl implements TransactionService {
 
             try {
                 originTransfer.setTransactionType(Transaction.TransactionEnum.TRANSFER);
-                transactionRepository.save(originTransfer);
 
                 // Lógica do método updateAccounts movida para dentro de executeTransfer
                 BigDecimal value = originTransfer.getValue();
@@ -193,12 +198,16 @@ public class TransactionServiceImpl implements TransactionService {
                 List<Account> accounts = Arrays.asList(originAccount, destinationAccount);
                 accountRepository.saveAll(accounts);
 
+                originTransfer.setStatus(TransferStatus.SUCCESSFUL);
+                transactionRepository.save(originTransfer);
                 logger.info("Money transfer completed!");
 
             } catch (Exception e) {
+                originTransfer.setStatus(TransferStatus.FAILED);
                 throw new RuntimeException("Can't execute the transfer");
             }
         } else {
+            transaction.get().setStatus(TransferStatus.FAILED);
             throw new RuntimeException("Origin transaction not found");
         }
     }

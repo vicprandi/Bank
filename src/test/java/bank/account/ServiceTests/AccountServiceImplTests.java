@@ -136,7 +136,7 @@ public class AccountServiceImplTests {
             fail("Expected AccountAlreadyExistsException to be thrown");
         } catch (AccountAlreadyExistsException e) {
             // Then
-            assertEquals("Conta já registrada", e.getMessage());
+            assertEquals("Account already registered", e.getMessage());
         }
     }
 
@@ -159,7 +159,7 @@ public class AccountServiceImplTests {
             fail("Expected AccountAlreadyExistsException to be thrown");
         } catch (CpfDoesntExistException e) {
             // Then
-            assertEquals("Cpf não existe", e.getMessage());
+            assertEquals("CPF doesn't exist", e.getMessage());
         }
     }
     @Test
@@ -210,7 +210,7 @@ public class AccountServiceImplTests {
             accountServiceImpl.getAllAccounts();
             fail("Expected AccountDoesntExistException was not thrown");
         } catch (AccountDoesntExistException e) {
-            assertEquals("Não há contas.", e.getMessage());
+            assertEquals("There's no accounts.", e.getMessage());
         }
     }
 
@@ -256,7 +256,7 @@ public class AccountServiceImplTests {
             accountServiceImpl.findAccountNumberByCustomerId(clientId);
             fail("Expected AccountDoesntExistException was not thrown");
         } catch (AccountDoesntExistException e) {
-            assertEquals("Conta não existe!", e.getMessage());
+            assertEquals("Account doesn't exist!", e.getMessage());
         }
     }
     @Test
@@ -287,7 +287,7 @@ public class AccountServiceImplTests {
             fail("Expected AccountDoesntExistException was not thrown");
         } catch (AccountDoesntExistException e) {
             // then
-            assertEquals("Não há conta.", e.getMessage());
+            assertEquals("There is no account.", e.getMessage());
         }
     }
 }

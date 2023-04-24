@@ -1,6 +1,7 @@
 package bank.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "account")
+@JsonInclude(JsonInclude.Include. NON_NULL)
 public class Account {
 
     @Id

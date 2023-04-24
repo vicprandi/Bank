@@ -86,6 +86,7 @@ public class TransactionController {
 
         return ResponseEntity.ok(transactionId);
     }
+
     // Adicione um novo endpoint GET para buscar a transação pelo ID
     @GetMapping("/{transactionId}")
     public ResponseEntity<Transaction> getTransaction(@PathVariable Long transactionId) {
