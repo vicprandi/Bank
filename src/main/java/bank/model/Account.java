@@ -25,7 +25,7 @@ public class Account {
     @JsonIgnoreProperties({"id", "cpf", "createdData", "postalCode", "street"})
     private Customer customer;
 
-    @OneToMany(targetEntity = Transaction.class, mappedBy = "account")
+    @OneToMany(targetEntity = Transaction.class, mappedBy = "originAccount")
     private List<Transaction> accountTransaction;
 
     @Column(name = "balance_money", nullable = false)

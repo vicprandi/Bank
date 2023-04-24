@@ -12,6 +12,7 @@ import bank.model.Customer;
 import bank.model.Transaction;
 import bank.transaction.controller.TransactionController;
 import bank.transaction.repository.TransactionRepository;
+import bank.transaction.request.TransactionRequest;
 import bank.transaction.service.TransactionServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -138,12 +140,12 @@ public class TransactionControllerTests {
         destinationAccountNumber = destinationAccount.getAccountNumber();
 
         transactionRequest = new Transaction();
-        transactionRequest.setAccount(account);
+        transactionRequest.setOriginAccount(account);
         transactionRequest.setValue(BigDecimal.valueOf(100));
         transactionRequest.setTransactionType(Transaction.TransactionEnum.DEPOSIT);
 
         transactionRequest2 = new Transaction();
-        transactionRequest2.setAccount(account);
+        transactionRequest2.setOriginAccount(account);
         transactionRequest2.setValue(BigDecimal.valueOf(100));
         transactionRequest2.setTransactionType(Transaction.TransactionEnum.WITHDRAW);
     }
@@ -185,42 +187,55 @@ public class TransactionControllerTests {
 
     @Test
     public void shouldReturnStatus200_afterDepositMoney() throws Exception {
-        when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.depositMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterDepositMoney() throws Exception {
-        when(transactionService.depositMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.depositMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transactions/deposit/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus200_afterWithdrawMoney() throws Exception {
-        when(transactionService.withdrawMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.withdrawMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transaction/withdraw/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterWithdrawMoney() throws Exception {
-        when(transactionService.withdrawMoney(accountNumber, new BigDecimal(100))).thenReturn(transactionRequest);
+        when(transactionService.withdrawMoney(any(TransactionRequest.class)))
+                .thenReturn(transactionRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/transactions/withdraw/{accountNumber}", accountNumber)
-                        .param("amount", "100")
+                        .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    private static String asJsonString(final Object obj) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

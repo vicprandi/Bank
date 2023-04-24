@@ -13,8 +13,7 @@ import java.math.BigDecimal;
 public class EventDTO {
     private Event event;
     private BigDecimal amount;
-    private String originAccount;
-    private String recipientAccount;
+    private Long transactionId;
     private TransferStatus status;
 
 }

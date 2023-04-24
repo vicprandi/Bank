@@ -26,13 +26,11 @@ public class KafkaService implements KafkaServicePort {
     public void sendKafka(
             Event event,
             BigDecimal amount,
-            String originAccount,
-            String recipientAccount) {
+            Long transactionId) {
         EventDTO eventDTO = new EventDTO(
                 event,
                 amount,
-                originAccount,
-                recipientAccount,
+                transactionId,
                 TransferStatus.PENDING
         );
 

@@ -8,7 +8,6 @@ public interface KafkaServicePort {
     void sendKafka(
             Event event,
             BigDecimal amount,
-            String originAccount,
-            String recipientAccount
+            Long transactionId
     );
 }

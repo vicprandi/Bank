@@ -16,16 +16,22 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "account_id", foreignKey = @ForeignKey)
+    @JoinColumn(name = "origin_account_id", foreignKey = @ForeignKey)
     @JsonIgnore
     @ManyToOne
-    private Account account;
+    private Account originAccount;
+
+    @JoinColumn(name="destination_account_id")
+    @ManyToOne
+    @JsonIgnore
+    private Account destinationAccount;
+
 
     @Column(name="value", nullable = false)
     @DecimalMin(value = "0.00", message = "Value must be positive")
     private BigDecimal value;
 
-    @Column(name="transaction_type", length = 50, nullable = false)
+    @Column(name="transaction_type", length = 50)
     @Enumerated(EnumType.STRING)
     private TransactionEnum transactionType;
 
