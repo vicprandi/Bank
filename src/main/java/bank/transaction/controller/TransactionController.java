@@ -71,7 +71,7 @@ public class TransactionController {
     }
 
     @ApiOperation(value ="Sacar o dinheiro")
-    @PostMapping("/withdraw/{accountNumber}")
+    @PostMapping("/withdraw")
     public Transaction withdrawMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         logger.info("Withdrawing money");
         Transaction transaction = transactionService.withdrawMoney(transactionRequest);
@@ -80,11 +80,11 @@ public class TransactionController {
 
     @ApiOperation(value ="Transferencia entre contas")
     @PostMapping("/transfer")
-    public ResponseEntity<Long> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) throws InterruptedException {
+    public ResponseEntity<String> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) throws InterruptedException {
         logger.info("Transfering money between accounts");
         Long transactionId = transactionService.transfer(amount, originAccountNumber, destinationAccountNumber);
 
-        return ResponseEntity.ok(transactionId);
+        return ResponseEntity.ok("Thanks for transfering your money. ID: " + transactionId);
     }
 
     // Adicione um novo endpoint GET para buscar a transação pelo ID

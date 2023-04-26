@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "account")
-@JsonInclude(JsonInclude.Include. NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Account {
 
     @Id

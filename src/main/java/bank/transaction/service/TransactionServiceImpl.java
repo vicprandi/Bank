@@ -11,6 +11,7 @@ import bank.kafka.model.Event;
 import bank.kafka.model.EventDTO;
 import bank.model.Account;
 import bank.model.Transaction;
+import bank.transaction.exception.TransferValidationException;
 import bank.transaction.exception.ValueNotAcceptedException;
 import bank.transaction.repository.TransactionRepository;
 import bank.transaction.request.TransactionRequest;
@@ -137,7 +138,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         } catch (Exception e) {
             transaction.setStatus(TransferStatus.FAILED);
-            throw new RuntimeException("Can't make the transfer");
+            transactionRepository.save(transaction);
+            throw new TransferValidationException("Can't make the transfer");
         }
 
         return transaction.getId();
@@ -204,11 +206,13 @@ public class TransactionServiceImpl implements TransactionService {
 
             } catch (Exception e) {
                 originTransfer.setStatus(TransferStatus.FAILED);
-                throw new RuntimeException("Can't execute the transfer");
+                transactionRepository.save(originTransfer);
+                throw new TransferValidationException("Can't execute the transfer");
             }
         } else {
             transaction.get().setStatus(TransferStatus.FAILED);
-            throw new RuntimeException("Origin transaction not found");
+            transactionRepository.save(transaction.get());
+            throw new TransferValidationException("Origin transaction not found");
         }
     }
     public Optional<Transaction> findById(Long transactionId) {
