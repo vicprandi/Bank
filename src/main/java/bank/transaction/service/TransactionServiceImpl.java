@@ -6,7 +6,6 @@ import bank.account.service.AccountServiceImpl;
 import bank.customer.exceptions.CustomerDoesntExistException;
 import bank.customer.service.CustomerServiceImpl;
 import bank.kafka.TransferStatus;
-import bank.kafka.consumer.TransferMoneyListenerInterface;
 import bank.kafka.model.Event;
 import bank.kafka.model.EventDTO;
 import bank.model.Account;
@@ -34,7 +33,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final KafkaTemplate<String, EventDTO> kafkaTemplate;
-    private static long sequenceNumber = 0;
     @Autowired
     public AccountServiceImpl accountService;
     @Autowired

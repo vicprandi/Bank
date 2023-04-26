@@ -27,19 +27,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(TransactionController.class)
@@ -152,14 +154,14 @@ public class TransactionControllerTests {
 
     @Test
     public void shouldReturnStatus201_afterGetAllTransactions() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/transaction"))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(get("/transaction"))
+                .andExpect(status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterGetAllTransactions() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/transactions"))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+        mockMvc.perform(get("/transactions"))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -172,17 +174,17 @@ public class TransactionControllerTests {
         String requestBody = new ObjectMapper().writeValueAsString(responseMap);
 
         Long customerId = customerRequest.customerObjectRequest().getId();
-        mockMvc.perform(MockMvcRequestBuilders.get("/transaction/1", customerId))
+        mockMvc.perform(get("/transaction/1", customerId))
 
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterGetTransactionByClientId() throws Exception {
         Long customerId = customerRequest.customerObjectRequest().getId();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/transacFStions/1", customerId))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+        mockMvc.perform(get("/transacFStions/1", customerId))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -190,10 +192,10 @@ public class TransactionControllerTests {
         when(transactionService.depositMoney(any(TransactionRequest.class)))
                 .thenReturn(transactionRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit/{accountNumber}", accountNumber)
+        mockMvc.perform(post("/transaction/deposit/{accountNumber}", accountNumber)
                         .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -201,10 +203,10 @@ public class TransactionControllerTests {
         when(transactionService.depositMoney(any(TransactionRequest.class)))
                 .thenReturn(transactionRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transactions/deposit/{accountNumber}", accountNumber)
+        mockMvc.perform(post("/transactions/deposit/{accountNumber}", accountNumber)
                         .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -212,10 +214,10 @@ public class TransactionControllerTests {
         when(transactionService.withdrawMoney(any(TransactionRequest.class)))
                 .thenReturn(transactionRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/withdraw/{accountNumber}", accountNumber)
+        mockMvc.perform(post("/transaction/withdraw/{accountNumber}", accountNumber)
                         .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -223,10 +225,10 @@ public class TransactionControllerTests {
         when(transactionService.withdrawMoney(any(TransactionRequest.class)))
                 .thenReturn(transactionRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transactions/withdraw/{accountNumber}", accountNumber)
+        mockMvc.perform(post("/transactions/withdraw/{accountNumber}", accountNumber)
                         .content(asJsonString(new TransactionRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     private static String asJsonString(final Object obj) {
@@ -243,12 +245,12 @@ public class TransactionControllerTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(originAccount);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(destinationAccount);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/transfer")
+        mockMvc.perform(post("/transaction/transfer")
                         .param("amount", "100")
                         .param("originAccountNumber", originAccountNumber.toString())
                         .param("destinationAccountNumber", destinationAccountNumber.toString())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -256,11 +258,64 @@ public class TransactionControllerTests {
         when(accountRepository.findByAccountNumber(originAccountNumber)).thenReturn(null);
         when(accountRepository.findByAccountNumber(destinationAccountNumber)).thenReturn(null);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/transactions/transfer")
+        mockMvc.perform(post("/transactions/transfer")
                         .param("amount", "100")
                         .param("originAccountNumber", originAccountNumber.toString())
                         .param("destinationAccountNumber", destinationAccountNumber.toString())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testTransferMoney() throws Exception {
+        // Arrange
+        BigDecimal transferAmount = BigDecimal.valueOf(100);
+        Long originAccountNumber = 111111L;
+        Long destinationAccountNumber = 222222L;
+        Long transactionId = 123456L;
+
+        when(transactionService.transfer(transferAmount, originAccountNumber, destinationAccountNumber)).thenReturn(transactionId);
+
+        // Act & Assert
+        mockMvc.perform(post("/transfer")
+                        .param("amount", transferAmount.toString())
+                        .param("originAccountNumber", originAccountNumber.toString())
+                        .param("destinationAccountNumber", destinationAccountNumber.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect((ResultMatcher) content().string(transactionId.toString()));
+    }
+
+    @Test
+    void testGetTransaction_found() throws Exception {
+        // Arrange
+        BigDecimal transferAmount = BigDecimal.valueOf(100);
+        Long originAccountNumber = 111111L;
+        Long destinationAccountNumber = 222222L;
+        Long transactionId = 123456L;
+        Transaction transaction = new Transaction();
+        transaction.setId(transactionId);
+
+        when(transactionService.findById(transactionId)).thenReturn(Optional.of(transaction));
+
+        // Act & Assert
+        mockMvc.perform(get("/{transactionId}", transactionId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect((ResultMatcher) content().json(objectMapper.writeValueAsString(transaction)));
+    }
+    @Test
+    void testGetTransaction_notFound() throws Exception {
+        // Arrange
+        Long transactionId = 123456L;
+
+        when(transactionService.findById(transactionId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        mockMvc.perform(get("/{transactionId}", transactionId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect((ResultMatcher) content().string(""));
     }
 }
+
