@@ -7,10 +7,10 @@ import bank.account.repository.AccountRepository;
 import bank.account.request.AccountRequest;
 import bank.account.service.AccountServiceImpl;
 
-import bank.client.request.ClientRequest;
-import bank.client.service.ClientServiceImpl;
+import bank.customer.request.CustomerRequest;
+import bank.customer.service.CustomerServiceImpl;
 import bank.model.Account;
-import bank.model.Client;
+import bank.model.Customer;
 
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AccountController.class)
 public class AccountControllerTests {
 
-    @MockBean private ClientServiceImpl clientService;
+    @MockBean private CustomerServiceImpl customerService;
 
     @MockBean private AccountRepository accountRepository;
 
@@ -48,12 +48,12 @@ public class AccountControllerTests {
     @Autowired MockMvc mockMvc;
 
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
     AccountRequest accountRequest;
     AccountRequest accountRequest2;
 
-    Client client;
+    Customer customer;
 
     Account account;
 
@@ -63,11 +63,11 @@ public class AccountControllerTests {
 
     @BeforeEach
     public void setUp() throws Exception {
-        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        clientRequest2 = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
+        customerRequest2 = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
 
-        clientService.registerClient(clientRequest);
-        clientService.registerClient(clientRequest2);
+        customerService.registerCustomer(customerRequest);
+        customerService.registerCustomer(customerRequest2);
 
         accountRequest = new AccountRequest();
         accountRequest.setBalanceMoney(balanceMoney);
@@ -80,16 +80,17 @@ public class AccountControllerTests {
         account.setBalanceMoney(accountRequest.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account.setAccountNumber(accountNumber);
-        client = clientRequest.clientObjectRequest();
-        account.setClient(client);
+        customer = customerRequest.customerObjectRequest();
+        account.setCustomer(customer);
 
         Account account2 = new Account();
 
         account.setBalanceMoney(accountRequest2.getBalanceMoney());
         accountNumber = accountRepository.generateAccountNumber();
         account2.setAccountNumber(accountNumber);
-        client = clientRequest2.clientObjectRequest();
-        account2.setClient(client);
+
+        customer = customerRequest2.customerObjectRequest();
+        account2.setCustomer(customer);
 
     }
 
@@ -107,14 +108,14 @@ public class AccountControllerTests {
 
     @Test
     public void shouldReturnStatus201_afterRegisterAccount() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/" + clientRequest.getCpf())
+        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/" + customerRequest.getCpf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
     @Test
     public void shouldReturnStatus201_afterGettingAccount() throws Exception {
-        mockMvc.perform(get("/accounts/" + clientRequest.clientObjectRequest().getId())
+        mockMvc.perform(get("/accounts/" + customerRequest.customerObjectRequest().getId())
                         .contentType(MediaType.APPLICATION_JSON));
     }
 
@@ -134,7 +135,7 @@ public class AccountControllerTests {
 
     @Test
     public void shouldReturnStatus202_afterDeleteAcount() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/delete/1")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
     }
@@ -152,10 +153,10 @@ public class AccountControllerTests {
         when(accountRepository.existsByAccountNumber(accountNumber)).thenReturn(true);
         // then
         try {
-            accountService.registerAccount(clientRequest.getCpf());
+            accountService.registerAccount(customerRequest.getCpf());
             fail("Deveria ter lançado a exceção AccountAlreadyExistsException");
         } catch (AccountAlreadyExistsException ex) {
-            mockMvc.perform(get("/accounts/" + clientRequest.getCpf())
+            mockMvc.perform(get("/accounts/" + customerRequest.getCpf())
                     .contentType(MediaType.APPLICATION_JSON));
             assertEquals("Account already registred", ex.getMessage());
             verify(status().isNotFound());
@@ -165,14 +166,14 @@ public class AccountControllerTests {
     @Test
     public void shouldReturnStatus404_ifIdIsNotRegistred() throws Exception {
         // given
-        when(accountRepository.existsById(client.getId())).thenReturn(false);
+        when(accountRepository.existsById(customer.getId())).thenReturn(false);
         // then
         try {
-            accountService.registerAccount(clientRequest.getCpf());
-            accountService.deleteAccount(client.getId());
+            accountService.registerAccount(customerRequest.getCpf());
+            accountService.deleteAccount(customer.getId());
             fail("Deveria ter lançado a exceção AccountDoesntExistException");
         } catch (AccountDoesntExistException ex) {
-            mockMvc.perform(get("/accounts/delete/" + client.getId())
+            mockMvc.perform(get("/accounts/delete/" + customer.getId())
                     .contentType(MediaType.APPLICATION_JSON));
             assertEquals("Account doesn't exists!", ex.getMessage());
             verify(status().isNotFound());

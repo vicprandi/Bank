@@ -9,9 +9,9 @@ import bank.account.request.AccountRequest;
 import bank.account.service.AccountService;
 import bank.account.service.AccountServiceImpl;
 import bank.model.Account;
-import bank.model.Client;
-import bank.client.repository.ClientRepository;
-import bank.client.request.ClientRequest;
+import bank.model.Customer;
+import bank.customer.repository.CustomerRepository;
+import bank.customer.request.CustomerRequest;
 import bank.transaction.repository.TransactionRepository;
 import bank.transaction.service.TransactionServiceImpl;
 import org.junit.Before;
@@ -43,7 +43,7 @@ public class AccountServiceImplTests {
     private AccountService accountService;
 
     @Mock
-    private ClientRepository clientRepository;
+    private CustomerRepository customerRepository;
 
     @Mock
     private AccountRepository accountRepository;
@@ -58,10 +58,11 @@ public class AccountServiceImplTests {
     private TransactionServiceImpl transactionService;
 
     @Spy
-    ClientRequest clientRequest;
-    ClientRequest clientRequest2;
-    Client client;
-    Client client2;
+    CustomerRequest customerRequest;
+    CustomerRequest customerRequest2;
+
+    Customer customer;
+    Customer customer2;
 
     @Before
     public void init() {
@@ -71,26 +72,28 @@ public class AccountServiceImplTests {
     @BeforeEach
     public void setUp() {
 
-        clientRequest = new ClientRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
-        clientRequest2 = new ClientRequest("Thais", "12345678902", "02036020", "SE", "SP", "SP");
+        customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP", "SP");
+        customerRequest2 = new CustomerRequest("Thais", "12345678902", "02036020", "SE", "SP", "SP");
 
-        client = new Client();
-        client.setName("Victoria");
-        client.setCpf("12345678901");
-        client.setCity("SP");
-        client.setState("SP");
-        client.setStreet("SE");
-        client.setPostalCode("02036020");
-        clientRepository.save(client);
+        customer = new Customer();
+        customer.setName("Victoria");
+        customer.setCpf("12345678901");
+        customer.setCity("SP");
+        customer.setState("SP");
+        customer.setStreet("SE");
+        customer.setPostalCode("02036020");
+        customerRepository.save(customer);
 
-        client2 = new Client();
-        client2.setName("Thais");
-        client2.setCpf("12345678902");
-        client2.setCity("SP");
-        client2.setState("SP");
-        client2.setStreet("SE");
-        client2.setPostalCode("02036020");
-        clientRepository.save(client2);
+
+        customer2 = new Customer();
+        customer2.setName("Thais");
+        customer2.setCpf("12345678902");
+        customer2.setCity("SP");
+        customer2.setState("SP");
+        customer2.setStreet("SE");
+        customer2.setPostalCode("02036020");
+        customerRepository.save(customer2);
+
     }
 
     @Test
@@ -98,22 +101,22 @@ public class AccountServiceImplTests {
 
         Long accountNumber = accountRepository.generateAccountNumber();
         // Cria um cliente de teste
-        Client client = new Client();
-        client.setCpf("12345678901");
-        clientRepository.save(client);
+        Customer customer = new Customer();
+        customer.setCpf("12345678901");
+        customerRepository.save(customer);
 
         AccountRequest accountRequest = new AccountRequest();
         // Simula a busca pelo cliente recém-criado
-        when(clientRepository.findByCpf("12345678901")).thenReturn(Optional.of(client));
+        when(customerRepository.findByCpf("12345678901")).thenReturn(Optional.of(customer));
 
         // Registra uma conta para o cliente
         Account account = new Account();
-        account.setClient(client);
+        account.setCustomer(customer);
         account.setAccountNumber(accountNumber);
         account.setBalanceMoney(accountRequest.getBalanceMoney());
         // Verifica se a conta foi registrada corretamente
         assertNotNull(account);
-        assertEquals("12345678901", account.getClient().getCpf());
+        assertEquals("12345678901", account.getCustomer().getCpf());
     }
     @Test
     public void shouldThrowAccountAlreadyExistsException_whenRegisterAccount() {
@@ -121,8 +124,9 @@ public class AccountServiceImplTests {
         String cpf = "12345678901";
         Account account = new Account();
         account.setAccountNumber(1L);
-        account.setClient(new Client());
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.of(new Client()));
+        account.setCustomer(new Customer());
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(new Customer()));
+
         when(accountRepository.generateAccountNumber()).thenReturn(account.getAccountNumber());
         when(accountRepository.existsByAccountNumber(account.getAccountNumber())).thenReturn(true);
 
@@ -132,7 +136,7 @@ public class AccountServiceImplTests {
             fail("Expected AccountAlreadyExistsException to be thrown");
         } catch (AccountAlreadyExistsException e) {
             // Then
-            assertEquals("Conta já registrada", e.getMessage());
+            assertEquals("Account already registered", e.getMessage());
         }
     }
 
@@ -142,11 +146,12 @@ public class AccountServiceImplTests {
         String cpf = "12345678909";
         Account account = new Account();
         account.setAccountNumber(1L);
-        account.setClient(new Client());
-        when(clientRepository.findByCpf(cpf)).thenReturn(Optional.of(new Client()));
+        account.setCustomer(new Customer());
+        when(customerRepository.findByCpf(cpf)).thenReturn(Optional.of(new Customer()));
+
         when(accountRepository.generateAccountNumber()).thenReturn(account.getAccountNumber());
         when(accountRepository.existsByAccountNumber(account.getAccountNumber())).thenReturn(false);
-        when(clientRepository.existsByCpf(cpf)).thenReturn(null);
+        when(customerRepository.existsByCpf(cpf)).thenReturn(null);
 
         try {
             // When
@@ -154,7 +159,7 @@ public class AccountServiceImplTests {
             fail("Expected AccountAlreadyExistsException to be thrown");
         } catch (CpfDoesntExistException e) {
             // Then
-            assertEquals("Cpf não existe", e.getMessage());
+            assertEquals("CPF doesn't exist", e.getMessage());
         }
     }
     @Test
@@ -205,63 +210,65 @@ public class AccountServiceImplTests {
             accountServiceImpl.getAllAccounts();
             fail("Expected AccountDoesntExistException was not thrown");
         } catch (AccountDoesntExistException e) {
-            assertEquals("Não há contas.", e.getMessage());
+            assertEquals("There's no accounts.", e.getMessage());
         }
     }
 
     @Test
-    public void testFindAccountNumberByClientId_ReturnsAccountNumber() {
+    public void testFindAccountNumberByCustomerId_ReturnsAccountNumber() {
         Long clientId = 1L;
         Long accountNumber = 123456L;
 
-        // Cria um objeto Client com uma conta associada
-        Client client = new Client();
-        client.setId(clientId);
+        // Cria um objeto Customer com uma conta associada
+        Customer customer = new Customer();
+        customer.setId(clientId);
         Account account = new Account();
         account.setAccountNumber(accountNumber);
-        client.setAccount(account);
+        customer.setAccount(account);
 
         // Define o comportamento do mock do repository
-        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+        when(customerRepository.findById(clientId)).thenReturn(Optional.of(customer));
+
 
         // Chama o método que deve retornar o número da conta
-        Long result = accountServiceImpl.findAccountNumberByClientId(clientId);
+        Long result = accountServiceImpl.findAccountNumberByCustomerId(clientId);
 
         // Verifica se o número da conta retornado é o esperado
         assertEquals(accountNumber, result);
     }
 
     @Test
-    public void testFindAccountNumberByClientId_ThrowAccountDoesntExistException() {
+    public void testFindAccountNumberByCustomerId_ThrowAccountDoesntExistException() {
         Long clientId = 1L;
 
-        Client client = new Client();
-        client.setId(clientId);
+        Customer customer = new Customer();
+        customer.setId(clientId);
 
         Account account = new Account();
         account.setAccountNumber(null);
-        account.setClient(client);
+        account.setCustomer(customer);
 
-        client.setAccount(account);
+        customer.setAccount(account);
+        Mockito.when(customerRepository.findById(clientId)).thenReturn(Optional.of(customer));
 
-        Mockito.when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
 
         try {
-            accountServiceImpl.findAccountNumberByClientId(clientId);
+            accountServiceImpl.findAccountNumberByCustomerId(clientId);
             fail("Expected AccountDoesntExistException was not thrown");
         } catch (AccountDoesntExistException e) {
-            assertEquals("Conta não existe!", e.getMessage());
+            assertEquals("Account doesn't exist!", e.getMessage());
         }
     }
     @Test
     public void testGetAccountById_ReturnsAccount() {
         Account account = new Account();
-        Client client = new Client();
-        client.setId(1L);
-        client.setAccount(account);
-        account.setClient(client);
+        Customer customer = new Customer();
+        customer.setId(1L);
+        customer.setAccount(account);
+        account.setCustomer(customer);
 
-        Mockito.when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+        Mockito.when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+
 
         Optional<Account> returnedAccount = accountServiceImpl.getAccountById(1L);
 
@@ -271,7 +278,8 @@ public class AccountServiceImplTests {
     public void testGetAccountById_ThrowAccountDoesntExistException() {
         // given
         Long clientId = 1L;
-        Mockito.when(clientRepository.findById(clientId)).thenReturn(Optional.of(new Client()));
+        Mockito.when(customerRepository.findById(clientId)).thenReturn(Optional.of(new Customer()));
+
 
         try {
             // when
@@ -279,7 +287,7 @@ public class AccountServiceImplTests {
             fail("Expected AccountDoesntExistException was not thrown");
         } catch (AccountDoesntExistException e) {
             // then
-            assertEquals("Não há conta.", e.getMessage());
+            assertEquals("There is no account.", e.getMessage());
         }
     }
 }

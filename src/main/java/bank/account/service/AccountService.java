@@ -9,5 +9,5 @@ public interface AccountService {
     List<Account> getAllAccounts();
 
     /* Achar conta pelo Id do CLiente */
-    Long findAccountNumberByClientId(Long id);
+    Long findAccountNumberByCustomerId(Long id);
 }

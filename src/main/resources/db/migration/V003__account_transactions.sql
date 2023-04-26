@@ -1,10 +1,16 @@
-create table account_transactions (
-id BIGSERIAL not null primary key,
-account_id BIGSERIAL not null,
-value numeric not null,
-transaction_type varchar(50) not null,
+CREATE TABLE account_transactions(
+    id BIGSERIAL PRIMARY KEY,
+    origin_account_id BIGSERIAL NOT NULL,
+    destination_account_id BIGINT NULL,
+    value NUMERIC NOT NULL,
+    transaction_type VARCHAR(50),
+    status VARCHAR(50),
 
-CONSTRAINT fk_account_id
-FOREIGN KEY (account_id)
-REFERENCES account(id)
+    CONSTRAINT fk_origin_account_id
+        FOREIGN KEY (origin_account_id)
+        REFERENCES account(id),
+
+    CONSTRAINT fk_destination_account_id
+        FOREIGN KEY (destination_account_id)
+        REFERENCES account(id)
 );
