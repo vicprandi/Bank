@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class AccountController {
     /*Para todas as Contas*/
     @ApiOperation(value ="Bring all Accounts")
     @GetMapping
+    @PreAuthorize("hasAuthority('SCOPE_view_all_accounts')")
     public List<Account> getAllAcounts() {
         logger.info("Returning all accounts");
         return accountService.getAllAccounts();
@@ -40,6 +42,7 @@ public class AccountController {
     /*Para uma conta*/
     @ApiOperation(value ="Bring a account")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_view_account')")
     public Optional<Account> getAccount(@PathVariable Long id) {
         logger.info("Returning a specific account");
         return accountService.getAccountById(id);
@@ -48,6 +51,7 @@ public class AccountController {
     /* Registro da Conta */
     @ApiOperation(value = "Account Register")
     @PostMapping("/{cpf}")
+    @PreAuthorize("hasAuthority('SCOPE_register_account')")
     public ResponseEntity<Account> registerAccount (@PathVariable String cpf) {
         logger.info("Account registered");
         Account response = accountService.registerAccount(cpf);
@@ -57,6 +61,7 @@ public class AccountController {
     /* Deletar a Conta */
     @ApiOperation(value = "Deleting Account")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_delete_account')")
     public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
         logger.info("Account deleted");
         accountService.deleteAccount(id);
