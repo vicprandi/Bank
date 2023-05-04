@@ -3,6 +3,7 @@ package bank;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+
 @SpringBootApplication
 public class BankApplication {
 
@@ -10,5 +11,4 @@ public class BankApplication {
 
 		SpringApplication.run(BankApplication.class, args);
 	}
-
 }

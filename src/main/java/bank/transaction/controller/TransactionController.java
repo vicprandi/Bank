@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -49,6 +50,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Bring all Transactions")
     @GetMapping
+    @PreAuthorize("hasAuthority('SCOPE_view_transactions')")
     public List<Transaction> getAllTransactions() {
         logger.info("Returning all transactions");
         return transactionService.getAllTransactions();
@@ -56,6 +58,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Bring transaction by CustomerId")
     @GetMapping("/customer/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_view_transactions_by_customer')")
     public List<Transaction> findTransactionByClientId(@PathVariable Long id) {
         logger.info("Returning transaction by ClientId");
         List<Transaction> transactions = transactionService.findTransactionByCustomerId(id);
@@ -64,6 +67,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Depositar o dinheiro")
     @PostMapping("/deposit")
+    @PreAuthorize("hasAuthority('SCOPE_deposit_money')")
     public Transaction depositMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         logger.info("Depositing money");
         Transaction transaction = transactionService.depositMoney(transactionRequest);
@@ -72,6 +76,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Sacar o dinheiro")
     @PostMapping("/withdraw/{accountNumber}")
+    @PreAuthorize("hasAuthority('SCOPE_withdraw_money')")
     public Transaction withdrawMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         logger.info("Withdrawing money");
         Transaction transaction = transactionService.withdrawMoney(transactionRequest);
@@ -80,6 +85,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Transferencia entre contas")
     @PostMapping("/transfer")
+    @PreAuthorize("hasAuthority('SCOPE_transfer_money')")
     public ResponseEntity<Long> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) throws InterruptedException {
         logger.info("Transfering money between accounts");
         Long transactionId = transactionService.transfer(amount, originAccountNumber, destinationAccountNumber);
@@ -89,6 +95,7 @@ public class TransactionController {
 
     // Adicione um novo endpoint GET para buscar a transação pelo ID
     @GetMapping("/{transactionId}")
+    @PreAuthorize("hasAuthority('SCOPE_view_transaction')")
     public ResponseEntity<Transaction> getTransaction(@PathVariable Long transactionId) {
         Optional<Transaction> transaction = transactionService.findById(transactionId);
 
