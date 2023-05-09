@@ -1,0 +1,149 @@
+{
+	"info": {
+		"_postman_id": "ccca1b72-7159-471c-9d45-edc6ca9c3319",
+		"name": "BANK -> TRANSACTIONS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25545449"
+	},
+	"item": [
+		{
+			"name": "Traz todas as transações já feitas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/transaction",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Traz todas as transações de um Client pelo ClientId",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/transaction/{clientId}",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transaction",
+						"{clientId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Depositar dinheiro na conta pelo ACCOUNT NUMBER e PARAMETRO amount",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/transaction/deposit/4537978594157930377?amount=100.00",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transaction",
+						"deposit",
+						"4537978594157930377"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "100.00"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sacar dinheiro da conta pelo AccountNumber + parametro Amount",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/transaction/withdraw/5751768077104769712?amount=50.00",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transaction",
+						"withdraw",
+						"5751768077104769712"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "50.00"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transferência entre contas - amount, origin, destination pelo parametro",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "locallocalhost:8080/transaction/transfer?amount=30.00&originAccountNumber=2831772130094715383&destinationAccountNumber=4537978594157930377",
+					"host": [
+						"locallocalhost"
+					],
+					"port": "8080",
+					"path": [
+						"transaction",
+						"transfer"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "30.00"
+						},
+						{
+							"key": "originAccountNumber",
+							"value": "2831772130094715383"
+						},
+						{
+							"key": "destinationAccountNumber",
+							"value": "4537978594157930377"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Puxar a transferência pelo ID indicado no POST",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

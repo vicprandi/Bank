@@ -1,0 +1,232 @@
+{
+	"info": {
+		"_postman_id": "85d00c53-7c81-4040-af13-2e5caa81598a",
+		"name": "BANK -> CLIENT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25545449"
+	},
+	"item": [
+		{
+			"name": "Registrar Cliente",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Iris\",\r\n    \"cpf\": \"12345678905\",\r\n    \"postalCode\": \"02036020\",\r\n    \"street\": \"Ana Catharina Randi\",\r\n    \"state\": \"São Paulo\",\r\n    \"city\": \"São Paulo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/clients",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Registrar Cliente Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Iris\",\r\n    \"cpf\": \"12345678905\",\r\n    \"postalCode\": \"02036020\",\r\n    \"street\": \"Ana Catharina Randi\",\r\n    \"state\": \"São Paulo\",\r\n    \"city\": \"São Paulo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/clients",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retornar único cliente",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/clients/12345678900",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clients",
+						"12345678900"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retornar todos os clientes",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/clients",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Atualizar Cliente - CPF NÃO ATUALIZA!",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Matheus\",\r\n    \"cpf\": \"11111111155\",\r\n    \"postalCode\": \"04637130\",\r\n    \"street\": \"Duarte de Azevedo\",\r\n    \"state\": \"São Paulo\",\r\n    \"city\": \"São Paulo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/clients/update",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clients",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deletar Cliente pelo CPF",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/clients/delete/12345678903",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clients",
+						"delete",
+						"12345678903"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:18080/realms/BankRealm/protocol/openid-connect/token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "bankclient",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "rl0dk8FECrBr9hnwIsNTRe7JOzG8WpCV",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "victoria.moreira",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "register_customer",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:18080/realms/BankRealm/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "18080",
+					"path": [
+						"realms",
+						"BankRealm",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
