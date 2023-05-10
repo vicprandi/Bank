@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -14,15 +15,8 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class ResourceServerConfig {
 
     @Bean
-    public CustomJwtAuthenticationConverter customJwtAuthenticationTokenConverter() {
-        return new CustomJwtAuthenticationConverter();
-    }
-
-    @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http.cors()
-                .and()
-                .oauth2ResourceServer()
                 .and()
                 .csrf().disable()
                 .httpBasic().disable()
@@ -37,28 +31,30 @@ public class ResourceServerConfig {
                 .and()
                 .authorizeHttpRequests()
                 //Customer
-                .requestMatchers(HttpMethod.GET, "/customer").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.GET, "/customer/{cpf}").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.POST, "/customer").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.PUT, "/customer/update").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.DELETE, "/customer/{cpf}").hasAnyAuthority("SCOPE_admin")
-                //Accounts
-                .requestMatchers(HttpMethod.GET, "/accounts").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.GET, "/accounts/{id}").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.POST, "/accounts/{cpf}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.DELETE, "/accounts/{id}").hasAnyAuthority("SCOPE_admin")
-                //Transaction
-                .requestMatchers(HttpMethod.GET, "/transaction").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.GET, "/transaction/customer/{id}").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.POST, "/transaction/deposit").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.POST, "/transaction/withdraw/{accountNumber}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.POST, "/transaction/transfer").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.GET, "/transaction/{transactionId}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.GET, "/customer").hasAnyAuthority("SCOPE_admin")
+                        .requestMatchers(HttpMethod.GET, "/customer/{cpf}").hasAnyAuthority("SCOPE_admin")
+                        .requestMatchers(HttpMethod.POST, "/customer").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                        .requestMatchers(HttpMethod.PUT, "/customer/update").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                        .requestMatchers(HttpMethod.DELETE, "/customer/{cpf}").hasAnyAuthority("SCOPE_admin")
+                        //Accounts
+                        .requestMatchers(HttpMethod.GET, "/accounts").hasAnyAuthority("SCOPE_admin")
+                        .requestMatchers(HttpMethod.GET, "/accounts/{id}").hasAnyAuthority("SCOPE_admin")
+                        .requestMatchers(HttpMethod.POST, "/accounts/{cpf}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                        .requestMatchers(HttpMethod.DELETE, "/accounts/{id}").hasAnyAuthority("SCOPE_admin")
+                        //Transaction
+                        .requestMatchers(HttpMethod.GET, "/transaction").hasAnyAuthority("SCOPE_admin")
+                        .requestMatchers(HttpMethod.GET, "/transaction/customer/{id}").hasAnyAuthority("SCOPE_admin")
+                        .requestMatchers(HttpMethod.POST, "/transaction/deposit").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                        .requestMatchers(HttpMethod.POST, "/transaction/withdraw/{accountNumber}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                        .requestMatchers(HttpMethod.POST, "/transaction/transfer").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                        .requestMatchers(HttpMethod.GET, "/transaction/{transactionId}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                        .anyRequest().authenticated()
+                //Terminou
+                .anyRequest()
+                .authenticated()
                 .and()
                 .oauth2ResourceServer()
-                .jwt()
-                .jwtAuthenticationConverter(customJwtAuthenticationTokenConverter()); // atencao: necessario pois sobrescrevemos a conf default do Spring Security
+                .jwt(); // atencao: necessario pois sobrescrevemos a conf default do Spring Security
 
         return http.build();
     }
