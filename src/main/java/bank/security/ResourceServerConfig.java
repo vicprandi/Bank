@@ -1,4 +1,4 @@
-package bank;
+package bank.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,19 +13,16 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfig {
 
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests((authz) -> authz
-//                        .anyRequest().authenticated()
-//                )
-//                .httpBasic(withDefaults());
-//        return http.build();
-//    }
+    @Bean
+    public CustomJwtAuthenticationConverter customJwtAuthenticationTokenConverter() {
+        return new CustomJwtAuthenticationConverter();
+    }
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http.cors()
+                .and()
+                .oauth2ResourceServer()
                 .and()
                 .csrf().disable()
                 .httpBasic().disable()
@@ -62,7 +59,8 @@ public class ResourceServerConfig {
                 .authenticated()
                 .and()
                 .oauth2ResourceServer()
-                .jwt(); // atencao: necessario pois sobrescrevemos a conf default do Spring Security
+                .jwt()
+                .jwtAuthenticationConverter(customJwtAuthenticationTokenConverter()); // atencao: necessario pois sobrescrevemos a conf default do Spring Security
 
         return http.build();
     }
