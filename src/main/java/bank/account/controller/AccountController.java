@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,8 @@ import java.util.logging.Logger;
 public class AccountController {
 
     private final AccountServiceImpl accountService;
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     @Autowired
     public AccountController(AccountServiceImpl accountService) {
@@ -50,11 +53,11 @@ public class AccountController {
     /* Para todas as Contas */
     @ApiOperation(value = "Bring all Accounts")
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_view_all_accounts')")
-    public List<Account> getAllAcounts(Authentication authentication) {
+    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    public List<Account> getAllAcounts() {
         // Verificar se o usuário tem o escopo view_all_accounts_admin
         boolean hasAdminScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_view_all_accounts"));
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
 
         if (!hasAdminScope) {
             throw new CustomAuthorizationException("Acesso negado");
@@ -64,12 +67,11 @@ public class AccountController {
         return accountService.getAllAccounts();
     }
 
-
     /* Para uma conta */
     @ApiOperation(value = "Bring a account")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_view_account')")
-    public Optional<Account> getAccount(@PathVariable Long id, Authentication authentication) {
+    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    public Optional<Account> getAccount(@PathVariable Long id) {
         checkAuthorization(id, authentication);
         logger.info("Returning a specific account");
         return accountService.getAccountById(id);
@@ -78,11 +80,15 @@ public class AccountController {
     /* Registro da Conta */
     @ApiOperation(value = "Account Register")
     @PostMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_register_account')")
-    public ResponseEntity<Account> registerAccount(@PathVariable String cpf, Authentication authentication) {
+    @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
+    public ResponseEntity<Account> registerAccount(@PathVariable String cpf) {
         // Verificar se o usuário tem o escopo register_account_manager
-        boolean hasManagerScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_register_account"));
+        authentication.getAuthorities().stream()
+                .anyMatch(authority -> {
+                    authority.getAuthority();
+                    return false;
+                });
+        boolean hasManagerScope = false;
 
         if (!hasManagerScope) {
             throw new CustomAuthorizationException("Acesso negado");
@@ -97,8 +103,8 @@ public class AccountController {
     /* Deletar a Conta */
     @ApiOperation(value = "Deleting Account")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_delete_account')")
-    public ResponseEntity<?> deleteAccount(@PathVariable Long id, Authentication authentication) {
+    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
         checkAuthorization(id, authentication);
         logger.info("Account deleted");
         accountService.deleteAccount(id);
