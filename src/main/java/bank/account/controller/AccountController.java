@@ -80,7 +80,7 @@ public class AccountController {
     /* Registro da Conta */
     @ApiOperation(value = "Account Register")
     @PostMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("hasAuthority('SCOPE_user')")
     public ResponseEntity<Account> registerAccount(@PathVariable String cpf) {
         // Verificar se o usuário tem o escopo
         Authentication authentication = getCurrentAuthentication();

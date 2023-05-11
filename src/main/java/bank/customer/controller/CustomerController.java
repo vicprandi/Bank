@@ -80,12 +80,12 @@ public class CustomerController {
     /* Registro do Customer */
     @ApiOperation(value = "Customer Register")
     @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_admin')")
     public ResponseEntity<Customer> registerCustomer(@RequestBody @Valid CustomerRequest customerRequest) {
         // Verificar se o usuário tem o escopo
         Authentication authentication = getCurrentAuthentication();
         boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
 
         if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");

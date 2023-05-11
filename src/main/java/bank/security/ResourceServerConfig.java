@@ -32,20 +32,20 @@ public class ResourceServerConfig {
                 //Customer
                 .requestMatchers(HttpMethod.GET, "/customer").hasAnyAuthority("SCOPE_admin")
                 .requestMatchers(HttpMethod.GET, "/customer/{cpf}").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.POST, "/customer").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.PUT, "/customer/update").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                .requestMatchers(HttpMethod.POST, "/customer").hasAnyAuthority("SCOPE_admin")
+                .requestMatchers(HttpMethod.PUT, "/customer/update").hasAnyAuthority("SCOPE_user")
                 .requestMatchers(HttpMethod.DELETE, "/customer/{cpf}").hasAnyAuthority("SCOPE_admin")
                         //Accounts
                 .requestMatchers(HttpMethod.GET, "/accounts").hasAnyAuthority("SCOPE_admin")
                 .requestMatchers(HttpMethod.GET, "/accounts/{id}").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.POST, "/accounts/{cpf}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                .requestMatchers(HttpMethod.POST, "/accounts/{cpf}").hasAnyAuthority("SCOPE_user")
                 .requestMatchers(HttpMethod.DELETE, "/accounts/{id}").hasAnyAuthority("SCOPE_admin")
                         //Transaction
                 .requestMatchers(HttpMethod.GET, "/transaction").hasAnyAuthority("SCOPE_admin")
                 .requestMatchers(HttpMethod.GET, "/transaction/customer/{id}").hasAnyAuthority("SCOPE_admin")
-                .requestMatchers(HttpMethod.POST, "/transaction/deposit").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.POST, "/transaction/withdraw/{accountNumber}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
-                .requestMatchers(HttpMethod.POST, "/transaction/transfer").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
+                .requestMatchers(HttpMethod.POST, "/transaction/deposit").hasAnyAuthority("SCOPE_user")
+                .requestMatchers(HttpMethod.POST, "/transaction/withdraw/{accountNumber}").hasAnyAuthority("SCOPE_user")
+                .requestMatchers(HttpMethod.POST, "/transaction/transfer").hasAnyAuthority("SCOPE_user")
                 .requestMatchers(HttpMethod.GET, "/transaction/{transactionId}").hasAnyAuthority("SCOPE_admin", "SCOPE_user")
                 //Terminou
                 .anyRequest()
