@@ -95,12 +95,12 @@ public class TransactionController {
 
     @ApiOperation(value ="Depositar o dinheiro")
     @PostMapping("/deposit")
-    @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_user')")
     public Transaction depositMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         // Verificar se o usuário tem o escopo
         Authentication authentication = getCurrentAuthentication();
         boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_user"));
 
         if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
@@ -113,12 +113,12 @@ public class TransactionController {
 
     @ApiOperation(value ="Sacar o dinheiro")
     @PostMapping("/withdraw/{accountNumber}")
-    @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_user')")
     public Transaction withdrawMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         // Verificar se o usuário tem o escopo
         Authentication authentication = getCurrentAuthentication();
         boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_user"));
 
         if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
@@ -131,12 +131,12 @@ public class TransactionController {
 
     @ApiOperation(value ="Transferencia entre contas")
     @PostMapping("/transfer")
-    @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_user')")
     public ResponseEntity<Long> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) throws InterruptedException {
         // Verificar se o usuário tem o escopo
         Authentication authentication = getCurrentAuthentication();
         boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_user"));
 
         if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");

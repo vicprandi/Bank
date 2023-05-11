@@ -99,12 +99,12 @@ public class CustomerController {
     /* Atualizar o Customer */
     @ApiOperation(value = "Customer Update")
     @PutMapping("/update")
-    @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_user')")
     public ResponseEntity<Customer> updateCustomer (@RequestBody @Valid CustomerRequest cpf) {
         // Verificar se o usuário tem o escopo
         Authentication authentication = getCurrentAuthentication();
         boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_user"));
 
         if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
