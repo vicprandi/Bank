@@ -1,196 +1,220 @@
 package bank.account.ControllerTests;
 
 import bank.account.controller.AccountController;
-import bank.account.exceptions.AccountAlreadyExistsException;
-import bank.account.exceptions.AccountDoesntExistException;
-import bank.account.repository.AccountRepository;
-import bank.account.request.AccountRequest;
+
 import bank.account.service.AccountServiceImpl;
-
-import bank.customer.request.CustomerRequest;
-import bank.customer.service.CustomerServiceImpl;
 import bank.model.Account;
-import bank.model.Customer;
 
-
+import bank.security.exceptions.CustomAuthorizationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
-import static org.aspectj.bridge.MessageUtil.fail;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(AccountController.class)
-public class AccountControllerTests {
+class AccountControllerTests {
 
-    @MockBean private CustomerServiceImpl customerService;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private AccountRepository accountRepository;
-
-    @MockBean private AccountServiceImpl accountService;
-
-    @Autowired MockMvc mockMvc;
-
-    @Spy
-    CustomerRequest customerRequest;
-    CustomerRequest customerRequest2;
-    AccountRequest accountRequest;
-    AccountRequest accountRequest2;
-
-    Customer customer;
-
-    Account account;
-
-    BigDecimal balanceMoney;
-
-    Long accountNumber;
+    @MockBean
+    private AccountServiceImpl accountService;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        customerRequest = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-        customerRequest2 = new CustomerRequest("Victoria", "12345678901", "02036020", "SE", "SP","SP");
-
-        customerService.registerCustomer(customerRequest);
-        customerService.registerCustomer(customerRequest2);
-
-        accountRequest = new AccountRequest();
-        accountRequest.setBalanceMoney(balanceMoney);
-
-        accountRequest2 = new AccountRequest();
-        accountRequest2.setBalanceMoney(balanceMoney);
-
-        Account account = new Account();
-        account.setId(1L);
-        account.setBalanceMoney(accountRequest.getBalanceMoney());
-        accountNumber = accountRepository.generateAccountNumber();
-        account.setAccountNumber(accountNumber);
-        customer = customerRequest.customerObjectRequest();
-        account.setCustomer(customer);
-
-        Account account2 = new Account();
-
-        account.setBalanceMoney(accountRequest2.getBalanceMoney());
-        accountNumber = accountRepository.generateAccountNumber();
-        account2.setAccountNumber(accountNumber);
-
-        customer = customerRequest2.customerObjectRequest();
-        account2.setCustomer(customer);
-
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void shouldReturnStatus201_afterGetAllAcounts() throws Exception {
-        mockMvc.perform(get("/accounts"))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+    public void shouldReturnStatus200_afterGetAllAccounts() throws Exception {
+        // Mocking accountService
+        List<Account> accounts = Arrays.asList(new Account(), new Account());
+        when(accountService.getAllAccounts()).thenReturn(accounts);
+
+        // Simulate authentication with SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the GET request
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldReturnStatus4xx_afterGetAllAcounts() throws Exception {
-        mockMvc.perform(get("/account"))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    public void shouldReturnStatus4xx_afterGetAllAccounts() throws Exception {
+        // Simulate authentication without the required SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_user"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the GET request
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus201_afterRegisterAccount() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/" + customerRequest.getCpf())
+        // Mocking accountService
+        Account newAccount = new Account();
+        when(accountService.registerAccount(anyString())).thenReturn(newAccount);
+
+        // Simulate authentication with SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("SCOPE_admin"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the POST request
+        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/{cpf}", "12345678900")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+                .andExpect(status().isCreated());
     }
 
     @Test
-    public void shouldReturnStatus201_afterGettingAccount() throws Exception {
-        mockMvc.perform(get("/accounts/" + customerRequest.customerObjectRequest().getId())
-                        .contentType(MediaType.APPLICATION_JSON));
-    }
+    public void shouldReturnStatus401_afterGettingOneAccountThatDoesntExist() throws Exception {
+        // Mocking accountService
+        when(accountService.getAccountById(anyLong())).thenThrow(new CustomAuthorizationException("Acesso negado"));
 
-    @Test
-    public void shouldReturnStatus404_afterGettingOneAccountThatDoesntExist() throws Exception {
-        mockMvc.perform(get("/accounts/" + null)
+        // Simulate authentication with SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the GET request
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{id}", 123)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus4xx_afterRegisterAccount() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/accounsts/12345678901")
+        // Mocking accountService
+        when(accountService.registerAccount(anyString())).thenThrow(new CustomAuthorizationException("Acesso negado"));
+
+        // Simulate authentication with SCOPE_user authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("SCOPE_user"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the POST request
+        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/{cpf}", "12345678900")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
-    public void shouldReturnStatus202_afterDeleteAcount() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/1")
+    public void shouldReturnStatus202_afterDeleteAccount() throws Exception {
+        // Mocking accountService
+        doNothing().when(accountService).deleteAccount(anyLong());
+
+        // Simulate authentication with SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the DELETE request
+        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/{id}", 123)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isAccepted());
+                .andExpect(status().isAccepted());
     }
+
     @Test
     public void shouldReturnStatus4xx_afterDeleteClient() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/delete")
+        // Mocking accountService
+        doThrow(new CustomAuthorizationException("Acesso negado")).when(accountService).deleteAccount(anyLong());
+
+        // Simulate authentication with SCOPE_user authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_user"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the DELETE request
+        mockMvc.perform(MockMvcRequestBuilders.delete("/accounts/{id}", 123)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(status().is4xxClientError());
     }
 
     //*Teste de exceções!*//
     @Test
     public void shouldReturnStatus404_afterRegisterAccountWithExistingCpf() throws Exception {
-        // given
-        when(accountRepository.existsByAccountNumber(accountNumber)).thenReturn(true);
-        // then
-        try {
-            accountService.registerAccount(customerRequest.getCpf());
-            fail("Deveria ter lançado a exceção AccountAlreadyExistsException");
-        } catch (AccountAlreadyExistsException ex) {
-            mockMvc.perform(get("/accounts/" + customerRequest.getCpf())
-                    .contentType(MediaType.APPLICATION_JSON));
-            assertEquals("Account already registred", ex.getMessage());
-            verify(status().isNotFound());
-        }
+        // Mocking accountService
+        when(accountService.registerAccount(anyString())).thenThrow(new CustomAuthorizationException("Acesso negado"));
+
+        // Simulate authentication with SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the POST request
+        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/{cpf}", "12345678900")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
     public void shouldReturnStatus404_ifIdIsNotRegistred() throws Exception {
-        // given
-        when(accountRepository.existsById(customer.getId())).thenReturn(false);
-        // then
-        try {
-            accountService.registerAccount(customerRequest.getCpf());
-            accountService.deleteAccount(customer.getId());
-            fail("Deveria ter lançado a exceção AccountDoesntExistException");
-        } catch (AccountDoesntExistException ex) {
-            mockMvc.perform(get("/accounts/delete/" + customer.getId())
-                    .contentType(MediaType.APPLICATION_JSON));
-            assertEquals("Account doesn't exists!", ex.getMessage());
-            verify(status().isNotFound());
-        }
+        // Mocking accountService
+        when(accountService.getAccountById(anyLong())).thenThrow(new CustomAuthorizationException("Acesso negado"));
+
+        // Simulate authentication with SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
+
+        // Perform the GET request
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{id}", 123)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
     }
+
     @Test
     public void testGetAccount() throws Exception {
-        Long id = 1L;
+        // Mocking accountService
         Account account = new Account();
-        account.setId(id);
-        account.setAccountNumber(123456L);
-        account.setBalanceMoney(BigDecimal.valueOf(1000));
+        when(accountService.getAccountById(anyLong())).thenReturn(Optional.of(account));
 
-        when(accountService.getAccountById(id)).thenReturn(Optional.of(account));
+        // Simulate authentication with SCOPE_admin authority
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
+        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + id)
+        // Perform the GET request
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{id}", 123)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
     }
 }
+

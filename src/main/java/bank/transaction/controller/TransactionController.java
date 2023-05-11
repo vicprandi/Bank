@@ -42,7 +42,6 @@ public class TransactionController {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
-
     @Autowired
     private TransferMoneyListener transferMoneyListener;
     @Autowired

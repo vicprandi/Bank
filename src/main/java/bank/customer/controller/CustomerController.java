@@ -76,7 +76,6 @@ public class CustomerController {
         return Optional.ofNullable(customerService.getCustomerCpf(cpf));
     }
 
-
     /* Registro do Customer */
     @ApiOperation(value = "Customer Register")
     @PostMapping
