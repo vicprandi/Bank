@@ -38,7 +38,10 @@ public class TransactionController {
 
     private final TransactionRepository transactionRepository;
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    private Authentication getCurrentAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
 
     @Autowired
     private TransferMoneyListener transferMoneyListener;
@@ -58,6 +61,8 @@ public class TransactionController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     public List<Transaction> getAllTransactions() {
         // Verificar se o usuário tem o escopo
+        Authentication authentication = getCurrentAuthentication();
+
         boolean hasAdminScope = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
 
@@ -74,6 +79,7 @@ public class TransactionController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     public List<Transaction> findTransactionByClientId(@PathVariable Long id) {
         // Verificar se o usuário tem o escopo
+        Authentication authentication = getCurrentAuthentication();
 
         boolean hasAdminScope = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
@@ -92,14 +98,11 @@ public class TransactionController {
     @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
     public Transaction depositMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         // Verificar se o usuário tem o escopo
-        authentication.getAuthorities().stream()
-                .anyMatch(authority -> {
-                    authority.getAuthority();
-                    return false;
-                });
-        boolean hasAdminScope = false;
+        Authentication authentication = getCurrentAuthentication();
+        boolean hasValidScope = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
 
-        if (!hasAdminScope) {
+        if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
         }
 
@@ -113,14 +116,11 @@ public class TransactionController {
     @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
     public Transaction withdrawMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         // Verificar se o usuário tem o escopo
-        authentication.getAuthorities().stream()
-                .anyMatch(authority -> {
-                    authority.getAuthority();
-                    return false;
-                });
-        boolean hasAdminScope = false;
+        Authentication authentication = getCurrentAuthentication();
+        boolean hasValidScope = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
 
-        if (!hasAdminScope) {
+        if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
         }
 
@@ -134,14 +134,11 @@ public class TransactionController {
     @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
     public ResponseEntity<Long> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) throws InterruptedException {
         // Verificar se o usuário tem o escopo
-        authentication.getAuthorities().stream()
-                .anyMatch(authority -> {
-                    authority.getAuthority();
-                    return false;
-                });
-        boolean hasAdminScope = false;
+        Authentication authentication = getCurrentAuthentication();
+        boolean hasValidScope = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
 
-        if (!hasAdminScope) {
+        if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
         }
 
@@ -156,14 +153,11 @@ public class TransactionController {
     @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
     public ResponseEntity<Transaction> getTransaction(@PathVariable Long transactionId) {
         // Verificar se o usuário tem o escopo
-        authentication.getAuthorities().stream()
-                .anyMatch(authority -> {
-                    authority.getAuthority();
-                    return false;
-                });
-        boolean hasAdminScope = false;
+        Authentication authentication = getCurrentAuthentication();
+        boolean hasValidScope = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
 
-        if (!hasAdminScope) {
+        if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
         }
 

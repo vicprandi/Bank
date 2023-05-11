@@ -36,7 +36,9 @@ public class CustomerController {
     }
     private static final Logger logger = Logger.getLogger(Customer.class.getName());
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    private Authentication getCurrentAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
 
     /*Para todos os CLientes*/
     @ApiOperation(value ="Bring all Customer")
@@ -44,9 +46,10 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     public List<Customer> getAllCustomer() {
         // Verificar se o usuário tem o escopo
+        Authentication authentication = getCurrentAuthentication();
 
         boolean hasAdminScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_view_customer"));
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
 
         if (!hasAdminScope) {
             throw new CustomAuthorizationException("Acesso negado");
@@ -61,6 +64,7 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     public Optional<Customer> getCustomer(@PathVariable @Valid String cpf) {
         // Verificar se o usuário tem o escopo
+        Authentication authentication = getCurrentAuthentication();
         boolean hasAdminScope = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
 
@@ -77,16 +81,13 @@ public class CustomerController {
     @ApiOperation(value = "Customer Register")
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
-    public ResponseEntity<Customer> registerCustomer (@RequestBody @Valid CustomerRequest customerRequest) {
+    public ResponseEntity<Customer> registerCustomer(@RequestBody @Valid CustomerRequest customerRequest) {
         // Verificar se o usuário tem o escopo
-        authentication.getAuthorities().stream()
-                .anyMatch(authority -> {
-                    authority.getAuthority();
-                    return false;
-                });
-        boolean hasAdminScope = false;
+        Authentication authentication = getCurrentAuthentication();
+        boolean hasValidScope = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
 
-        if (!hasAdminScope) {
+        if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
         }
 
@@ -101,14 +102,11 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
     public ResponseEntity<Customer> updateCustomer (@RequestBody @Valid CustomerRequest cpf) {
         // Verificar se o usuário tem o escopo
-        authentication.getAuthorities().stream()
-                .anyMatch(authority -> {
-                    authority.getAuthority();
-                    return false;
-                });
-        boolean hasAdminScope = false;
+        Authentication authentication = getCurrentAuthentication();
+        boolean hasValidScope = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin") || authority.getAuthority().equals("SCOPE_user"));
 
-        if (!hasAdminScope) {
+        if (!hasValidScope) {
             throw new CustomAuthorizationException("Acesso negado");
         }
 
@@ -123,7 +121,8 @@ public class CustomerController {
     @DeleteMapping("/{cpf}")
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     public ResponseEntity<?> deleteCustomer(@PathVariable String cpf) {
-        // Verificar se o usuário tem o escopo view_customer
+        // Verificar se o usuário tem o escopo
+        Authentication authentication = getCurrentAuthentication();
         boolean hasAdminScope = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
 
