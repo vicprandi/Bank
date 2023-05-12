@@ -36,42 +36,19 @@ public class CustomerController {
     }
     private static final Logger logger = Logger.getLogger(Customer.class.getName());
 
-    private Authentication getCurrentAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
-
     /*Para todos os CLientes*/
     @ApiOperation(value ="Bring all Customer")
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("@securityExpressionRoot.hasScope('SCOPE_admin')")
     public List<Customer> getAllCustomer() {
-        // Verificar se o usuário tem o escopo
-        Authentication authentication = getCurrentAuthentication();
-
-        boolean hasAdminScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
-
-        if (!hasAdminScope) {
-            throw new CustomAuthorizationException("Acesso negado");
-        }
-
         logger.info("Returning all costumer");
         return customerService.getAllCustomers();
     }
 
     @ApiOperation(value = "Bring a specific customer")
     @GetMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("@securityExpressionRoot.hasScope('SCOPE_admin')")
     public Optional<Customer> getCustomer(@PathVariable @Valid String cpf) {
-        // Verificar se o usuário tem o escopo
-        Authentication authentication = getCurrentAuthentication();
-        boolean hasAdminScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
-
-        if (!hasAdminScope) {
-            throw new CustomAuthorizationException("Acesso negado");
-        }
-
         logger.info("Returning a specific costumer");
         return Optional.ofNullable(customerService.getCustomerCpf(cpf));
     }
@@ -79,16 +56,8 @@ public class CustomerController {
     /* Registro do Customer */
     @ApiOperation(value = "Customer Register")
     @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("@securityExpressionRoot.hasScope('SCOPE_admin')")
     public ResponseEntity<Customer> registerCustomer(@RequestBody @Valid CustomerRequest customerRequest) {
-        // Verificar se o usuário tem o escopo
-        Authentication authentication = getCurrentAuthentication();
-        boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
-
-        if (!hasValidScope) {
-            throw new CustomAuthorizationException("Acesso negado");
-        }
 
         Customer customer = customerService.registerCustomer(customerRequest);
         logger.info("Costumer registered");
@@ -98,16 +67,8 @@ public class CustomerController {
     /* Atualizar o Customer */
     @ApiOperation(value = "Customer Update")
     @PutMapping("/update")
-    @PreAuthorize("hasAuthority('SCOPE_user')")
+    @PreAuthorize("@securityExpressionRoot.hasScope('SCOPE_user')")
     public ResponseEntity<Customer> updateCustomer (@RequestBody @Valid CustomerRequest cpf) {
-        // Verificar se o usuário tem o escopo
-        Authentication authentication = getCurrentAuthentication();
-        boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_user"));
-
-        if (!hasValidScope) {
-            throw new CustomAuthorizationException("Acesso negado");
-        }
 
         Customer customer = customerService.updateCustomer(cpf);
         logger.info("Costumer updated");
@@ -118,16 +79,8 @@ public class CustomerController {
     @ApiOperation(value = "Deleting Customer")
     @Transactional
     @DeleteMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("@securityExpressionRoot.hasScope('SCOPE_admin')")
     public ResponseEntity<?> deleteCustomer(@PathVariable String cpf) {
-        // Verificar se o usuário tem o escopo
-        Authentication authentication = getCurrentAuthentication();
-        boolean hasAdminScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
-
-        if (!hasAdminScope) {
-            throw new CustomAuthorizationException("Acesso negado");
-        }
 
         logger.info("Costumer deleted");
         customerService.deleteCustomer(cpf);
