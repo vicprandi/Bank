@@ -1,8 +1,13 @@
 package bank.security;
 
 import bank.security.exceptions.CustomAuthorizationException;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
@@ -26,6 +31,22 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
             throw new CustomAuthorizationException("Acesso negado");
         }
         return true;
+    }
+
+    @Bean
+    public MethodSecurityExpressionHandler expressionHandler() {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler() {
+            @Override
+            public MethodSecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, MethodInvocation invocation) {
+                CustomMethodSecurityExpressionRoot root = new CustomMethodSecurityExpressionRoot(authentication);
+                root.setPermissionEvaluator(getPermissionEvaluator());
+                root.setTrustResolver(new AuthenticationTrustResolverImpl());
+                root.setRoleHierarchy(getRoleHierarchy());
+                root.setDefaultRolePrefix(getDefaultRolePrefix());
+                return root;
+            }
+        };
+        return handler;
     }
 
     @Override

@@ -1,11 +1,8 @@
 package bank.transaction.controller;
 
-import bank.kafka.consumer.TransferMoneyListener;
-import bank.kafka.producer.KafkaService;
+
 import bank.model.Account;
 import bank.model.Transaction;
-import bank.security.exceptions.CustomAuthorizationException;
-import bank.transaction.repository.TransactionRepository;
 import bank.transaction.request.TransactionRequest;
 import bank.transaction.service.TransactionServiceImpl;
 import io.swagger.annotations.Api;
@@ -19,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -36,17 +31,10 @@ public class TransactionController {
 
     private final TransactionServiceImpl transactionService;
 
-    private final TransactionRepository transactionRepository;
     @Autowired
-    private TransferMoneyListener transferMoneyListener;
-    @Autowired
-    private KafkaService kafkaService;
-
-    @Autowired
-    public TransactionController(TransactionServiceImpl transactionService, TransactionRepository transactionRepository) {
+    public TransactionController(TransactionServiceImpl transactionService) {
 
         this.transactionService = transactionService;
-        this.transactionRepository = transactionRepository;
     }
     private static final Logger logger = Logger.getLogger(Account.class.getName());
 
