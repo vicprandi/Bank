@@ -26,12 +26,6 @@ public class AccountController {
 
     private final AccountServiceImpl accountService;
 
-
-    private Authentication getCurrentAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
-
-
     @Autowired
     public AccountController(AccountServiceImpl accountService) {
 
@@ -64,14 +58,6 @@ public class AccountController {
     @PostMapping("/{cpf}")
     @PreAuthorize("@securityExpressionRoot.hasScope('SCOPE_user')")
     public ResponseEntity<Account> registerAccount(@PathVariable String cpf) {
-        // Verificar se o usuário tem o escopo
-        Authentication authentication = getCurrentAuthentication();
-        boolean hasValidScope = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("SCOPE_admin"));
-
-        if (!hasValidScope) {
-            throw new CustomAuthorizationException("Acesso negado");
-        }
 
         logger.info("Account registered");
         Account response = accountService.registerAccount(cpf);
