@@ -1,7 +1,9 @@
 package bank.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -9,8 +11,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true)
 public class ResourceServerConfig {
+
+    private CustomJwtAuthenticationConverter customJwtAuthenticationConverter;
+
+    protected MethodSecurityExpressionHandler createExpressionHandler() {
+        return new CustomMethodSecurityHandler();
+    }
 
     //Configuração para usar o @PreAuthorize
     @Bean
@@ -33,7 +41,8 @@ public class ResourceServerConfig {
                 .authenticated()
                 .and()
                 .oauth2ResourceServer()
-                .jwt(); // conf default do Spring Security
+                .jwt()
+                .jwtAuthenticationConverter(customJwtAuthenticationConverter); // conf default do Spring Security
 
         return http.build();
     }

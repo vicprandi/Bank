@@ -33,22 +33,6 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
         return true;
     }
 
-    @Bean
-    public MethodSecurityExpressionHandler expressionHandler() {
-        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler() {
-            @Override
-            public MethodSecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, MethodInvocation invocation) {
-                CustomMethodSecurityExpressionRoot root = new CustomMethodSecurityExpressionRoot(authentication);
-                root.setPermissionEvaluator(getPermissionEvaluator());
-                root.setTrustResolver(new AuthenticationTrustResolverImpl());
-                root.setRoleHierarchy(getRoleHierarchy());
-                root.setDefaultRolePrefix(getDefaultRolePrefix());
-                return root;
-            }
-        };
-        return handler;
-    }
-
     @Override
     public void setFilterObject(Object filterObject) {
         this.filterObject = filterObject;
@@ -67,6 +51,9 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
     @Override
     public Object getReturnObject() {
         return this.returnObject;
+    }
+
+    void setThis(Object target) {
     }
 
     @Override
