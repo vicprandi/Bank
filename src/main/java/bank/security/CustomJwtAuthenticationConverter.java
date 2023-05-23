@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
@@ -19,18 +20,17 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
 
     @Override
     public AbstractAuthenticationToken convert(@NotNull Jwt jwt) {
-
         // Adiciona as authorities do JWT
         Collection<? extends GrantedAuthority> jwtAuthorities = jwtGrantedAuthoritiesConverter.convert(jwt);
         List<GrantedAuthority> authorities = new ArrayList<>(jwtAuthorities);
 
-        // Adiciona as authorities do grupo "groups"
-        List<String> groups = jwt.getClaimAsStringList("groups");
-        if (groups != null) {
-            List<SimpleGrantedAuthority> groupAuthorities = groups.stream()
-                    .map(SimpleGrantedAuthority::new)
+        // Adiciona as authorities do grupo "roles"
+        List<String> roles = jwt.getClaimAsStringList("roles");
+        if (roles != null) {
+            List<SimpleGrantedAuthority> roleAuthorities = roles.stream()
+                    .map(role -> new SimpleGrantedAuthority(role.toUpperCase())) // certifique-se que as autoridades estão em maiúsculas
                     .toList();
-            authorities.addAll(groupAuthorities);
+            authorities.addAll(roleAuthorities);
         }
         return new JwtAuthenticationToken(jwt, authorities);
     }
