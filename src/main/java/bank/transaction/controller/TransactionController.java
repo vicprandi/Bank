@@ -40,7 +40,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Bring all Transactions")
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("hasAuthority('SCOPE_admin:view')")
     public List<Transaction> getAllTransactions() {
 
         logger.info("Returning all transactions");
@@ -49,7 +49,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Bring transaction by CustomerId")
     @GetMapping("/customer/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("hasAuthority('SCOPE_admin:view')")
     public List<Transaction> findTransactionByClientId(@PathVariable Long id) {
 
         logger.info("Returning transaction by ClientId");
@@ -59,7 +59,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Depositar o dinheiro")
     @PostMapping("/deposit")
-    @PreAuthorize("hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_user:write')")
     public Transaction depositMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
 
         logger.info("Depositing money");
@@ -69,7 +69,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Sacar o dinheiro")
     @PostMapping("/withdraw/{accountNumber}")
-    @PreAuthorize("hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_user:write')")
     public Transaction withdrawMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         logger.info("Withdrawing money");
         Transaction transaction = transactionService.withdrawMoney(transactionRequest);
@@ -78,7 +78,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Transferencia entre contas")
     @PostMapping("/transfer")
-    @PreAuthorize("hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_user:write')")
     public ResponseEntity<Long> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) throws InterruptedException {
 
         logger.info("Transfering money between accounts");
@@ -89,7 +89,7 @@ public class TransactionController {
 
     // Adicione um novo endpoint GET para buscar a transação pelo ID
     @GetMapping("/{transactionId}")
-    @PreAuthorize("hasAuthority('SCOPE_admin') or hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_admin:view') or hasAuthority('SCOPE_user:view')")
     public ResponseEntity<Transaction> getTransaction(@PathVariable Long transactionId) {
 
         Optional<Transaction> transaction = transactionService.findById(transactionId);

@@ -33,7 +33,7 @@ public class AccountController {
     /* Para todas as Contas */
     @ApiOperation(value = "Bring all Accounts")
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("hasAuthority('SCOPE_admin:view')")
     public List<Account> getAllAcounts() {
 
         logger.info("Returning all accounts");
@@ -43,7 +43,7 @@ public class AccountController {
     /* Para uma conta */
     @ApiOperation(value = "Bring a account")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("hasAuthority('SCOPE_admin:view')")
     public Optional<Account> getAccount(@PathVariable Long id) {
 
         logger.info("Returning a specific account");
@@ -53,7 +53,7 @@ public class AccountController {
     /* Registro da Conta */
     @ApiOperation(value = "Account Register")
     @PostMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_user')")
+    @PreAuthorize("hasAuthority('SCOPE_admin:view') or hasAuthority('SCOPE_user:write') or hasAuthority('SCOPE_user:view')")
     public ResponseEntity<Account> registerAccount(@PathVariable String cpf) {
 
         logger.info("Account registered");
@@ -65,7 +65,7 @@ public class AccountController {
     /* Deletar a Conta */
     @ApiOperation(value = "Deleting Account")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_admin')")
+    @PreAuthorize("hasAuthority('SCOPE_admin:write') or hasAuthority('SCOPE:user:write')")
     public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
 
         logger.info("Account deleted");
