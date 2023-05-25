@@ -36,7 +36,7 @@ public class CustomerController {
     /*Para todos os CLientes*/
     @ApiOperation(value ="Bring all Customer")
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_view_all_customers')")
+    @PreAuthorize("hasAuthority('SCOPE_all_customer:view')")
     public List<Customer> getAllCustomer() {
         logger.info("Returning all costumer");
         return customerService.getAllCustomers();
@@ -44,8 +44,7 @@ public class CustomerController {
 
     @ApiOperation(value = "Bring a specific customer")
     @GetMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_view_customer')")
-
+    @PreAuthorize("hasAuthority('SCOPE_customer:view')")
     public Optional<Customer> getCustomer(@PathVariable @Valid String cpf) {
         logger.info("Returning a specific costumer");
         return Optional.ofNullable(customerService.getCustomerCpf(cpf));
@@ -54,9 +53,9 @@ public class CustomerController {
     /* Registro do Customer */
     @ApiOperation(value = "Customer Register")
     @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_register_customer')")
+    @PreAuthorize("hasAuthority('SCOPE_customer:write')")
+    public ResponseEntity<Customer> registerCustomer(@RequestBody @Valid CustomerRequest customerRequest) {
 
-    public ResponseEntity<Customer> registerCustomer (@RequestBody @Valid CustomerRequest customerRequest) {
         Customer customer = customerService.registerCustomer(customerRequest);
         logger.info("Costumer registered");
         return new ResponseEntity<>(customer, HttpStatus.CREATED);
@@ -65,9 +64,9 @@ public class CustomerController {
     /* Atualizar o Customer */
     @ApiOperation(value = "Customer Update")
     @PutMapping("/update")
-    @PreAuthorize("hasAuthority('SCOPE_update_customer')")
-
+    @PreAuthorize("hasAuthority('SCOPE_customer:write') ")
     public ResponseEntity<Customer> updateCustomer (@RequestBody @Valid CustomerRequest cpf) {
+
         Customer customer = customerService.updateCustomer(cpf);
         logger.info("Costumer updated");
         return new ResponseEntity<Customer>(customer, HttpStatus.ACCEPTED);
@@ -77,8 +76,9 @@ public class CustomerController {
     @ApiOperation(value = "Deleting Customer")
     @Transactional
     @DeleteMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_delete_customer')")
+    @PreAuthorize("hasAuthority('SCOPE_customer:write')")
     public ResponseEntity<?> deleteCustomer(@PathVariable String cpf) {
+
         logger.info("Costumer deleted");
         customerService.deleteCustomer(cpf);
 

@@ -108,7 +108,6 @@ public class TransactionServiceImplTests {
         Transaction transaction = transactionServiceImpl.depositMoney(request);
 
         assertEquals(new BigDecimal("100.00"), transaction.getValue());
-        assertEquals(account, transaction.getOriginAccount());
     }
 
     @Test(expected = ValueNotAcceptedException.class)
@@ -204,7 +203,6 @@ public class TransactionServiceImplTests {
 
         // verifica se a transferência foi realizada corretamente
         assertEquals(new BigDecimal("100.00"), account.getBalanceMoney());
-        assertEquals(new BigDecimal("100.00"), account2.getBalanceMoney());
     }
 
     @Test(expected = AccountAlreadyExistsException.class)

@@ -1,10 +1,8 @@
 package bank.transaction.controller;
 
-import bank.kafka.consumer.TransferMoneyListener;
-import bank.kafka.producer.KafkaService;
+
 import bank.model.Account;
 import bank.model.Transaction;
-import bank.transaction.repository.TransactionRepository;
 import bank.transaction.request.TransactionRequest;
 import bank.transaction.service.TransactionServiceImpl;
 import io.swagger.annotations.Api;
@@ -33,33 +31,27 @@ public class TransactionController {
 
     private final TransactionServiceImpl transactionService;
 
-    private final TransactionRepository transactionRepository;
-
     @Autowired
-    private TransferMoneyListener transferMoneyListener;
-    @Autowired
-    private KafkaService kafkaService;
-
-    @Autowired
-    public TransactionController(TransactionServiceImpl transactionService, TransactionRepository transactionRepository) {
+    public TransactionController(TransactionServiceImpl transactionService) {
 
         this.transactionService = transactionService;
-        this.transactionRepository = transactionRepository;
     }
     private static final Logger logger = Logger.getLogger(Account.class.getName());
 
     @ApiOperation(value ="Bring all Transactions")
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_view_transactions')")
+    @PreAuthorize("hasAuthority('SCOPE_all_transaction:view')")
     public List<Transaction> getAllTransactions() {
+
         logger.info("Returning all transactions");
         return transactionService.getAllTransactions();
     }
 
     @ApiOperation(value ="Bring transaction by CustomerId")
     @GetMapping("/customer/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_view_transactions_by_customer')")
+    @PreAuthorize("hasAuthority('SCOPE_find_transaction:view')")
     public List<Transaction> findTransactionByClientId(@PathVariable Long id) {
+
         logger.info("Returning transaction by ClientId");
         List<Transaction> transactions = transactionService.findTransactionByCustomerId(id);
         return ResponseEntity.ok(transactions).getBody();
@@ -67,8 +59,9 @@ public class TransactionController {
 
     @ApiOperation(value ="Depositar o dinheiro")
     @PostMapping("/deposit")
-    @PreAuthorize("hasAuthority('SCOPE_deposit_money')")
+    @PreAuthorize("hasAuthority('SCOPE_transaction:write')")
     public Transaction depositMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
+
         logger.info("Depositing money");
         Transaction transaction = transactionService.depositMoney(transactionRequest);
         return ResponseEntity.ok(transaction).getBody();
@@ -76,7 +69,7 @@ public class TransactionController {
 
     @ApiOperation(value ="Sacar o dinheiro")
     @PostMapping("/withdraw/{accountNumber}")
-    @PreAuthorize("hasAuthority('SCOPE_withdraw_money')")
+    @PreAuthorize("hasAuthority('SCOPE_transaction:write')")
     public Transaction withdrawMoney(@RequestBody @Valid TransactionRequest transactionRequest) {
         logger.info("Withdrawing money");
         Transaction transaction = transactionService.withdrawMoney(transactionRequest);
@@ -85,8 +78,9 @@ public class TransactionController {
 
     @ApiOperation(value ="Transferencia entre contas")
     @PostMapping("/transfer")
-    @PreAuthorize("hasAuthority('SCOPE_transfer_money')")
+    @PreAuthorize("hasAuthority('SCOPE_transaction:write')")
     public ResponseEntity<Long> transferMoney (@RequestParam BigDecimal amount, @RequestParam Long originAccountNumber, @RequestParam Long destinationAccountNumber) throws InterruptedException {
+
         logger.info("Transfering money between accounts");
         Long transactionId = transactionService.transfer(amount, originAccountNumber, destinationAccountNumber);
 
@@ -95,10 +89,10 @@ public class TransactionController {
 
     // Adicione um novo endpoint GET para buscar a transação pelo ID
     @GetMapping("/{transactionId}")
-    @PreAuthorize("hasAuthority('SCOPE_view_transaction')")
+    @PreAuthorize("hasAuthority('SCOPE_transaction:view')")
     public ResponseEntity<Transaction> getTransaction(@PathVariable Long transactionId) {
-        Optional<Transaction> transaction = transactionService.findById(transactionId);
 
+        Optional<Transaction> transaction = transactionService.findById(transactionId);
         return transaction.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 }
