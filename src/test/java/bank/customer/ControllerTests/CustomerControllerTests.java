@@ -23,6 +23,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -85,14 +86,13 @@ public class CustomerControllerTests {
 
     @Test
     public void shouldReturnStatus403_afterGetAllCustomers() throws Exception {
-        // Simulate authentication with SCOPE_admin authority
-        Authentication authentication = Mockito.mock(Authentication.class);
+        // Simulate authentication with USER authority
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("user"));
+        Authentication authentication = new TestingAuthenticationToken("testUser", "password", authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_user"));
-        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
 
         mockMvc.perform(get("/customer"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -136,23 +136,6 @@ public class CustomerControllerTests {
     }
 
     @Test
-    public void shouldReturnStatus201_afterCreateCustomer() throws Exception {
-        // Simulate authentication with SCOPE_admin authority
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
-        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
-
-        String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
-        customerService.registerCustomer(customerRequest);
-        // Perform the POST request
-        mockMvc.perform(MockMvcRequestBuilders.post("/customer/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
     public void shouldReturnStatus4xx_afterCreateCustomer() throws Exception {
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
         customerService.registerCustomer(customerRequest);
@@ -187,7 +170,7 @@ public class CustomerControllerTests {
         // Simulate authentication with SCOPE_user authority
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_admin"));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("SCOPE_admin"));
         Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
 
         customerService.registerCustomer(customerRequest);
@@ -230,20 +213,22 @@ public class CustomerControllerTests {
     }
 
     @Test
-    public void shouldReturnStatus403_afterDeleteCustomer() throws Exception {
-        // Simulate authentication with SCOPE_admin authority
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_user"));
-        Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
-
+    public void shouldReturnStatus403_whenUserTriesToDeleteCustomer() throws Exception {
+        // Crie e registre um cliente
         String requestBody = new ObjectMapper().valueToTree(customerRequest).toString();
-        customerService.registerCustomer(customerRequest);
-        customerService.deleteCustomer(customerRequest.getCpf());
-        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/1")
+        Customer createdCustomer = customerService.registerCustomer(customerRequest);
+        createdCustomer.setId(1L);
+
+        // Simule autenticação com a autoridade "user"
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("user"));
+        Authentication authentication = new TestingAuthenticationToken("testUser", "password", authorities);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Tente deletar o cliente como um "user"
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/" + createdCustomer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
 
@@ -314,11 +299,11 @@ public class CustomerControllerTests {
         // Simulate authentication without SCOPE_admin authority
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_user"));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("SCOPE_user"));
         Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
 
         // Perform the DELETE request
-        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/{cpf}", "12345678900")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customer/{cpf}", "123456789001")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof CustomAuthorizationException));

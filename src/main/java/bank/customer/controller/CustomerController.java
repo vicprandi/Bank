@@ -36,7 +36,7 @@ public class CustomerController {
     /*Para todos os CLientes*/
     @ApiOperation(value ="Bring all Customer")
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_admin:view')")
+    @PreAuthorize("hasAuthority('SCOPE_all_customer:view')")
     public List<Customer> getAllCustomer() {
         logger.info("Returning all costumer");
         return customerService.getAllCustomers();
@@ -44,7 +44,7 @@ public class CustomerController {
 
     @ApiOperation(value = "Bring a specific customer")
     @GetMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_admin:view')")
+    @PreAuthorize("hasAuthority('SCOPE_customer:view')")
     public Optional<Customer> getCustomer(@PathVariable @Valid String cpf) {
         logger.info("Returning a specific costumer");
         return Optional.ofNullable(customerService.getCustomerCpf(cpf));
@@ -53,7 +53,7 @@ public class CustomerController {
     /* Registro do Customer */
     @ApiOperation(value = "Customer Register")
     @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_admin:write') or hasAuthority('SCOPE:user:write')")
+    @PreAuthorize("hasAuthority('SCOPE_customer:write')")
     public ResponseEntity<Customer> registerCustomer(@RequestBody @Valid CustomerRequest customerRequest) {
 
         Customer customer = customerService.registerCustomer(customerRequest);
@@ -64,7 +64,7 @@ public class CustomerController {
     /* Atualizar o Customer */
     @ApiOperation(value = "Customer Update")
     @PutMapping("/update")
-    @PreAuthorize("hasAuthority('SCOPE_admin:write') or hasAuthority('SCOPE_user:write')")
+    @PreAuthorize("hasAuthority('SCOPE_customer:write') ")
     public ResponseEntity<Customer> updateCustomer (@RequestBody @Valid CustomerRequest cpf) {
 
         Customer customer = customerService.updateCustomer(cpf);
@@ -76,7 +76,7 @@ public class CustomerController {
     @ApiOperation(value = "Deleting Customer")
     @Transactional
     @DeleteMapping("/{cpf}")
-    @PreAuthorize("hasAuthority('SCOPE_admin:write') or hasAuthority('SCOPE_admin:write')")
+    @PreAuthorize("hasAuthority('SCOPE_customer:write')")
     public ResponseEntity<?> deleteCustomer(@PathVariable String cpf) {
 
         logger.info("Costumer deleted");

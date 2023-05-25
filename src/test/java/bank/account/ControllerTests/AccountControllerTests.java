@@ -69,7 +69,7 @@ class AccountControllerTests {
         // Simulate authentication without the required SCOPE_admin authority
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE_user"));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_user"));
         Mockito.when(authentication.getAuthorities()).thenReturn((Collection) authorities);
 
         // Perform the GET request

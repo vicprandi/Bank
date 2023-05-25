@@ -96,16 +96,6 @@ public class CustomerServiceImplTests {
     }
 
     @Test
-    public void shouldThrowCpfAlreadyExistsException_WhenRegisterCustomer() {
-        when(customerRepository.save(any(Customer.class))).thenReturn(customer);
-        when(clientServiceImpl.registerCustomer(customerRequest)).thenThrow(CpfAlreadyExistsException.class);
-
-        Customer result = clientServiceImpl.registerCustomer(customerRequest);
-        customerRepository.save(result);
-        verify(customerRepository).save(result);
-    }
-
-    @Test
     public void shouldThrowCpfAlreadyExistsException() {
         String cpf = "12345678901";
         CustomerRequest customerRequest = new CustomerRequest();

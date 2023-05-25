@@ -16,10 +16,6 @@ public class ResourceServerConfig {
 
     private CustomJwtAuthenticationConverter customJwtAuthenticationConverter;
 
-    protected MethodSecurityExpressionHandler createExpressionHandler() {
-        return new CustomMethodSecurityHandler();
-    }
-
     //Configuração para usar o @PreAuthorize
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {

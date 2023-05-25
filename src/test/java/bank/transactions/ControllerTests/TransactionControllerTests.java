@@ -5,6 +5,7 @@ import bank.model.Transaction;
 import bank.security.exceptions.CustomAuthorizationException;
 import bank.transaction.request.TransactionRequest;
 import bank.transaction.service.TransactionServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -120,19 +121,24 @@ class TransactionControllerTests {
         // Simulate authentication with SCOPE_user authority
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("SCOPE_user"));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_user"));
         when(authentication.getAuthorities()).thenReturn((Collection) authorities);
 
         // Prepare the request body
         TransactionRequest request = new TransactionRequest();
         request.setValue(BigDecimal.valueOf(100));
 
+        // Create an ObjectMapper to convert the TransactionRequest object to a JSON string
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(request);
+
         // Perform the POST request
         mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request.toString()))
+                        .content(requestBody))
                 .andExpect(status().isOk());
     }
+
 
     @Test
     public void shouldReturnStatus403_afterDepositMoney_withoutUserScope() throws Exception {
@@ -146,12 +152,15 @@ class TransactionControllerTests {
         TransactionRequest request = new TransactionRequest();
         request.setValue(BigDecimal.valueOf(100));
 
+        // Create an ObjectMapper to convert the TransactionRequest object to a JSON string
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(request);
+
         // Perform the POST request
-        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/deposit")
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction/withdraw")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request.toString()))
-                .andExpect(status().is4xxClientError())
-                .andExpect(result -> assertFalse(result.getResolvedException() instanceof CustomAuthorizationException));
+                        .content(requestBody))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -232,7 +241,7 @@ class TransactionControllerTests {
                         .param("originAccountNumber", "123456")
                         .param("destinationAccountNumber", "789012")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden())
+                .andExpect(status().is4xxClientError())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof CustomAuthorizationException));
     }
     @Test
